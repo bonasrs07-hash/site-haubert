@@ -1,0 +1,220 @@
+---
+/**
+ * Hero da home — a prova do conceito em cima da dobra.
+ *
+ * O mote troca com o modo: "Luz. Leveza. Encontro." de dia, "Fogo. Força.
+ * Tradição." à noite. Os dois vêm no HTML e quem escolhe é o CSS a partir do
+ * `[data-modo]` — então o mote certo já está pintado no primeiro frame, sem
+ * JS e sem flash. `visibility` (e não `display`) tira o inativo da árvore de
+ * acessibilidade sem quebrar a transição. (ADR-004)
+ */
+import BotaoReserva from '@/components/shared/BotaoReserva.astro';
+import { buscarCasa, buscarMarcas } from '@/lib/casa';
+import { ESSENCIA } from '@/constants/casa';
+
+const casa = buscarCasa();
+const marcas = buscarMarcas();
+---
+
+<section class="hero">
+  <div class="casa-container hero__interno">
+    <p class="t-eyebrow hero__olho">
+      {casa.cidade} · {casa.uf}
+      <span aria-hidden="true"> — </span>
+      Desde o primeiro café até o último brinde
+    </p>
+
+    <div class="hero__motes">
+      {
+        marcas.map((marca) => (
+          <p class="hero__mote" data-lado={marca.modo}>
+            <span class="hero__marca">{marca.nomeCurto}</span>
+            <span class="hero__frase t-display">{marca.mote}</span>
+          </p>
+        ))
+      }
+    </div>
+
+    <div class="hero__pe">
+      <div class="hero__texto">
+        {/*
+          O h1 é esta linha, não o mote.
+          Duas razões: o mote troca com o modo (dois h1 no HTML seria errado, e
+          esconder um com CSS não muda o que o robô lê), e esta frase carrega
+          justamente os dois termos pelos quais a casa é procurada — "café" e
+          "churrasco". Tamanho é decisão de CSS; hierarquia é decisão de HTML.
+        */}
+        <h1 class="hero__lead">
+          Mais que café. Mais que churrasco.
+          <strong>Mais que um lugar.</strong>
+        </h1>
+        <p class="t-meta hero__essencia">{ESSENCIA}</p>
+      </div>
+
+      <div class="hero__acoes">
+        <BotaoReserva variante="inline" origem="hero" id="hero" />
+        <a class="btn btn-secundario" href="/sobre">Conhecer a casa</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="hero__virada t-meta">
+    <span class="hero__ponto" aria-hidden="true"></span>
+    Depois das 19h, a CASA vira HAUBERT.
+  </p>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    /* Sobe por baixo do cabeçalho fixo e devolve o espaço como padding. */
+    margin-top: calc(-1 * var(--altura-topo));
+    padding-top: var(--altura-topo);
+    background-color: var(--cor-superficie);
+  }
+
+  .hero__interno {
+    display: grid;
+    gap: var(--esp-7);
+    align-content: space-between;
+    min-height: clamp(34rem, 88svh, 58rem);
+    padding-block: var(--esp-8) var(--esp-7);
+  }
+
+  .hero__olho {
+    max-width: 40ch;
+  }
+
+  /* ---- Os motes -------------------------------------------------------- */
+  .hero__motes {
+    display: grid;
+  }
+
+  .hero__mote {
+    grid-area: 1 / 1;
+    margin: 0;
+    display: grid;
+    gap: var(--esp-3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition:
+      opacity var(--transicao-modo),
+      transform var(--transicao-modo),
+      visibility var(--transicao-modo);
+  }
+
+  :global([data-modo='dia']) .hero__mote[data-lado='dia'],
+  :global([data-modo='noite']) .hero__mote[data-lado='noite'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .hero__marca {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--cor-acento);
+  }
+
+  .hero__frase {
+    display: block;
+    max-width: 14ch;
+  }
+
+  /* ---- Pé do hero ------------------------------------------------------ */
+  .hero__pe {
+    display: grid;
+    gap: var(--esp-6);
+    align-items: end;
+  }
+
+  .hero__lead {
+    margin: 0 0 var(--esp-3);
+    /* h1 vem bold por padrão e a Bebas Neue só tem 400 — sem isto o browser
+       sintetiza o peso e engorda a letra. */
+    font-weight: 400;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.375rem, 3vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto);
+    max-width: 22ch;
+  }
+
+  .hero__lead strong {
+    display: block;
+    font-weight: 400;
+    color: var(--cor-texto-forte);
+  }
+
+  .hero__essencia {
+    display: block;
+    color: var(--cor-texto-suave);
+  }
+
+  .hero__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-3);
+    align-items: start;
+  }
+
+  /* ---- A virada -------------------------------------------------------- */
+  .hero__virada {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--esp-3);
+    margin: 0;
+    padding-block: var(--esp-4);
+    /* Esta faixa é filha direta do hero, não do container: sem isto o texto
+       encosta nas duas bordas da tela do celular. */
+    padding-inline: var(--gutter);
+    border-block: var(--borda-fina) solid var(--cor-borda);
+    color: var(--cor-texto-suave);
+    text-align: center;
+  }
+
+  .hero__ponto {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--raio-selo);
+    background-color: var(--cor-acento);
+  }
+
+  /* Tela estreita: os dois botões passam a ocupar a linha inteira. Dois
+     retângulos de larguras diferentes encostados à esquerda leem como sobra
+     de layout; empilhados e cheios leem como escolha — e o alvo do polegar
+     dobra de tamanho. */
+  @media (max-width: 26rem) {
+    .hero__acoes {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Celular deitado: o piso de 34rem faria o hero ocupar quase duas telas de
+     rolagem antes de qualquer conteúdo. */
+  @media (max-height: 34rem) and (orientation: landscape) {
+    .hero__interno {
+      min-height: auto;
+      gap: var(--esp-5);
+      padding-block: var(--esp-6) var(--esp-5);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero__pe {
+      grid-template-columns: 1fr auto;
+      gap: var(--esp-8);
+    }
+
+    .hero__acoes {
+      justify-content: end;
+    }
+  }
+</style>

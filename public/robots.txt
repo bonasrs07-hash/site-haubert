@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Disallow: /privacidade
+
+Sitemap: https://casahaubert.com.br/sitemap-index.xml

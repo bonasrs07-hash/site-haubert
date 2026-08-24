@@ -1,0 +1,117 @@
+---
+/**
+ * /privacidade — o aviso de privacidade da Fase 1.
+ *
+ * Ele é curto porque a Fase 1 realmente não coleta dado pessoal: a reserva sai
+ * do site antes de qualquer campo ser preenchido. Quando a reserva nativa
+ * entrar (Fase 3), esta página cresce junto — e não depois. (ADR-005, LGPD)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import { buscarCasa } from '@/lib/casa';
+
+const casa = buscarCasa();
+const atualizadoEm = '24 de agosto de 2026';
+---
+
+<Base
+  titulo="Privacidade"
+  descricao="Como a CASA + HAUBERT trata dados neste site. Versão curta: não coletamos dado pessoal para reservar."
+  semIndexacao
+>
+  <HeroPagina
+    olho={`Atualizado em ${atualizadoEm}`}
+    titulo="Privacidade"
+    lead="Versão curta: para reservar, este site não pede nem guarda nenhum dado seu."
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container">
+      <div class="texto">
+        <h2>O que o site coleta</h2>
+        <p>
+          Nada que identifique você. Não há formulário de reserva, cadastro,
+          login nem newsletter nesta versão do site. Não usamos cookies de
+          publicidade nem de rastreamento entre sites.
+        </p>
+
+        <h2>Medição de audiência</h2>
+        <p>
+          Usamos o Vercel Web Analytics para saber quantas pessoas visitam cada
+          página e quantas clicam em "Reservar mesa". Essa medição é agregada e
+          sem cookies: não cria identificador do visitante e não segue você por
+          outros sites.
+        </p>
+
+        <h2>Fontes e imagens</h2>
+        <p>
+          As fontes do site são servidas pelo nosso próprio domínio. Nenhuma
+          requisição sai daqui para Google Fonts ou serviços parecidos — seu
+          endereço de IP não é entregue a terceiros só por abrir a página.
+        </p>
+
+        <h2>Quando você toca em "Reservar mesa"</h2>
+        <p>
+          O botão abre uma conversa no WhatsApp com a mensagem já escrita. A
+          partir do momento em que a conversa começa, ela acontece dentro do
+          WhatsApp e passa a seguir a política de privacidade da Meta. O que
+          você escreve lá fica com a equipe da casa e é usado só para organizar
+          a sua mesa.
+        </p>
+        <p>
+          A mesma coisa vale para os links de Instagram: ao tocar, você sai
+          deste site.
+        </p>
+
+        <h2>Seus direitos</h2>
+        <p>
+          A LGPD garante que você possa confirmar, acessar, corrigir e pedir a
+          exclusão dos seus dados. Como este site não guarda nada, o pedido
+          normalmente diz respeito às conversas de reserva — e para isso basta
+          falar com a equipe pelos canais da casa.
+        </p>
+
+        <h2>Mudanças</h2>
+        <p>
+          Quando a reserva pelo próprio site entrar no ar, esta página passa a
+          descrever exatamente quais dados são pedidos, por quanto tempo ficam
+          guardados e quem tem acesso. A data no topo indica a última revisão.
+        </p>
+
+        <h2>Contato</h2>
+        <p>
+          {casa.nome} — {casa.cidade}/{casa.uf}. Fale com a gente pelos perfis
+          oficiais listados em <a class="link" href="/contato">contato</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .texto {
+    max-width: 62ch;
+    display: grid;
+    gap: var(--esp-4);
+  }
+
+  .texto h2 {
+    margin: var(--esp-5) 0 0;
+    font-family: var(--fonte-titulo);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .texto h2:first-child {
+    margin-top: 0;
+  }
+
+  .texto p {
+    margin: 0;
+    line-height: 1.65;
+    color: var(--cor-texto);
+  }
+</style>

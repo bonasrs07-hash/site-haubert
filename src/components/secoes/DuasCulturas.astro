@@ -1,0 +1,245 @@
+---
+/**
+ * As duas marcas, lado a lado.
+ *
+ * A seção que responde à dúvida número um de quem chega pelo Instagram: "é um
+ * café ou é uma steakhouse?". Resposta: é uma casa, com dois horários.
+ *
+ * Cada cartão é clicável e troca o modo — é o segundo caminho para a mesma
+ * decisão que o alternador do topo oferece. Duas portas, um destino. (RN-03)
+ */
+import Foto from '@/components/shared/Foto.astro';
+import { buscarMarcas } from '@/lib/casa';
+import { FOTO_DIA, FOTO_NOITE } from '@/constants/imagens';
+import { limparPendente } from '@/lib/texto';
+
+const marcas = buscarMarcas();
+---
+
+<section class="casa-secao duas" id="duas-culturas">
+  <div class="casa-container">
+    <div class="duas__grade">
+      {
+        marcas.map((marca) => (
+          <article class="duas__cartao revelar" data-lado={marca.modo}>
+            <button type="button" class="duas__acender" data-acender={marca.modo}>
+              <span class="so-leitor">Ver a casa no modo {marca.modo === 'dia' ? 'Dia' : 'Noite'}</span>
+            </button>
+
+            <p class="t-eyebrow duas__olho">{marca.descritor}</p>
+            <h2 class="duas__nome">{marca.nomeCurto}</h2>
+            <p class="duas__mote">{marca.mote}</p>
+
+            <div class="duas__foto">
+              <Foto
+                foto={marca.modo === 'dia' ? FOTO_DIA : FOTO_NOITE}
+                proporcao="16 / 11"
+                larguras={[320, 480, 660]}
+                sizes="(min-width: 48rem) 42vw, 88vw"
+              />
+            </div>
+
+            <p class="duas__manifesto">{marca.copy.manifesto}</p>
+
+            <ul class="duas__lista" role="list">
+              {marca.copy.manifestoApoio.map((linha) => (
+                <li>{linha}</li>
+              ))}
+            </ul>
+
+            <dl class="duas__dados">
+              <div>
+                <dt class="t-eyebrow">Horário</dt>
+                <dd>{limparPendente(marca.horarioLegivel)}</dd>
+              </div>
+              <div>
+                <dt class="t-eyebrow">Instagram</dt>
+                <dd>
+                  <a class="duas__insta" href={marca.instagramUrl} rel="me noopener" target="_blank">
+                    {marca.instagram} · {marca.seguidores}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))
+      }
+    </div>
+
+    <p class="duas__virada">
+      <span aria-hidden="true">↳</span>
+      Depois das 19h, a CASA vira HAUBERT. <em>Mesma casa, outra energia.</em>
+    </p>
+  </div>
+</section>
+
+<script>
+  import { definirModo } from '@/lib/modo';
+  import type { Modo } from '@/lib/tipos';
+
+  document.querySelectorAll<HTMLButtonElement>('[data-acender]').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const alvo = botao.dataset.acender;
+      if (alvo === 'dia' || alvo === 'noite') definirModo(alvo as Modo);
+    });
+  });
+</script>
+
+<style>
+  .duas__grade {
+    display: grid;
+    gap: var(--esp-6);
+  }
+
+  .duas__cartao {
+    position: relative;
+    display: grid;
+    gap: var(--esp-3);
+    align-content: start;
+    /* 32px fixos numa tela de 320px deixam 216px de linha para o manifesto —
+       o texto vira uma coluna de três palavras. A moldura acompanha a tela. */
+    padding: clamp(var(--esp-4), 5vw, var(--esp-6));
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    /* O cartão da marca inativa recua, mas continua legível: quem chegou de
+       dia precisa conseguir ler o que acontece à noite. */
+    opacity: 0.72;
+    transition:
+      opacity var(--transicao-modo),
+      border-color var(--transicao-modo),
+      background-color var(--transicao-modo);
+  }
+
+  :global([data-modo='dia']) .duas__cartao[data-lado='dia'],
+  :global([data-modo='noite']) .duas__cartao[data-lado='noite'] {
+    opacity: 1;
+    border-color: var(--cor-acento);
+    background-color: var(--cor-superficie-2);
+  }
+
+  /* Área clicável cobrindo o cartão, atrás do conteúdo — os links de dentro
+     continuam alcançáveis. */
+  .duas__acender {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: inherit;
+  }
+
+  .duas__cartao > :not(.duas__acender) {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .duas__cartao a {
+    pointer-events: auto;
+  }
+
+  .duas__olho {
+    margin: 0;
+  }
+
+  .duas__foto {
+    margin-block: var(--esp-2);
+  }
+
+  .duas__nome {
+    margin: 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 0.9;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .duas__mote {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: 1.375rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--cor-acento);
+  }
+
+  .duas__manifesto {
+    margin: var(--esp-4) 0 0;
+    font-size: var(--tam-corpo);
+    line-height: 1.4;
+    color: var(--cor-texto);
+    max-width: 26ch;
+  }
+
+  .duas__lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--esp-2);
+    color: var(--cor-texto-suave);
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.5;
+    max-width: 40ch;
+  }
+
+  .duas__dados {
+    display: grid;
+    gap: var(--esp-4);
+    margin: var(--esp-5) 0 0;
+    padding-top: var(--esp-5);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .duas__dados dt {
+    margin-bottom: var(--esp-1);
+  }
+
+  .duas__dados dd {
+    margin: 0;
+    font-size: var(--tam-corpo-sm);
+    color: var(--cor-texto);
+  }
+
+  .duas__insta {
+    display: inline-flex;
+    align-items: center;
+    /* Alvo de toque: o texto sozinho tem 20px de altura. */
+    min-height: var(--alvo-toque);
+    color: var(--cor-texto);
+    text-decoration: none;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .duas__insta:hover {
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .duas__virada {
+    margin: var(--esp-6) 0 0;
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+    text-align: center;
+  }
+
+  .duas__virada em {
+    font-style: normal;
+    color: var(--cor-acento);
+  }
+
+  @media (min-width: 52rem) {
+    .duas__grade {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .duas__dados {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

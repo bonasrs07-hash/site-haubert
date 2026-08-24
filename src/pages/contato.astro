@@ -1,0 +1,192 @@
+---
+/**
+ * /contato — onde, quando e como falar com a casa.
+ *
+ * Endereço, telefone e mapa estão bloqueados até o cliente confirmar (BLK-003,
+ * BLK-005). A página assume isso na cara: mostra o que é verdade, aponta o
+ * canal que funciona hoje (Instagram/WhatsApp) e não inventa um endereço para
+ * preencher espaço. Endereço errado no Google Maps é pior que endereço
+ * ausente — manda o cliente para a porta errada. (RN-43)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { buscarCasa, buscarMarcas } from '@/lib/casa';
+import { limparPendente, temValor } from '@/lib/texto';
+
+const casa = buscarCasa();
+const marcas = buscarMarcas();
+const temEndereco = temValor(casa.endereco);
+---
+
+<Base
+  titulo="Contato e reservas"
+  descricao="Horários, canais e reserva da CASA Coffee Colab e do HAUBERT Steak & Grillhouse, em Novo Hamburgo/RS."
+>
+  <HeroPagina
+    olho={`${casa.cidade} · ${casa.uf}`}
+    titulo="Onde a casa fica"
+    lead="A reserva acontece no WhatsApp, com a equipe que atende o salão. Sem formulário e sem espera por e-mail."
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container contato__grade">
+      <div class="contato__bloco">
+        <p class="t-eyebrow">Endereço</p>
+        {
+          temEndereco ? (
+            <p class="contato__forte">{limparPendente(casa.endereco)}</p>
+          ) : (
+            <Fragment>
+              <p class="contato__forte">
+                {casa.cidade} · {casa.uf}
+              </p>
+              <p class="contato__nota">
+                O endereço completo e o link do mapa entram assim que a casa
+                confirmar. Até lá, a equipe manda a localização na conversa.
+              </p>
+            </Fragment>
+          )
+        }
+      </div>
+
+      <div class="contato__bloco">
+        <p class="t-eyebrow">Horários</p>
+        <dl class="contato__horarios">
+          {
+            marcas.map((marca) => (
+              <div>
+                <dt>{marca.nomeCurto}</dt>
+                <dd>{limparPendente(marca.horarioLegivel)}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="contato__nota">Feriados e datas especiais: confirme na conversa.</p>
+      </div>
+
+      <div class="contato__bloco">
+        <p class="t-eyebrow">Canais</p>
+        <ul class="contato__canais" role="list">
+          {
+            marcas.map((marca) => (
+              <li>
+                <a class="contato__canal" href={marca.instagramUrl} rel="me noopener" target="_blank">
+                  <span class="contato__canal-nome">{marca.instagram}</span>
+                  <span class="contato__canal-meta">
+                    {marca.nomeCurto} · {marca.seguidores}
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <ChamadaReserva
+    olho="Reserva"
+    titulo="Escolha, toque, converse."
+    origem="contato"
+    id="contato"
+  />
+</Base>
+
+<style>
+  .contato__grade {
+    display: grid;
+    gap: var(--esp-6);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    padding-top: var(--esp-6);
+  }
+
+  .contato__bloco {
+    display: grid;
+    gap: var(--esp-3);
+    align-content: start;
+  }
+
+  .contato__forte {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .contato__nota {
+    margin: 0;
+    max-width: 38ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .contato__horarios {
+    display: grid;
+    gap: var(--esp-4);
+    margin: 0;
+  }
+
+  .contato__horarios dt {
+    font-family: var(--fonte-titulo);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .contato__horarios dd {
+    margin: var(--esp-1) 0 0;
+    font-size: var(--tam-corpo-sm);
+    color: var(--cor-texto-suave);
+  }
+
+  .contato__canais {
+    display: grid;
+    gap: var(--esp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contato__canal {
+    display: grid;
+    align-content: center;
+    gap: var(--esp-1);
+    min-height: var(--alvo-toque);
+    padding-block: var(--esp-3);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    text-decoration: none;
+    transition: border-color var(--transicao);
+  }
+
+  .contato__canal:hover {
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .contato__canal-nome {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    color: var(--cor-texto-forte);
+  }
+
+  .contato__canal-meta {
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  @media (min-width: 52rem) {
+    .contato__grade {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--esp-7);
+    }
+  }
+</style>

@@ -1,0 +1,197 @@
+---
+/**
+ * Barra de reserva persistente.
+ *
+ * Mobile: barra fixa no rodapé. Desktop: pílula flutuante no canto.
+ * Em qualquer scroll, de qualquer página, reservar está a um toque.
+ *
+ * O status "aberto agora" NÃO é renderizado no build — site estático guardaria
+ * a resposta das 3h da manhã e serviria ao meio-dia. Quem calcula é o cliente,
+ * no fuso da casa. Sem JS, sobra o horário escrito, que é sempre verdade.
+ * (RN-41, F-006)
+ */
+import BotaoReserva from './BotaoReserva.astro';
+import { buscarMarcas } from '@/lib/casa';
+import { limparPendente } from '@/lib/texto';
+
+const marcas = buscarMarcas();
+---
+
+<div class="barra" data-barra>
+  <div class="barra__interno">
+    <div class="barra__estado">
+      {
+        marcas.map((marca) => (
+          <p
+            class="barra__marca"
+            data-marca-status
+            data-modo-marca={marca.modo}
+            data-faixas={JSON.stringify(marca.horario)}
+          >
+            <span class="barra__sinal" aria-hidden="true" data-sinal></span>
+            <span class="barra__nome">{marca.nomeCurto}</span>
+            <span class="barra__horario">{limparPendente(marca.horarioLegivel)}</span>
+          </p>
+        ))
+      }
+    </div>
+
+    <BotaoReserva variante="flutuante" origem="barra" id="barra" />
+  </div>
+</div>
+
+<script>
+  import { estaAbertaEm } from '@/lib/horario';
+  import { lerModo } from '@/lib/modo';
+  import type { FaixaHorario } from '@/lib/tipos';
+
+  const barra = document.querySelector<HTMLElement>('[data-barra]');
+
+  function lerFaixas(bruto: string | undefined): FaixaHorario[] {
+    if (!bruto) return [];
+    try {
+      const valor = JSON.parse(bruto);
+      return Array.isArray(valor) ? (valor as FaixaHorario[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function pintar() {
+    if (!barra) return;
+    const modo = lerModo();
+
+    barra.querySelectorAll<HTMLElement>('[data-marca-status]').forEach((linha) => {
+      // Só a marca do modo ativo aparece: a barra é uma linha, não um painel.
+      linha.hidden = linha.dataset.modoMarca !== modo;
+
+      const sinal = linha.querySelector<HTMLElement>('[data-sinal]');
+      if (!sinal) return;
+
+      const aberta = estaAbertaEm(lerFaixas(linha.dataset.faixas));
+
+      // `null` = horário não confirmado. Nunca dizemos "fechado" por falta de
+      // dado — dizer que está fechado quando está aberta custa uma mesa. (RN-43)
+      if (aberta === null) {
+        sinal.dataset.estado = 'incerto';
+        sinal.title = 'Confirme o horário com a equipe';
+      } else {
+        sinal.dataset.estado = aberta ? 'aberto' : 'fechado';
+        sinal.title = aberta ? 'Aberto agora' : 'Fechado agora';
+      }
+    });
+  }
+
+  pintar();
+  new MutationObserver(pintar).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-modo'],
+  });
+  // A casa vira às 19h com a página aberta. O sinal precisa virar junto.
+  setInterval(pintar, 60_000);
+</script>
+
+<style>
+  .barra {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 60;
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    background-color: color-mix(in srgb, var(--cor-superficie) 92%, transparent);
+    backdrop-filter: blur(10px);
+    padding: var(--esp-3) 0 calc(var(--esp-3) + env(safe-area-inset-bottom));
+    transition: background-color var(--transicao-modo);
+  }
+
+  .barra__interno {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-4);
+    width: 100%;
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .barra__estado {
+    min-width: 0;
+  }
+
+  .barra__marca {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-2);
+    margin: 0;
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .barra__marca[hidden] {
+    display: none;
+  }
+
+  .barra__nome {
+    color: var(--cor-texto-forte);
+  }
+
+  .barra__horario {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .barra__sinal {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--raio-selo);
+    background-color: var(--cor-texto-suave);
+  }
+
+  .barra__sinal[data-estado='aberto'] {
+    background-color: var(--cor-acento);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-acento) 22%, transparent);
+  }
+
+  .barra__sinal[data-estado='fechado'] {
+    background-color: var(--cor-borda);
+  }
+
+  /* Telas estreitas: o horário escrito sai, o sinal e o nome ficam. */
+  @media (max-width: 30rem) {
+    .barra__horario {
+      display: none;
+    }
+  }
+
+  /* Desktop: a barra some e sobra a pílula, encostada no canto. */
+  @media (min-width: 60rem) {
+    .barra {
+      inset-inline: auto 0;
+      border-top: 0;
+      background-color: transparent;
+      backdrop-filter: none;
+      padding-bottom: var(--esp-6);
+      padding-inline-end: var(--gutter);
+      /* O respiro do canto continua sendo caixa de elemento fixo: sem isto
+         ele engole o clique de tudo que passa por baixo — uma faixa invisível
+         de 32px por 64px no canto de toda página. Some para o ponteiro; a
+         pílula (e o painel que sai dela) volta a receber. */
+      pointer-events: none;
+    }
+
+    .barra__interno {
+      padding-inline: 0;
+      pointer-events: auto;
+    }
+
+    .barra__estado {
+      display: none;
+    }
+  }
+</style>

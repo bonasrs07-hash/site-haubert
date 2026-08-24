@@ -1,0 +1,97 @@
+---
+/**
+ * Faixa de tipo cinético — a frase que atravessa a tela.
+ *
+ * É o gesto tipográfico da referência, aplicado às frases proprietárias do
+ * guia. Duplicamos o conteúdo e escondemos a cópia do leitor de tela: quem usa
+ * NVDA não deve ouvir a mesma frase duas vezes.
+ *
+ * Com `prefers-reduced-motion`, a faixa para e vira uma linha estática.
+ */
+interface Props {
+  texto: string;
+  destaque?: boolean;
+  velocidade?: number; // segundos por volta
+}
+
+const { texto, destaque = false, velocidade = 38 } = Astro.props;
+const repeticoes = [0, 1, 2, 3];
+---
+
+<div class:list={['faixa', destaque && 'faixa--destaque']} role="presentation">
+  <div class="faixa__trilho" style={`--volta:${velocidade}s`}>
+    {
+      repeticoes.map((i) => (
+        <span class="faixa__item" aria-hidden={i === 0 ? undefined : 'true'}>
+          {texto}
+          <span class="faixa__brasa" aria-hidden="true"></span>
+        </span>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .faixa {
+    overflow: hidden;
+    padding-block: var(--esp-5);
+    border-block: var(--borda-fina) solid var(--cor-borda);
+    user-select: none;
+  }
+
+  .faixa--destaque {
+    background-color: var(--cor-acento-fundo);
+    color: var(--cor-acento-texto);
+    border-color: transparent;
+  }
+
+  .faixa__trilho {
+    display: flex;
+    width: max-content;
+    animation: correr var(--volta) linear infinite;
+  }
+
+  .faixa__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-6);
+    padding-inline-end: var(--esp-6);
+    font-family: var(--fonte-display);
+    font-size: clamp(1.5rem, 4.5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: inherit;
+  }
+
+  .faixa:not(.faixa--destaque) .faixa__item {
+    color: var(--cor-texto-forte);
+  }
+
+  .faixa__brasa {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--raio-selo);
+    background-color: currentColor;
+    opacity: 0.55;
+  }
+
+  .faixa:not(.faixa--destaque) .faixa__brasa {
+    background-color: var(--cor-acento);
+    opacity: 1;
+  }
+
+  /* 4 cópias: uma volta = 25% do trilho. */
+  @keyframes correr {
+    to {
+      transform: translateX(-25%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faixa__trilho {
+      animation: none;
+    }
+  }
+</style>

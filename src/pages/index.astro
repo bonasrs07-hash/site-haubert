@@ -1,0 +1,56 @@
+---
+/**
+ * Home — a rota que decide se o seguidor vira mesa ocupada.
+ *
+ * Ordem do funil: atenção (hero) → o que é isto (duas culturas) → confiança
+ * (manifesto, o que entregamos, fogo, cultura) → oferta (chamada de reserva).
+ * A reserva também está fixa na tela o tempo todo, para quem já decidiu no
+ * primeiro scroll. (docs/00_VISAO)
+ */
+import Base from '@/layouts/Base.astro';
+import Hero from '@/components/secoes/Hero.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import DuasCulturas from '@/components/secoes/DuasCulturas.astro';
+import TiraFotos from '@/components/secoes/TiraFotos.astro';
+import Manifesto from '@/components/secoes/Manifesto.astro';
+import CabecalhoSecao from '@/components/secoes/CabecalhoSecao.astro';
+import GradeEixos from '@/components/secoes/GradeEixos.astro';
+import Fogo from '@/components/secoes/Fogo.astro';
+import Cultura from '@/components/secoes/Cultura.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { O_QUE_ENTREGAMOS } from '@/constants/casa';
+---
+
+<Base
+  titulo="Café de dia, fogo à noite"
+  descricao="CASA Coffee Colab de dia, HAUBERT Steak & Grillhouse à noite. Uma casa, dois ritmos, em Novo Hamburgo. Reserve sua mesa em três toques."
+>
+  <Hero />
+
+  <Faixa texto="Mesma casa. Outra energia." />
+
+  <DuasCulturas />
+
+  <Manifesto />
+
+  <TiraFotos />
+
+  <section class="casa-secao" id="entregamos">
+    <div class="casa-container">
+      <CabecalhoSecao
+        olho="O que entregamos"
+        titulo="Seis coisas que a gente não terceiriza"
+        lead="Do grão ao brinde, o que sai daqui passa por técnica, tempo e propósito."
+      />
+      <GradeEixos itens={O_QUE_ENTREGAMOS} numerado />
+    </div>
+  </section>
+
+  <Faixa texto="Verdade aquece. Verdade conecta. Verdade fica." destaque velocidade={44} />
+
+  <Fogo comChamada />
+
+  <Cultura comEixos={false} />
+
+  <ChamadaReserva origem="home" id="home" />
+</Base>

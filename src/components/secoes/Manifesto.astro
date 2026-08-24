@@ -1,0 +1,118 @@
+---
+/**
+ * O manifesto — os quatro ritmos da casa (prancha 001).
+ *
+ * Cada linha é um par sujeito/verbo. A primeira metade em peso normal, a
+ * segunda em acento: é a mesma estrutura visual do guia impresso.
+ */
+import { COMPROMISSO, HEADLINE_MAE, RITMOS } from '@/constants/casa';
+
+interface Props {
+  comCompromisso?: boolean;
+}
+
+const { comCompromisso = true } = Astro.props;
+---
+
+<section class="casa-secao manifesto" id="manifesto">
+  <div class="casa-container">
+    <ol class="manifesto__ritmos" role="list">
+      {
+        RITMOS.map((ritmo, i) => (
+          <li class="manifesto__ritmo revelar" style={`--atraso:${i * 90}ms`}>
+            <span class="manifesto__de">{ritmo.de}</span>
+            <span class="manifesto__faz">{ritmo.faz}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="manifesto__pe">
+      <blockquote class="manifesto__headline revelar">
+        <p>{HEADLINE_MAE}</p>
+      </blockquote>
+
+      {
+        comCompromisso && (
+          <div class="manifesto__compromisso revelar">
+            <p class="t-eyebrow">O compromisso</p>
+            <p class="t-corpo">{COMPROMISSO}</p>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .manifesto__ritmos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+  }
+
+  .manifesto__ritmo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.3em;
+    padding-block: var(--esp-4);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    font-family: var(--fonte-display);
+    font-size: clamp(2rem, 8vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: var(--ls-display);
+    text-transform: uppercase;
+    transition-delay: var(--atraso);
+  }
+
+  .manifesto__ritmo:first-child {
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .manifesto__de {
+    color: var(--cor-texto-forte);
+  }
+
+  .manifesto__faz {
+    color: var(--cor-acento);
+  }
+
+  .manifesto__pe {
+    display: grid;
+    gap: var(--esp-7);
+    margin-top: var(--esp-8);
+  }
+
+  .manifesto__headline {
+    margin: 0;
+    padding-left: var(--esp-5);
+    border-left: 2px solid var(--cor-acento);
+  }
+
+  .manifesto__headline p {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    max-width: 20ch;
+  }
+
+  .manifesto__compromisso {
+    display: grid;
+    gap: var(--esp-3);
+    align-content: start;
+  }
+
+  @media (min-width: 64rem) {
+    .manifesto__pe {
+      grid-template-columns: 1.2fr 1fr;
+      gap: var(--esp-8);
+      align-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+/**
+ * Moldura padrão de foto.
+ *
+ * Existe para que nenhuma seção precise repetir proporção, borda e véu — e,
+ * principalmente, para que a troca Dia/Noite alcance a imagem. O véu é o token
+ * `--overlay-foto`, que já muda com o modo: a mesma foto assenta mais clara de
+ * dia e mais funda à noite, sem segundo arquivo e sem uma linha de JS.
+ *
+ * `<Image>` do Astro faz o trabalho pesado no build — converte, gera o srcset e
+ * escreve width/height, que é o que impede o salto de layout quando a imagem
+ * chega. Custo em JavaScript: zero. (ADR-006)
+ */
+import { Image } from 'astro:assets';
+import type { Foto } from '@/constants/imagens';
+
+interface Props {
+  foto: Foto;
+  /** Proporção da moldura, em sintaxe de `aspect-ratio`. */
+  proporcao?: string;
+  /** Larguras do srcset. Padrão serve ladrilho; cartão grande pede mais. */
+  larguras?: number[];
+  sizes?: string;
+  /** Sai do lazy — use só na imagem que aparece acima da dobra. */
+  prioridade?: boolean;
+  /** Escurece a foto para receber texto por cima. */
+  veu?: boolean;
+  classe?: string;
+}
+
+const {
+  foto,
+  proporcao = '4 / 5',
+  larguras = [240, 320, 480],
+  sizes = '(min-width: 48rem) 20rem, 45vw',
+  prioridade = false,
+  veu = false,
+  classe = '',
+} = Astro.props;
+
+// Nunca pedir mais largura do que o arquivo tem: fazer upscale de um recorte de
+// prancha só gera peso e borrão. (constants/imagens.ts explica a origem)
+//
+// O topo da escada é sempre a largura NATIVA do arquivo. Sem isso o srcset
+// pararia no degrau pedido abaixo dela — numa tela 2x o browser escolheria
+// 480px tendo 578px disponíveis, e jogaria fora resolução que já pagamos.
+// A margem de 3% evita o degrau inútil: pedir 1400 num arquivo de 1401 gera
+// um segundo derivado que ninguém escolhe e que ninguém deixa de baixar.
+const cabem = larguras.filter((l) => l < foto.src.width * 0.97);
+const escala = [...new Set([...cabem, foto.src.width])].sort((a, b) => a - b);
+---
+
+<figure class:list={['foto', veu && 'foto--veu', classe]} style={`--proporcao:${proporcao}`}>
+  <Image
+    src={foto.src}
+    alt={foto.alt}
+    widths={escala}
+    sizes={sizes}
+    loading={prioridade ? 'eager' : 'lazy'}
+    decoding={prioridade ? 'sync' : 'async'}
+    class="foto__img"
+  />
+</figure>
+
+<style>
+  .foto {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    aspect-ratio: var(--proporcao);
+    background-color: var(--cor-superficie-2);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+  }
+
+  .foto__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* O véu vem do token, então acompanha o modo sozinho. */
+  .foto--veu::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--overlay-foto);
+    pointer-events: none;
+  }
+</style>

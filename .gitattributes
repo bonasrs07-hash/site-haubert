@@ -1,0 +1,19 @@
+# Este repositório é escrito no Windows e construído no Linux (Vercel). Sem
+# normalizar, o CRLF entra no histórico e o primeiro diff feito do outro lado
+# marca o arquivo inteiro como alterado sem uma linha real de mudança — ruído
+# que esconde a revisão de verdade.
+* text=auto eol=lf
+
+# Binário não se normaliza e não se tenta ler como texto.
+*.webp  binary
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.pdf   binary
+
+# Lockfile é gerado: some da revisão no GitHub, mas continua com diff legível
+# em quem for auditar dependência.
+package-lock.json linguist-generated=true

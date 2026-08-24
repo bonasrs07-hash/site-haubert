@@ -1,0 +1,167 @@
+---
+/**
+ * Alternador Dia/Noite.
+ *
+ * Controle segmentado, não interruptor: o visitante vê as DUAS atmosferas e
+ * qual está ativa. É a tradução em UI do "mesma casa, outra energia".
+ *
+ * O estado visual vem do `[data-modo]` no <html>, via CSS — por isso o rótulo
+ * certo já está pintado antes de qualquer JS rodar. O script só troca o
+ * atributo. (ADR-004, princípio nº1: intuitividade)
+ */
+interface Props {
+  compacto?: boolean;
+}
+const { compacto = false } = Astro.props;
+---
+
+<div
+  class:list={['alternador', compacto && 'alternador--compacto']}
+  role="group"
+  aria-label="Atmosfera da casa"
+  data-alternador
+>
+  <button type="button" class="alternador__opcao" data-alvo="dia">
+    <span class="alternador__ponto" aria-hidden="true"></span>
+    <span>Dia</span>
+  </button>
+  <button type="button" class="alternador__opcao" data-alvo="noite">
+    <span class="alternador__ponto" aria-hidden="true"></span>
+    <span>Noite</span>
+  </button>
+</div>
+
+<script>
+  import { definirModo, lerModo } from '@/lib/modo';
+  import type { Modo } from '@/lib/tipos';
+
+  function sincronizar() {
+    const atual = lerModo();
+    document.querySelectorAll<HTMLElement>('[data-alternador]').forEach((grupo) => {
+      grupo.querySelectorAll<HTMLButtonElement>('.alternador__opcao').forEach((botao) => {
+        botao.setAttribute('aria-pressed', String(botao.dataset.alvo === atual));
+      });
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-alternador]').forEach((grupo) => {
+    grupo.addEventListener('click', (evento) => {
+      const botao = (evento.target as HTMLElement).closest<HTMLButtonElement>('.alternador__opcao');
+      const alvo = botao?.dataset.alvo;
+      if (alvo === 'dia' || alvo === 'noite') definirModo(alvo as Modo);
+    });
+  });
+
+  // Qualquer parte da página pode trocar o modo — o alternador só acompanha.
+  new MutationObserver(sincronizar).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-modo'],
+  });
+
+  sincronizar();
+</script>
+
+<style>
+  .alternador {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-selo);
+    background-color: color-mix(in srgb, var(--cor-superficie) 70%, transparent);
+  }
+
+  .alternador__opcao {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+    min-height: 40px;
+    padding-inline: var(--esp-4);
+    border: 0;
+    border-radius: var(--raio-selo);
+    background-color: transparent;
+    color: var(--cor-texto-suave);
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background-color var(--transicao),
+      color var(--transicao);
+  }
+
+  /* A pílula mede 48px, mas cada botão dentro dela mede 40 — e 40 é menos que
+     o `--alvo-toque` da casa. Em vez de engordar o controle (o que empurraria
+     o cabeçalho inteiro para baixo), o alvo cresce por fora do desenho: a
+     área de toque chega a 48px sem mover um pixel do que se vê. */
+  .alternador__opcao::after {
+    content: '';
+    position: absolute;
+    inset-block: calc((var(--alvo-toque) - 40px) / -2);
+    inset-inline: 0;
+  }
+
+  .alternador--compacto .alternador__opcao {
+    padding-inline: var(--esp-3);
+  }
+
+  /* No topo de um celular de 320px o alternador divide a linha com a
+     assinatura e o menu. Encolhe o respiro, nunca o rótulo: "Dia" e "Noite"
+     por extenso são o que dispensa tutorial. (princípio nº 1) */
+  @media (max-width: 36rem) {
+    .alternador--compacto .alternador__opcao {
+      padding-inline: var(--esp-2);
+      gap: var(--esp-1);
+    }
+
+    .alternador--compacto .alternador__ponto {
+      width: 6px;
+      height: 6px;
+    }
+  }
+
+  /* 320–376px: o ponto é decoração `aria-hidden`, e o estado ativo continua
+     dito pelo fundo cheio e pela paleta da página inteira. Ele sai para que o
+     RÓTULO caiba — entre enfeite e palavra, sai o enfeite. */
+  @media (max-width: 23.5rem) {
+    .alternador--compacto .alternador__opcao {
+      padding-inline: 6px;
+    }
+
+    .alternador--compacto .alternador__ponto {
+      display: none;
+    }
+  }
+
+  .alternador__ponto {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--raio-selo);
+    background-color: currentColor;
+    opacity: 0.45;
+    transition: opacity var(--transicao);
+  }
+
+  /* O estado ativo é derivado do <html>, não do JS: correto no primeiro frame. */
+  :global([data-modo='dia']) .alternador__opcao[data-alvo='dia'],
+  :global([data-modo='noite']) .alternador__opcao[data-alvo='noite'] {
+    background-color: var(--cor-texto-forte);
+    color: var(--cor-superficie);
+  }
+
+  :global([data-modo='dia']) .alternador__opcao[data-alvo='dia'] .alternador__ponto,
+  :global([data-modo='noite']) .alternador__opcao[data-alvo='noite'] .alternador__ponto {
+    opacity: 1;
+  }
+
+  .alternador__opcao:hover {
+    color: var(--cor-texto-forte);
+  }
+
+  :global([data-modo='dia']) .alternador__opcao[data-alvo='dia']:hover,
+  :global([data-modo='noite']) .alternador__opcao[data-alvo='noite']:hover {
+    color: var(--cor-superficie);
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/**
+ * O par assinatura do sistema: label monoespaçada com tracking largo por cima,
+ * título em caixa alta por baixo. Nunca inverta. (docs/02_DESIGN_SYSTEM §2)
+ */
+interface Props {
+  olho: string;
+  titulo: string;
+  lead?: string;
+  nivel?: 'h1' | 'h2';
+  alinhamento?: 'inicio' | 'centro';
+}
+
+const { olho, titulo, lead, nivel = 'h2', alinhamento = 'inicio' } = Astro.props;
+const Titulo = nivel;
+---
+
+<header class:list={['cs', `cs--${alinhamento}`, 'revelar']}>
+  <p class="t-eyebrow cs__olho">
+    <span class="cs__traco" aria-hidden="true"></span>
+    {olho}
+  </p>
+  <Titulo class="t-h2 cs__titulo">{titulo}</Titulo>
+  {lead && <p class="t-corpo cs__lead">{lead}</p>}
+</header>
+
+<style>
+  .cs {
+    display: grid;
+    gap: var(--esp-4);
+    margin-bottom: var(--esp-7);
+  }
+
+  .cs--centro {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .cs__olho {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+  }
+
+  .cs__traco {
+    display: block;
+    width: var(--esp-6);
+    height: 1px;
+    background-color: var(--cor-acento);
+  }
+
+  .cs--centro .cs__lead {
+    margin-inline: auto;
+  }
+
+  .cs__titulo {
+    max-width: 20ch;
+  }
+
+  .cs--centro .cs__titulo {
+    max-width: 24ch;
+  }
+</style>

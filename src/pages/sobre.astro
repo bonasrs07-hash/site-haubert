@@ -1,0 +1,70 @@
+---
+/**
+ * /sobre — a página que a referência (disturbancebrands.com/pages/about-us)
+ * inspira mais de perto: manifesto longo, tipografia grande, pouca imagem e
+ * muito ponto de vista.
+ *
+ * É também a página de confiança do funil: quem chega aqui já se interessou e
+ * está decidindo se pertence. (docs/00_VISAO)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import DuasCulturas from '@/components/secoes/DuasCulturas.astro';
+import Manifesto from '@/components/secoes/Manifesto.astro';
+import CabecalhoSecao from '@/components/secoes/CabecalhoSecao.astro';
+import GradeEixos from '@/components/secoes/GradeEixos.astro';
+import BandaFoto from '@/components/secoes/BandaFoto.astro';
+import { HEADLINE_MAE } from '@/constants/casa';
+import { FOTO_TIME } from '@/constants/imagens';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { O_QUE_ENTREGAMOS, PILARES } from '@/constants/casa';
+---
+
+<Base
+  titulo="A casa"
+  descricao="Uma essência, dois conceitos. CASA Coffee Colab e HAUBERT Steak & Grillhouse dividem o mesmo endereço, a mesma equipe e o mesmo propósito em Novo Hamburgo."
+>
+  <HeroPagina
+    olho="Quem somos"
+    titulo="Mais que café. Mais que churrasco. Mais que um lugar."
+    lead="Somos ponto de encontro entre boas pessoas, boa comida, bom design e boas histórias. Do café da manhã ao último brinde da noite, conectamos duas culturas que se completam: leveza e encontro, fogo e celebração."
+    frase="Uma essência. Dois conceitos. Uma conexão que fica."
+  />
+
+  <Manifesto comCompromisso />
+
+  <Faixa texto={HEADLINE_MAE} destaque velocidade={46} />
+
+  <DuasCulturas />
+
+  <BandaFoto foto={FOTO_TIME} variante="larga" proporcao="21 / 5" />
+
+  <section class="casa-secao" id="pilares">
+    <div class="casa-container">
+      <CabecalhoSecao
+        olho="Os pilares"
+        titulo="Seis princípios que não são negociáveis"
+        lead="Não são valores de parede. São o critério que usamos para decidir o que entra e o que não entra na casa."
+      />
+      <GradeEixos itens={PILARES} numerado />
+    </div>
+  </section>
+
+  <section class="casa-secao" id="entregamos">
+    <div class="casa-container">
+      <CabecalhoSecao
+        olho="O que entregamos"
+        titulo="Seis coisas que a gente não terceiriza"
+      />
+      <GradeEixos itens={O_QUE_ENTREGAMOS} />
+    </div>
+  </section>
+
+  <ChamadaReserva
+    olho="Venha ver"
+    titulo="Manifesto é bom. Mesa é melhor."
+    origem="sobre"
+    id="sobre"
+  />
+</Base>

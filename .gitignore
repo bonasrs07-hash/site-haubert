@@ -1,0 +1,42 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+.astro/
+.output/
+.vercel/
+
+# Ambiente — segredo nunca é versionado
+.env
+.env.*
+!.env.example
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Editor / SO
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Log
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Fontes de marca em alta (74MB de PNG não vão para o repositório).
+# Guardar no Drive do projeto; brand/BRAND-DNA-EXTRAIDO.md é a versão versionada.
+brand/*.png
+brand/*.psd
+brand/*.ai
+
+# Preferência local de quem opera o Claude Code neste repositório (janela de
+# contexto, permissões da máquina). Não é regra do projeto — regra do projeto
+# mora no CLAUDE.md e é versionada.
+.claude/settings.local.json

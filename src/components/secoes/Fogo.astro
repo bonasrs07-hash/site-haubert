@@ -1,0 +1,202 @@
+---
+/**
+ * Os cinco elementos do fogo (prancha 003).
+ *
+ * É uma sequência, não uma lista: madeira → brasa → técnica → fumaça →
+ * descanso. A linha que liga os números existe para dizer isso sem uma
+ * palavra a mais.
+ */
+import CabecalhoSecao from './CabecalhoSecao.astro';
+import Foto from '@/components/shared/Foto.astro';
+import { ELEMENTOS_DO_FOGO, FRASE_FOGO } from '@/constants/casa';
+import { FOTOS_DO_FOGO } from '@/constants/imagens';
+
+interface Props {
+  olho?: string;
+  titulo?: string;
+  lead?: string;
+  comChamada?: boolean;
+}
+
+const {
+  olho = 'O método',
+  titulo = 'Não é sobre queimar. É sobre dominar.',
+  lead = 'O fogo revela o que é feito com intenção. Aqui, o tempo é ingrediente e a técnica é o que constrói sabor.',
+  comChamada = false,
+} = Astro.props;
+---
+
+<section class="casa-secao fogo" id="fogo">
+  <div class="casa-container">
+    <CabecalhoSecao olho={olho} titulo={titulo} lead={lead} />
+
+    <ol class="fogo__passos" role="list">
+      {
+        ELEMENTOS_DO_FOGO.map((elemento, i) => (
+          <li class="fogo__passo revelar" style={`--atraso:${i * 80}ms`}>
+            <span class="fogo__num" aria-hidden="true">
+              {elemento.numero}
+            </span>
+            <div class="fogo__texto">
+              <h3 class="t-h3">{elemento.nome}</h3>
+              <p>{elemento.descricao}</p>
+            </div>
+            {FOTOS_DO_FOGO[i] && (
+              <div class="fogo__foto">
+                <Foto
+                  foto={FOTOS_DO_FOGO[i]}
+                  proporcao="4 / 3"
+                  larguras={[200, 280, 340]}
+                  sizes="(min-width: 48rem) 12rem, 55vw"
+                />
+              </div>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="fogo__frase revelar">{FRASE_FOGO}</p>
+
+    {
+      comChamada && (
+        <p class="fogo__chamada">
+          <a class="btn btn-secundario" href="/fogo">
+            Ver os cortes e o método completo
+          </a>
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .fogo__passos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0;
+  }
+
+  .fogo__passo {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--esp-5);
+    padding-block: var(--esp-6);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    transition-delay: var(--atraso);
+  }
+
+  .fogo__passo:last-child {
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .fogo__num {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-eyebrow);
+    color: var(--cor-acento);
+    padding-top: 0.35em;
+  }
+
+  /* A linha que costura os cinco passos: a sequência é a mensagem. */
+  .fogo__passo::before {
+    content: '';
+    position: absolute;
+    left: 0.9rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--cor-borda);
+    opacity: 0.55;
+  }
+
+  .fogo__passo:first-child::before {
+    top: 50%;
+  }
+
+  .fogo__passo:last-child::before {
+    bottom: 50%;
+  }
+
+  .fogo__texto {
+    display: grid;
+    gap: var(--esp-2);
+  }
+
+  /* No estreito a foto cai abaixo do texto, alinhada com ele — nunca sob o
+     número, senão quebra a linha que costura a sequência. */
+  .fogo__foto {
+    grid-column: 2;
+    margin-top: var(--esp-4);
+    max-width: 22rem;
+  }
+
+  @media (min-width: 48rem) {
+    .fogo__passo {
+      grid-template-columns: auto 1fr 12rem;
+    }
+
+    .fogo__foto {
+      grid-column: 3;
+      grid-row: 1;
+      margin-top: 0;
+      max-width: none;
+    }
+  }
+
+  .fogo__texto p {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .fogo__frase {
+    margin: var(--esp-8) 0 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.5rem, 4.5vw, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    max-width: 22ch;
+  }
+
+  .fogo__chamada {
+    margin: var(--esp-5) 0 0;
+  }
+
+  /* A partir daqui o passo abre em quatro colunas — número, nome, descrição e
+     foto — e o `display: contents` do texto é o que joga o h3 e o p direto na
+     grade do <li>. Por isso a foto precisa pedir a coluna 4 explicitamente:
+     sem isso ela cairia na coluna da descrição e ocuparia a linha inteira. */
+  @media (min-width: 52rem) {
+    .fogo__passo {
+      grid-template-columns: 4rem 14rem 1fr 12rem;
+      align-items: baseline;
+      gap: var(--esp-6);
+    }
+
+    .fogo__foto {
+      grid-column: 4;
+      grid-row: 1;
+      align-self: start;
+    }
+
+    .fogo__texto {
+      display: contents;
+    }
+
+    .fogo__texto p {
+      max-width: 46ch;
+    }
+
+    .fogo__passo::before {
+      left: 1.5rem;
+    }
+  }
+</style>

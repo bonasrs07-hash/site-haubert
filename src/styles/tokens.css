@@ -1,0 +1,134 @@
+/* ==========================================================================
+   CASA + HAUBERT — tokens do design system
+   --------------------------------------------------------------------------
+   Fonte: guia SOCIAL DNA (ago/2025). Hex amostrados do original.
+   Documentação: docs/02_DESIGN_SYSTEM/README.md · brand/BRAND-DNA-EXTRAIDO.md
+
+   REGRA: componente nunca escreve cor literal. Só var(--cor-*).
+   A troca Dia/Noite reescreve estes tokens via [data-modo] no <html>. (ADR-004)
+
+   Na Fase 2+ o bloco [data-modo] passa a ser INJETADO no <head> a partir de
+   brands.tokens (JSONB). Este arquivo continua sendo o fallback: site com cor
+   antiga é melhor que site sem cor. (ADR-002)
+   ========================================================================== */
+
+:root {
+  /* ---- Paleta bruta: CASA (dia) ---------------------------------------- */
+  --casa-areia: #dacfbb; /* areia / linho     */
+  --casa-sage: #a0a083; /* sage              */
+  --casa-oliva: #555123; /* oliva escuro      */
+  --casa-tinta: #232322; /* tinta             */
+  --casa-terracota: #be6a44; /* terracota         */
+
+  /* ---- Paleta bruta: HAUBERT (noite) ----------------------------------- */
+  --haubert-carvao: #131212; /* carvão            */
+  --haubert-grafite: #212120; /* grafite           */
+  --haubert-brasa: #631f15; /* brasa (bordô)     */
+  --haubert-caramelo: #784920; /* caramelo queimado */
+  --haubert-areia: #d0bda1; /* areia quente      */
+  --haubert-areia-2: #a3937d; /* areia esmaecida   */
+
+  /* ---- Sistema --------------------------------------------------------- */
+  --osso: #f6efe7;
+  --tijolo: #a0361f; /* o vermelho do guia            */
+  --tijolo-claro: #d9553a; /* legível sobre carvão (4,8:1)  */
+
+  /* ---- Tipografia ------------------------------------------------------ */
+  --fonte-display: 'Anton', 'Archivo Black', Impact, sans-serif;
+  --fonte-titulo: 'Bebas Neue', 'Oswald', sans-serif;
+  --fonte-corpo: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --fonte-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --tam-display: clamp(3.5rem, 12vw, 9rem);
+  --tam-h1: clamp(2.5rem, 7vw, 5rem);
+  --tam-h2: clamp(2rem, 4.5vw, 3.25rem);
+  --tam-h3: 1.5rem;
+  --tam-corpo: 1.125rem;
+  --tam-corpo-sm: 0.9375rem;
+  --tam-eyebrow: 0.75rem;
+  --tam-meta: 0.8125rem;
+
+  --lh-display: 0.88;
+  --lh-h1: 0.92;
+  --lh-h2: 0.95;
+  --lh-corpo: 1.55;
+
+  --ls-display: -0.03em;
+  --ls-h1: -0.02em;
+  --ls-eyebrow: 0.18em;
+  --ls-meta: 0.06em;
+
+  /* ---- Espaçamento (base 8) -------------------------------------------- */
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2rem;
+  --esp-7: 3rem;
+  --esp-8: 4rem;
+  --esp-9: 6rem;
+  --esp-10: 8rem;
+  --esp-11: 12rem;
+
+  --ritmo-secao: clamp(4rem, 10vw, 10rem);
+  --largura-max: 1440px;
+  --largura-texto: 65ch;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+
+  /* ---- Forma ----------------------------------------------------------- */
+  --raio-0: 0;
+  --raio-1: 2px;
+  --raio-selo: 999px;
+  --borda-fina: 1px;
+  --alvo-toque: 48px; /* altura mínima de qualquer alvo de toque */
+
+  /* ---- Cromo fixo (o layout reserva espaço para eles) -------------------
+     Derivados das peças, não medidos no olho: os dois são um alvo de toque
+     mais o respiro do container mais a régua. Escrever o número à mão é o que
+     fazia o conteúdo passar 5px por baixo do topo e da barra — e no celular
+     esses 5px caem justamente na última linha de texto e no botão. */
+  --altura-topo: calc(var(--alvo-toque) + 2 * var(--esp-4) + var(--borda-fina));
+  --altura-barra: calc(var(--alvo-toque) + 2 * var(--esp-3) + var(--borda-fina));
+
+  /* ---- Movimento ------------------------------------------------------- */
+  --transicao: 180ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --transicao-modo: 320ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+/* ==========================================================================
+   MODO DIA — CASA Coffee Colab · "Luz. Leveza. Encontro."
+   ========================================================================== */
+:root,
+[data-modo='dia'] {
+  --cor-superficie: var(--osso);
+  --cor-superficie-2: var(--casa-areia);
+  --cor-texto: var(--casa-tinta); /* 13,8:1 */
+  --cor-texto-forte: var(--haubert-carvao); /* 16,6:1 */
+  --cor-texto-suave: var(--casa-oliva); /*  7,1:1 */
+  --cor-acento: var(--tijolo); /*  6,1:1 */
+  --cor-acento-fundo: var(--tijolo);
+  --cor-acento-texto: var(--osso); /*  6,1:1 sobre o acento */
+  --cor-borda: var(--casa-sage);
+  --cor-decor: var(--casa-terracota); /* NUNCA como texto: 3,5:1 */
+  --overlay-foto: rgb(35 35 34 / 0.35);
+  --sombra-fixo: 0 -1px 0 var(--casa-sage);
+}
+
+/* ==========================================================================
+   MODO NOITE — HAUBERT Steak & Grillhouse · "Fogo. Força. Tradição."
+   ========================================================================== */
+[data-modo='noite'] {
+  --cor-superficie: var(--haubert-carvao);
+  --cor-superficie-2: var(--haubert-grafite);
+  --cor-texto: var(--haubert-areia); /* 10,3:1 */
+  --cor-texto-forte: var(--osso); /* 16,6:1 */
+  --cor-texto-suave: var(--haubert-areia-2); /*  6,3:1 */
+  --cor-acento: var(--tijolo-claro); /*  4,8:1 — NUNCA --tijolo aqui (2,7:1) */
+  --cor-acento-fundo: var(--haubert-brasa);
+  --cor-acento-texto: var(--osso); /* 10,6:1 sobre a brasa */
+  --cor-borda: var(--haubert-caramelo);
+  --cor-decor: var(--haubert-caramelo);
+  --overlay-foto: rgb(19 18 18 / 0.55);
+  --sombra-fixo: 0 -1px 0 var(--haubert-caramelo);
+}

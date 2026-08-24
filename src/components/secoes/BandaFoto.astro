@@ -1,0 +1,91 @@
+---
+/**
+ * Bloco de foto com frase.
+ *
+ * Duas variantes, escolhidas pela RESOLUÇÃO da imagem e não pelo gosto:
+ *
+ * - `larga` — faixa da largura do container. Só para foto que tenha pixel para
+ *   isso (o recorte precisa nascer largo, tipo a foto do time, 1401px).
+ * - `lado` — foto contida ao lado do texto. É o que serve para os recortes de
+ *   250–350px, que é a maioria do acervo atual. Esticar um deles para faixa
+ *   larga entregaria borrão. (constants/imagens.ts, ADR-007)
+ */
+import Foto from '@/components/shared/Foto.astro';
+import type { Foto as TipoFoto } from '@/constants/imagens';
+
+interface Props {
+  foto: TipoFoto;
+  frase?: string;
+  apoio?: string;
+  variante?: 'larga' | 'lado';
+  proporcao?: string;
+}
+
+const { foto, frase, apoio, variante = 'lado', proporcao } = Astro.props;
+
+const proporcaoFinal = proporcao ?? (variante === 'larga' ? '21 / 6' : '4 / 3');
+---
+
+<section class:list={['banda', `banda--${variante}`]}>
+  <div class="casa-container banda__interno">
+    <div class="banda__foto">
+      <Foto
+        foto={foto}
+        proporcao={proporcaoFinal}
+        larguras={variante === 'larga' ? [640, 960, 1400] : [280, 400, 560]}
+        sizes={variante === 'larga' ? '(min-width: 90rem) 1440px, 100vw' : '(min-width: 56rem) 26rem, 88vw'}
+      />
+    </div>
+
+    {
+      (frase || apoio) && (
+        <div class="banda__texto">
+          {frase && <p class="banda__frase">{frase}</p>}
+          {apoio && <p class="banda__apoio">{apoio}</p>}
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .banda {
+    padding-block: var(--esp-8);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .banda__interno {
+    display: grid;
+    gap: var(--esp-6);
+    align-items: center;
+  }
+
+  .banda__frase {
+    margin: 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.75rem, 5vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .banda__apoio {
+    margin: var(--esp-4) 0 0;
+    max-width: 42ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.6;
+    color: var(--cor-texto-suave);
+  }
+
+  .banda--lado .banda__foto {
+    max-width: 26rem;
+  }
+
+  @media (min-width: 56rem) {
+    .banda--lado .banda__interno {
+      grid-template-columns: 26rem 1fr;
+      gap: var(--esp-8);
+    }
+  }
+</style>

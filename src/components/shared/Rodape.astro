@@ -1,0 +1,245 @@
+---
+/**
+ * Rodapé — o fecho do guia SOCIAL DNA (prancha 016), não uma lista de links.
+ *
+ * Onde falta dado do cliente, mostramos o que é verdade (cidade/UF) em vez de
+ * um endereço inventado ou um campo vazio. (BLK-003, RN-43)
+ */
+import { buscarCasa } from '@/lib/casa';
+import { FECHO, FRASE_LOCAL } from '@/constants/casa';
+import { limparPendente, temValor } from '@/lib/texto';
+
+const casa = buscarCasa();
+const anoAtual = new Date().getFullYear();
+const localizacao = temValor(casa.endereco)
+  ? limparPendente(casa.endereco)
+  : `${casa.cidade} · ${casa.uf}`;
+---
+
+<footer class="rodape">
+  <div class="casa-container">
+    <div class="rodape__fecho revelar">
+      {FECHO.map((linha) => <p class="rodape__linha">{linha}</p>)}
+    </div>
+
+    <div class="rodape__grade">
+      {
+        casa.marcas.map((marca) => (
+          <div class="rodape__coluna">
+            <p class="t-eyebrow">{marca.descritor}</p>
+            <p class="rodape__marca">{marca.nomeCurto}</p>
+            <p class="rodape__mote">{marca.mote}</p>
+            <p class="rodape__dado">{limparPendente(marca.horarioLegivel)}</p>
+            <a class="rodape__insta" href={marca.instagramUrl} rel="me noopener" target="_blank">
+              {marca.instagram}
+              <span class="rodape__seguidores">{marca.seguidores}</span>
+            </a>
+          </div>
+        ))
+      }
+
+      <div class="rodape__coluna">
+        <p class="t-eyebrow">Onde</p>
+        <p class="rodape__dado rodape__dado--forte">{localizacao}</p>
+        <p class="rodape__dado">
+          Mesma casa. Dois ritmos.<br />Depois das 19h, a CASA vira HAUBERT.
+        </p>
+        <a class="link rodape__link" href="/contato">Como chegar e reservar</a>
+      </div>
+    </div>
+
+    <p class="rodape__bandeira">{FRASE_LOCAL}</p>
+
+    <div class="rodape__base">
+      <p class="rodape__miudo">
+        © {anoAtual} {casa.nome} · {casa.cidade}/{casa.uf}
+      </p>
+      <p class="rodape__miudo">
+        <a class="rodape__link" href="/privacidade">Privacidade</a>
+        <span aria-hidden="true"> · </span>
+        Se for beber, não dirija.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    padding-block: var(--esp-9) var(--esp-10);
+    background-color: var(--cor-superficie);
+  }
+
+  /* ---- O fecho --------------------------------------------------------- */
+  .rodape__fecho {
+    margin-bottom: var(--esp-9);
+  }
+
+  .rodape__linha {
+    margin: 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.75rem, 5.5vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  /* Cada linha um pouco mais apagada: o manifesto termina, não grita. */
+  .rodape__linha:nth-child(2) {
+    opacity: 0.8;
+  }
+  .rodape__linha:nth-child(3) {
+    opacity: 0.62;
+  }
+  .rodape__linha:nth-child(4) {
+    opacity: 0.46;
+  }
+  .rodape__linha:nth-child(5) {
+    opacity: 0.32;
+  }
+
+  /* ---- Colunas --------------------------------------------------------- */
+  .rodape__grade {
+    display: grid;
+    gap: var(--esp-7);
+    padding-top: var(--esp-7);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .rodape__coluna {
+    display: grid;
+    gap: var(--esp-2);
+    align-content: start;
+  }
+
+  .rodape__marca {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .rodape__mote {
+    margin: 0;
+    color: var(--cor-acento);
+    font-size: var(--tam-corpo-sm);
+  }
+
+  .rodape__dado {
+    margin: 0;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.5;
+    color: var(--cor-texto-suave);
+  }
+
+  .rodape__dado--forte {
+    color: var(--cor-texto);
+  }
+
+  .rodape__insta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-3);
+    margin-top: var(--esp-2);
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-decoration: none;
+    color: var(--cor-texto-forte);
+    border-bottom: 1px solid var(--cor-borda);
+    /* Alvo de toque: o texto sozinho tem 20px de altura. */
+    min-height: var(--alvo-toque);
+    padding-bottom: var(--esp-2);
+    transition: border-color var(--transicao);
+  }
+
+  .rodape__insta:hover {
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .rodape__seguidores {
+    color: var(--cor-texto-suave);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+  }
+
+  .rodape__link {
+    color: var(--cor-acento);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+
+  /* Link solto na coluna é alvo de toque; link dentro de parágrafo é texto e
+     fica com a altura da linha, como manda a exceção de link embutido. */
+  .rodape__coluna > .rodape__link {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--alvo-toque);
+  }
+
+  /* ---- Bandeira e base ------------------------------------------------- */
+  .rodape__bandeira {
+    margin: var(--esp-9) 0 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.5rem, 6vw, 4rem);
+    line-height: 1;
+    letter-spacing: var(--ls-display);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    opacity: 0.14;
+    user-select: none;
+  }
+
+  .rodape__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--esp-3);
+    margin-top: var(--esp-6);
+    padding-top: var(--esp-5);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .rodape__miudo {
+    margin: 0;
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  /* No celular as colunas viram pilha e o ritmo de 96/128px transforma o
+     rodapé em três telas de rolagem. O respiro que dá silêncio no desktop dá
+     abandono no mobile. */
+  @media (max-width: 30rem) {
+    .rodape {
+      padding-block: var(--esp-7) var(--esp-8);
+    }
+
+    .rodape__fecho {
+      margin-bottom: var(--esp-7);
+    }
+
+    .rodape__grade {
+      gap: var(--esp-6);
+      padding-top: var(--esp-6);
+    }
+
+    .rodape__bandeira {
+      margin-top: var(--esp-7);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .rodape__grade {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--esp-6);
+    }
+  }
+</style>

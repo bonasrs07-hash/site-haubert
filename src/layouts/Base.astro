@@ -1,0 +1,205 @@
+---
+import '@fontsource/anton/latin-400.css';
+import '@fontsource/bebas-neue/latin-400.css';
+import '@fontsource/space-grotesk/latin-400.css';
+import '@fontsource/space-grotesk/latin-500.css';
+import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/space-mono/latin-700.css';
+import '@/styles/global.css';
+
+import Cabecalho from '@/components/shared/Cabecalho.astro';
+import Rodape from '@/components/shared/Rodape.astro';
+import BarraReserva from '@/components/shared/BarraReserva.astro';
+import { buscarCasa } from '@/lib/casa';
+import { ESSENCIA } from '@/constants/casa';
+import type { Modo } from '@/lib/tipos';
+
+interface Props {
+  titulo: string;
+  descricao: string;
+  /** Força um modo nesta rota (ex.: /noite). Sem isso, a hora decide. (ADR-004) */
+  modoForcado?: Modo;
+  /** Rotas de conteúdo duplicado apontam para a canônica. */
+  canonica?: string;
+  semIndexacao?: boolean;
+}
+
+const { titulo, descricao, modoForcado, canonica, semIndexacao = false } = Astro.props;
+
+const casa = buscarCasa();
+const urlCanonica = new URL(canonica ?? Astro.url.pathname, Astro.site ?? Astro.url.origin);
+
+// A imagem de compartilhamento é gerada a partir das fotos da marca e vive em
+// public/ — precisa de URL absoluta, porque quem lê é o WhatsApp e o Instagram,
+// não o browser. Sem ela o card sai como um retângulo cinza, que é exatamente o
+// contrário do que a casa vende. (docs/02_DESIGN_SYSTEM)
+const urlImagemOg = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
+
+// Preview de branch nunca é indexado. Sem isto, a homologação entra no Google e
+// passa a competir com o site de verdade pelo nome da casa — e sai do índice
+// muito mais devagar do que entrou.
+const ehPreview = process.env.VERCEL_ENV === 'preview';
+const foraDoIndice = semIndexacao || ehPreview;
+const tituloCompleto = `${titulo} · ${casa.nome}`;
+
+// schema.org — uma entrada por marca. É o que faz a busca local entender que
+// são dois restaurantes no mesmo endereço. (docs/09_BACKLOG, Épico D)
+const dadosEstruturados = casa.marcas.map((marca) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: marca.nome,
+  slogan: marca.mote,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: casa.cidade,
+    addressRegion: casa.uf,
+    addressCountry: 'BR',
+  },
+  sameAs: [marca.instagramUrl],
+  url: new URL(marca.modo === 'noite' ? '/noite' : '/', Astro.site ?? Astro.url.origin).href,
+}));
+---
+
+<!doctype html>
+<html lang="pt-BR" class="sem-js" data-modo={modoForcado ?? 'dia'} data-modo-forcado={modoForcado}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/*
+      Tema ANTES da primeira pintura. Inline e síncrono de propósito: assíncrono
+      faz a página piscar (FOUC). Precedência: rota que força > ?modo= >
+      preferência salva > hora local. A hora define o padrão, nunca a prisão.
+      (ADR-004, RN-03)
+    */}
+    <script is:inline>
+      (function () {
+        var raiz = document.documentElement;
+        raiz.classList.remove('sem-js');
+
+        function valido(m) {
+          return m === 'dia' || m === 'noite';
+        }
+
+        var modo = raiz.getAttribute('data-modo-forcado');
+
+        if (!valido(modo)) {
+          try {
+            var daUrl = new URLSearchParams(window.location.search).get('modo');
+            if (valido(daUrl)) modo = daUrl;
+          } catch (e) {}
+        }
+        if (!valido(modo)) {
+          try {
+            var salvo = window.localStorage.getItem('casa-modo');
+            if (valido(salvo)) modo = salvo;
+          } catch (e) {}
+        }
+        if (!valido(modo)) {
+          var agora = new Date();
+          var minutos = agora.getHours() * 60 + agora.getMinutes();
+          modo = minutos >= 1140 || minutos < 300 ? 'noite' : 'dia';
+        }
+
+        raiz.setAttribute('data-modo', modo);
+      })();
+    </script>
+
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <link rel="canonical" href={urlCanonica.href} />
+    {foraDoIndice && <meta name="robots" content="noindex, follow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={casa.nome} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={urlCanonica.href} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:image" content={urlImagemOg.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Salão da casa dividido ao meio: de dia como café, à noite como steakhouse."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={urlImagemOg.href} />
+
+    <meta name="theme-color" content="#131212" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f6efe7" media="(prefers-color-scheme: light)" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(dadosEstruturados)}
+    />
+  </head>
+
+  <body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <Cabecalho />
+
+    <main id="conteudo">
+      <slot />
+    </main>
+
+    <Rodape />
+    <BarraReserva />
+
+    <p class="so-leitor">{ESSENCIA}</p>
+
+    {/*
+      Entrada de seção: uma vez só, e desligada por prefers-reduced-motion no
+      CSS. Sem JS, `.sem-js` já deixa tudo visível — o conteúdo nunca depende
+      disto para existir. (docs/02_DESIGN_SYSTEM §5)
+    */}
+    <script>
+      const alvos = document.querySelectorAll('.revelar');
+      if (alvos.length) {
+        const observador = new IntersectionObserver(
+          (entradas) => {
+            for (const entrada of entradas) {
+              if (entrada.isIntersecting) {
+                entrada.target.classList.add('visivel');
+                observador.unobserve(entrada.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+        );
+        alvos.forEach((alvo) => observador.observe(alvo));
+      }
+    </script>
+
+    <style>
+      /* Invisível até receber foco pelo teclado — aí vira o primeiro elemento
+         da página, por cima do cabeçalho fixo. */
+      .pular {
+        position: fixed;
+        top: var(--esp-3);
+        left: var(--esp-3);
+        z-index: 100;
+        transform: translateY(-200%);
+        padding: var(--esp-3) var(--esp-4);
+        background-color: var(--cor-acento-fundo);
+        color: var(--cor-acento-texto);
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        text-decoration: none;
+        border-radius: var(--raio-1);
+        transition: transform var(--transicao);
+      }
+
+      .pular:focus-visible {
+        transform: none;
+      }
+    </style>
+  </body>
+</html>

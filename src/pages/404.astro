@@ -1,0 +1,97 @@
+---
+/**
+ * 404 — erro com voz de marca e uma saída em cada direção.
+ *
+ * Página de erro que só diz "não encontrado" transfere para o visitante um
+ * problema que é nosso. Esta oferece os quatro caminhos que resolvem 99% dos
+ * casos e mantém a reserva a um toque. (F-006)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+
+const SAIDAS = [
+  { href: '/', rotulo: 'Início', nota: 'A casa inteira, de dia e de noite' },
+  { href: '/noite', rotulo: 'A noite', nota: 'HAUBERT, a partir das 19h' },
+  { href: '/fogo', rotulo: 'O fogo', nota: 'O método e os cortes' },
+  { href: '/contato', rotulo: 'Contato', nota: 'Horários, canais e reserva' },
+];
+---
+
+<Base
+  titulo="Página não encontrada"
+  descricao="Esta página não existe mais — mas a casa continua aberta."
+  semIndexacao
+>
+  <HeroPagina
+    olho="Erro 404"
+    titulo="Essa porta não existe"
+    lead="O endereço que você abriu não leva a lugar nenhum. A casa, essa continua no mesmo lugar."
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container">
+      <ul class="saidas" role="list">
+        {
+          SAIDAS.map((saida) => (
+            <li>
+              <a class="saidas__item" href={saida.href}>
+                <span class="saidas__rotulo">{saida.rotulo}</span>
+                <span class="saidas__nota">{saida.nota}</span>
+                <span class="saidas__seta" aria-hidden="true">
+                  &rarr;
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .saidas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .saidas__item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--esp-2) var(--esp-4);
+    padding-block: var(--esp-5);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    text-decoration: none;
+    transition: padding-inline-start var(--transicao);
+  }
+
+  .saidas__item:hover {
+    padding-inline-start: var(--esp-3);
+  }
+
+  .saidas__rotulo {
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .saidas__nota {
+    grid-column: 1;
+    font-size: var(--tam-corpo-sm);
+    color: var(--cor-texto-suave);
+  }
+
+  .saidas__seta {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--cor-acento);
+    font-size: 1.5rem;
+  }
+</style>

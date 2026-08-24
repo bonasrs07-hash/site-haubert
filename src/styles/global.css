@@ -1,0 +1,308 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* ==========================================================================
+   Ponte Tailwind v4 ← tokens da marca
+   --------------------------------------------------------------------------
+   `@theme inline` faz as utilitárias apontarem para a custom property em vez
+   de copiarem o valor. É o que permite trocar Dia/Noite sem regerar CSS.
+   ========================================================================== */
+@theme inline {
+  --color-superficie: var(--cor-superficie);
+  --color-superficie-2: var(--cor-superficie-2);
+  --color-texto: var(--cor-texto);
+  --color-texto-forte: var(--cor-texto-forte);
+  --color-texto-suave: var(--cor-texto-suave);
+  --color-acento: var(--cor-acento);
+  --color-acento-fundo: var(--cor-acento-fundo);
+  --color-acento-texto: var(--cor-acento-texto);
+  --color-borda: var(--cor-borda);
+  --color-decor: var(--cor-decor);
+
+  --font-display: var(--fonte-display);
+  --font-titulo: var(--fonte-titulo);
+  --font-corpo: var(--fonte-corpo);
+  --font-mono: var(--fonte-mono);
+
+  --container-casa: var(--largura-max);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  * {
+    min-width: 0;
+  }
+
+  html {
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto);
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* O cabeçalho é fixo: âncora não pode parar embaixo dele. */
+    scroll-padding-top: calc(var(--altura-topo) + var(--esp-4));
+  }
+
+  body {
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto);
+    font-family: var(--fonte-corpo);
+    font-size: var(--tam-corpo);
+    line-height: var(--lh-corpo);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition:
+      background-color var(--transicao-modo),
+      color var(--transicao-modo);
+    /* Espaço para a barra de reserva, que é fixa em todos os tamanhos. */
+    padding-bottom: calc(var(--altura-barra) + env(safe-area-inset-bottom));
+  }
+
+  /* O cabeçalho é fixo: o conteúdo começa abaixo dele. Seção que quer sangrar
+     por baixo puxa com margin-top negativa (ver .hero). */
+  main {
+    padding-top: var(--altura-topo);
+  }
+
+  ::selection {
+    background-color: var(--cor-acento-fundo);
+    color: var(--cor-acento-texto);
+  }
+
+  :where(a):focus-visible,
+  :where(button):focus-visible,
+  :where(input, select, textarea):focus-visible,
+  :where([tabindex]):focus-visible {
+    outline: 2px solid var(--cor-acento);
+    outline-offset: 3px;
+    border-radius: var(--raio-1);
+  }
+
+  img,
+  picture,
+  video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  hr {
+    border: 0;
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    opacity: 0.55;
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   Tipografia — a escala do design system, como classes
+   ========================================================================== */
+@layer components {
+  .t-display {
+    font-family: var(--fonte-display);
+    font-size: var(--tam-display);
+    line-height: var(--lh-display);
+    letter-spacing: var(--ls-display);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .t-h1 {
+    font-family: var(--fonte-display);
+    font-size: var(--tam-h1);
+    line-height: var(--lh-h1);
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .t-h2 {
+    font-family: var(--fonte-titulo);
+    font-size: var(--tam-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .t-h3 {
+    font-family: var(--fonte-titulo);
+    font-size: var(--tam-h3);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  /* O par assinatura do sistema: display com tracking negativo +
+     label monoespaçada com tracking largo. Nunca inverta. */
+  .t-eyebrow {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-eyebrow);
+    line-height: 1.4;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+    margin: 0;
+  }
+
+  .t-meta {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    line-height: 1.45;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .t-corpo {
+    font-size: var(--tam-corpo);
+    line-height: var(--lh-corpo);
+    max-width: var(--largura-texto);
+  }
+
+  .t-corpo-sm {
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.5;
+    max-width: var(--largura-texto);
+  }
+
+  /* ---- Estruturas ---------------------------------------------------- */
+  .casa-container {
+    width: 100%;
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .casa-secao {
+    padding-block: var(--ritmo-secao);
+  }
+
+  .regua {
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    opacity: 0.5;
+  }
+
+  /* ---- Botões --------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--esp-2);
+    min-height: var(--alvo-toque);
+    padding-inline: var(--esp-5);
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    text-decoration: none;
+    border: var(--borda-fina) solid transparent;
+    border-radius: var(--raio-1);
+    cursor: pointer;
+    transition:
+      background-color var(--transicao),
+      color var(--transicao),
+      border-color var(--transicao);
+  }
+
+  .btn-primario {
+    background-color: var(--cor-acento-fundo);
+    color: var(--cor-acento-texto);
+  }
+
+  .btn-primario:hover {
+    background-color: var(--cor-texto-forte);
+    color: var(--cor-superficie);
+  }
+
+  .btn-secundario {
+    background-color: transparent;
+    color: var(--cor-texto-forte);
+    border-color: var(--cor-borda);
+  }
+
+  .btn-secundario:hover {
+    background-color: var(--cor-texto-forte);
+    color: var(--cor-superficie);
+    border-color: var(--cor-texto-forte);
+  }
+
+  /* ---- Link de texto --------------------------------------------------- */
+  .link {
+    color: var(--cor-acento);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    transition: opacity var(--transicao);
+  }
+
+  .link:hover {
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================================================
+   Entrada de seção — uma vez só, e nunca contra a vontade do usuário
+   ========================================================================== */
+@layer utilities {
+  .revelar {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 600ms cubic-bezier(0.2, 0.6, 0.2, 1),
+      transform 600ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .revelar.visivel {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Sem JS o conteúdo não pode ficar invisível. */
+  .sem-js .revelar {
+    opacity: 1;
+    transform: none;
+  }
+
+  .so-leitor {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .revelar {
+    opacity: 1;
+    transform: none;
+  }
+}

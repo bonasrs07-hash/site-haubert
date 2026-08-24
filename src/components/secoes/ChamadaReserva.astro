@@ -1,0 +1,152 @@
+---
+/**
+ * A chamada de reserva — o fundo do funil.
+ *
+ * A urgência aqui é REAL e verificável: o HAUBERT abre quatro noites por
+ * semana, a partir das 19h. Nenhum contador falso, nenhuma "última mesa".
+ * Escassez fabricada converte uma vez e queima a marca depois — e esta marca
+ * vende justamente verdade. (docs/00_VISAO, RN-38)
+ */
+import BotaoReserva from '@/components/shared/BotaoReserva.astro';
+import { buscarMarcas } from '@/lib/casa';
+import { limparPendente } from '@/lib/texto';
+
+interface Props {
+  olho?: string;
+  titulo?: string;
+  origem?: string;
+  id?: string;
+}
+
+const {
+  olho = 'Mesa',
+  titulo = 'A casa está aberta. A mesa é sua.',
+  origem = 'chamada',
+  id = 'chamada',
+} = Astro.props;
+
+const marcas = buscarMarcas();
+---
+
+<section class="casa-secao chamada" id="reservar">
+  <div class="casa-container chamada__interno">
+    <div class="chamada__texto">
+      <p class="t-eyebrow chamada__olho">
+        <span class="chamada__traco" aria-hidden="true"></span>
+        {olho}
+      </p>
+      <h2 class="t-h2 chamada__titulo">{titulo}</h2>
+      <p class="t-corpo chamada__lead">
+        Três toques e você está falando com a equipe. Sem formulário, sem
+        cadastro, sem esperar e-mail de confirmação.
+      </p>
+
+      <dl class="chamada__horarios">
+        {
+          marcas.map((marca) => (
+            <div class="chamada__horario">
+              <dt>{marca.nomeCurto}</dt>
+              <dd>{limparPendente(marca.horarioLegivel)}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="chamada__acao">
+      <BotaoReserva variante="inline" origem={origem} id={id} />
+      <p class="chamada__nota">
+        Grupos acima de 8 pessoas e eventos privados: fale com a equipe pelo
+        mesmo canal.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chamada {
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    background-color: var(--cor-superficie-2);
+  }
+
+  .chamada__interno {
+    display: grid;
+    gap: var(--esp-7);
+    align-items: start;
+  }
+
+  .chamada__olho {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    margin: 0 0 var(--esp-4);
+  }
+
+  .chamada__traco {
+    display: block;
+    width: var(--esp-6);
+    height: 1px;
+    background-color: var(--cor-acento);
+  }
+
+  .chamada__titulo {
+    max-width: 16ch;
+  }
+
+  .chamada__lead {
+    margin: var(--esp-4) 0 0;
+    color: var(--cor-texto-suave);
+  }
+
+  .chamada__horarios {
+    display: grid;
+    gap: var(--esp-4);
+    margin: var(--esp-6) 0 0;
+    padding-top: var(--esp-5);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .chamada__horario dt {
+    font-family: var(--fonte-titulo);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .chamada__horario dd {
+    margin: var(--esp-1) 0 0;
+    font-size: var(--tam-corpo-sm);
+    color: var(--cor-texto-suave);
+  }
+
+  .chamada__acao {
+    display: grid;
+    gap: var(--esp-4);
+    align-content: start;
+    /* Mesma razão do cartão das duas culturas: no celular a moldura não pode
+       comer a largura do que ela emoldura. */
+    padding: clamp(var(--esp-4), 5vw, var(--esp-6));
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie);
+  }
+
+  .chamada__nota {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--cor-texto-suave);
+  }
+
+  @media (min-width: 56rem) {
+    .chamada__interno {
+      grid-template-columns: 1.15fr 22rem;
+      gap: var(--esp-8);
+    }
+
+    .chamada__horarios {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

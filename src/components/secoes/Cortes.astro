@@ -1,0 +1,108 @@
+---
+/**
+ * Os cortes (prancha 004).
+ *
+ * SEM PREÇO na Fase 1 — de propósito. Preço no site sem processo para
+ * atualizá-lo vira preço errado em três meses, e preço errado na mesa custa
+ * mais caro que preço ausente. O cardápio com valores entra na Fase 2, quando
+ * a equipe puder editar pelo painel. (BLK-004, RN-21)
+ */
+import CabecalhoSecao from './CabecalhoSecao.astro';
+import { CORTES, PROMESSA_STEAK } from '@/constants/casa';
+
+interface Props {
+  olho?: string;
+  titulo?: string;
+}
+
+const { olho = 'Na brasa', titulo = 'Os cortes' } = Astro.props;
+---
+
+<section class="casa-secao cortes" id="cortes">
+  <div class="casa-container">
+    <CabecalhoSecao
+      olho={olho}
+      titulo={titulo}
+      lead="Seis cortes, um método. O cardápio completo, com valores do dia, a equipe passa na conversa."
+    />
+
+    <ul class="cortes__grade" role="list">
+      {
+        CORTES.map((corte, i) => (
+          <li class="cortes__item revelar" style={`--atraso:${Math.min(i, 5) * 70}ms`}>
+            <h3 class="cortes__nome">{corte.nome}</h3>
+            <p class="cortes__desc">{corte.descricao}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="cortes__promessa revelar">
+      <span class="t-eyebrow">A promessa</span>
+      {PROMESSA_STEAK}
+    </p>
+  </div>
+</section>
+
+<style>
+  .cortes__grade {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .cortes__item {
+    display: grid;
+    gap: var(--esp-2);
+    align-content: start;
+    padding-block: var(--esp-5);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    transition-delay: var(--atraso);
+  }
+
+  .cortes__nome {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .cortes__desc {
+    margin: 0;
+    max-width: 32ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .cortes__promessa {
+    display: grid;
+    gap: var(--esp-3);
+    margin: var(--esp-7) 0 0;
+    max-width: 46ch;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto);
+  }
+
+  @media (min-width: 40rem) {
+    .cortes__grade {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: var(--esp-6);
+    }
+  }
+
+  @media (min-width: 68rem) {
+    .cortes__grade {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

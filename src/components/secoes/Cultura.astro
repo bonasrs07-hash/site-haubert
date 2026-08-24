@@ -1,0 +1,154 @@
+---
+/**
+ * Cultura e eventos (pranchas 006 e 013).
+ *
+ * Os eventos aparecem por CADÊNCIA, não por data: o guia não traz calendário e
+ * data errada no site queima mais confiança do que a ausência dela. A agenda
+ * com datas reais entra na Fase 2, alimentada pelo painel. (BLK-007, RN-52)
+ */
+import CabecalhoSecao from './CabecalhoSecao.astro';
+import GradeEixos from './GradeEixos.astro';
+import { EIXOS_CULTURA, EVENTOS, FRASE_CULTURA } from '@/constants/casa';
+import { buscarMarca } from '@/lib/casa';
+
+interface Props {
+  comEixos?: boolean;
+}
+
+const { comEixos = true } = Astro.props;
+
+const eventos = EVENTOS.map((evento) => ({
+  ...evento,
+  marca: evento.marcaSlug ? buscarMarca(evento.marcaSlug) : undefined,
+}));
+---
+
+<section class="casa-secao cultura" id="cultura">
+  <div class="casa-container">
+    <CabecalhoSecao
+      olho="O que acontece aqui"
+      titulo="A cultura não é acessório. É essência."
+      lead="Música, arte, cidade e movimento. O que a casa programa é parte do que a casa é."
+    />
+
+    {comEixos && <GradeEixos itens={EIXOS_CULTURA} colunas={2} numerado />}
+
+    <div class="cultura__eventos">
+      <p class="t-eyebrow cultura__olho">Os encontros</p>
+
+      <ul class="cultura__grade" role="list">
+        {
+          eventos.map((evento, i) => (
+            <li class="cultura__cartao revelar" style={`--atraso:${Math.min(i, 3) * 80}ms`}>
+              <p class="t-meta cultura__cadencia">{evento.cadencia}</p>
+              <h3 class="cultura__titulo">{evento.titulo}</h3>
+              <p class="cultura__desc">{evento.descricao}</p>
+              <p class="cultura__onde">
+                {evento.marca ? evento.marca.nomeCurto : 'CASA + HAUBERT'}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="cultura__aviso">
+        As datas de cada edição saem no Instagram da casa.
+      </p>
+    </div>
+
+    <p class="cultura__frase revelar">{FRASE_CULTURA}</p>
+  </div>
+</section>
+
+<style>
+  .cultura__eventos {
+    margin-top: var(--esp-8);
+  }
+
+  .cultura__olho {
+    margin: 0 0 var(--esp-5);
+  }
+
+  .cultura__grade {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--esp-4);
+  }
+
+  .cultura__cartao {
+    display: grid;
+    gap: var(--esp-2);
+    align-content: start;
+    padding: var(--esp-5);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie-2);
+    transition-delay: var(--atraso);
+  }
+
+  .cultura__cadencia {
+    color: var(--cor-acento);
+  }
+
+  .cultura__titulo {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .cultura__desc {
+    margin: 0;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.5;
+    color: var(--cor-texto-suave);
+  }
+
+  .cultura__onde {
+    margin: var(--esp-3) 0 0;
+    padding-top: var(--esp-3);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .cultura__aviso {
+    margin: var(--esp-4) 0 0;
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .cultura__frase {
+    margin: var(--esp-8) 0 0;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.75rem, 6vw, 4rem);
+    line-height: 1;
+    letter-spacing: var(--ls-display);
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+    max-width: 16ch;
+  }
+
+  @media (min-width: 44rem) {
+    .cultura__grade {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .cultura__grade {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

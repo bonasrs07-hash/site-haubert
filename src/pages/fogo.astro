@@ -1,0 +1,41 @@
+---
+/**
+ * /fogo — o método e os cortes.
+ *
+ * A página de prova: quem chega aqui quer saber se a casa sabe o que está
+ * fazendo antes de gastar uma noite de sexta. Por isso ela mostra processo
+ * (os cinco elementos), não adjetivo.
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import Fogo from '@/components/secoes/Fogo.astro';
+import Cortes from '@/components/secoes/Cortes.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { FRASE_FOGO } from '@/constants/casa';
+---
+
+<Base
+  titulo="O fogo"
+  descricao="Madeira, brasa, técnica, fumaça e descanso: os cinco elementos do método do HAUBERT, e os seis cortes que saem da nossa brasa."
+>
+  <HeroPagina
+    olho="O método"
+    titulo="O fogo é o que transforma"
+    lead="Aqui, o tempo é ingrediente. A técnica é o que constrói sabor. Nada acelera o que precisa de brasa."
+    frase={FRASE_FOGO}
+  />
+
+  <Fogo olho="Cinco elementos" titulo="Não é sobre queimar. É sobre dominar." />
+
+  <Faixa texto="A lenha transforma." destaque velocidade={36} />
+
+  <Cortes olho="Da brasa para a mesa" titulo="Os cortes" />
+
+  <ChamadaReserva
+    olho="Brasa"
+    titulo="A brasa acende às 19h."
+    origem="fogo"
+    id="fogo"
+  />
+</Base>

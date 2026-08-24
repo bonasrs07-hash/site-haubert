@@ -1,0 +1,63 @@
+---
+/**
+ * /noite — a mesma casa, entrando pela porta do HAUBERT.
+ *
+ * Existe por dois motivos concretos:
+ *   1. É o link que o @haubert.steakhouse coloca na bio. Quem vem de lá não
+ *      pode cair numa página de café.
+ *   2. Dá ao Google uma URL para o segundo Restaurant do schema.org.
+ *
+ * Força o modo Noite no servidor — e o alternador continua funcionando: quem
+ * quiser ver o dia, vê. A hora define o padrão, nunca a prisão. (RN-03)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import CabecalhoSecao from '@/components/secoes/CabecalhoSecao.astro';
+import GradeEixos from '@/components/secoes/GradeEixos.astro';
+import Fogo from '@/components/secoes/Fogo.astro';
+import Cortes from '@/components/secoes/Cortes.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { FRASE_NOITE, NOITE_EXPERIENCIAS } from '@/constants/casa';
+import { buscarMarcaPorModo } from '@/lib/casa';
+import { limparPendente } from '@/lib/texto';
+
+const haubert = buscarMarcaPorModo('noite');
+---
+
+<Base
+  titulo="HAUBERT Steak & Grillhouse"
+  descricao="Fogo. Força. Tradição. A partir das 19h, a CASA vira HAUBERT: brasa, cortes e a noite de Novo Hamburgo. Reserve sua mesa."
+  modoForcado="noite"
+>
+  <HeroPagina
+    olho={`${haubert.descritor} · ${limparPendente(haubert.horarioLegivel)}`}
+    titulo={haubert.mote}
+    lead={haubert.copy.convite}
+    frase={FRASE_NOITE}
+  />
+
+  <section class="casa-secao" id="experiencias">
+    <div class="casa-container">
+      <CabecalhoSecao
+        olho="A casa à noite"
+        titulo="Mesma casa. Nova atmosfera."
+        lead="Quando o dia desacelera, a luz baixa, o som sobe e a lenha assume."
+      />
+      <GradeEixos itens={NOITE_EXPERIENCIAS} colunas={2} numerado />
+    </div>
+  </section>
+
+  <Faixa texto="Fogo. Força. Tradição." destaque velocidade={40} />
+
+  <Cortes />
+
+  <Fogo olho="Como fazemos" titulo="Não é sobre queimar. É sobre dominar." />
+
+  <ChamadaReserva
+    olho="Noite"
+    titulo="A brasa já está pronta."
+    origem="noite"
+    id="noite"
+  />
+</Base>

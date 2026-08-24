@@ -1,0 +1,341 @@
+---
+/**
+ * Cabeçalho fixo.
+ *
+ * A assinatura mostra SEMPRE as duas marcas; o modo ativo apenas decide qual
+ * delas está acesa. É o "mesma casa, outra energia" em uma linha — e evita
+ * a leitura errada de que são dois negócios diferentes.
+ *
+ * Menu mobile é <details>: sem JS, sem ilha, sem armadilha de foco.
+ */
+import AlternadorModo from './AlternadorModo.astro';
+import { buscarCasa, buscarMarcas } from '@/lib/casa';
+
+const casa = buscarCasa();
+const marcas = buscarMarcas();
+const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
+
+const NAV = [
+  { href: '/sobre', rotulo: 'A casa' },
+  { href: '/fogo', rotulo: 'O fogo' },
+  { href: '/cultura', rotulo: 'Cultura' },
+  { href: '/contato', rotulo: 'Contato' },
+];
+
+const ehAtual = (href: string) => rotaAtual === href;
+---
+
+<header class="topo">
+  <div class="topo__interno">
+    {/*
+      A assinatura sai do tenant, não do componente: o dia é o primeiro lado, a
+      noite é o segundo, e a grafia (inclusive a caixa) é dado da marca. Trocar
+      "Casa Coffee" por outro nome é editar o seed, não este arquivo. (ADR-002)
+    */}
+    <a class="marca" href="/" aria-label={`${casa.nome} — página inicial`}>
+      {
+        marcas.map((marca, i) => (
+          <Fragment>
+            {i > 0 && <span class="marca__mais" aria-hidden="true">+</span>}
+            <span class="marca__lado" data-lado={marca.modo}>{marca.logotipo}</span>
+          </Fragment>
+        ))
+      }
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      {
+        NAV.map((item) => (
+          <a
+            class="nav__link"
+            href={item.href}
+            aria-current={ehAtual(item.href) ? 'page' : undefined}
+          >
+            {item.rotulo}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="topo__acoes">
+      <AlternadorModo compacto />
+      <a class="btn btn-secundario topo__cta" href="/contato#reservar">Reservar</a>
+
+      <details class="menu">
+        <summary class="menu__gatilho" aria-label="Abrir menu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </summary>
+        <nav class="menu__painel" aria-label="Menu">
+          <a class="menu__link" href="/">Início</a>
+          <a class="menu__link" href="/noite">A noite</a>
+          {NAV.map((item) => <a class="menu__link" href={item.href}>{item.rotulo}</a>)}
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Rolou: o cabeçalho ganha fundo. Passivo, e sem tocar em layout.
+  const topo = document.querySelector<HTMLElement>('.topo');
+  if (topo) {
+    const marcar = () => topo.classList.toggle('topo--rolado', window.scrollY > 24);
+    marcar();
+    window.addEventListener('scroll', marcar, { passive: true });
+  }
+
+  // Navegar fecha o menu — nada pior que voltar e achar o painel aberto.
+  document.querySelectorAll<HTMLElement>('.menu__link').forEach((link) => {
+    link.addEventListener('click', () => {
+      link.closest('details')?.removeAttribute('open');
+    });
+  });
+</script>
+
+<style>
+  .topo {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 70;
+    transition:
+      background-color var(--transicao),
+      border-color var(--transicao);
+    border-bottom: var(--borda-fina) solid transparent;
+  }
+
+  .topo--rolado {
+    background-color: color-mix(in srgb, var(--cor-superficie) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom-color: var(--cor-borda);
+  }
+
+  .topo__interno {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-4);
+    width: 100%;
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    padding: var(--esp-4) var(--gutter);
+  }
+
+  /* ---- Assinatura ------------------------------------------------------ */
+  .marca {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--esp-2);
+    /* Anton, não Bebas Neue: a Bebas é caixa-alta de verdade — os caracteres
+       minúsculos dela desenham as MESMAS maiúsculas ("Casa" e "CASA" medem
+       igual). Assinatura com inicial maiúscula só existe numa fonte que tenha
+       minúscula, e a Anton é a display que o site já carrega. (ADR-003) */
+    font-family: var(--fonte-display);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    /* A caixa da assinatura é grafia da marca e vem escrita no tenant — o CSS
+       não pode reescrever para caixa alta por cima dela. */
+    text-transform: none;
+    text-decoration: none;
+    color: var(--cor-texto-forte);
+    white-space: nowrap;
+    /* O texto tem 31px; o alvo de toque precisa de 44. */
+    padding-block: var(--esp-2);
+  }
+
+  /* Quem está acesa é decidido pelo <html>, não pelo JS. */
+  .marca__lado {
+    opacity: 0.32;
+    transition: opacity var(--transicao-modo);
+  }
+
+  :global([data-modo='dia']) .marca__lado[data-lado='dia'],
+  :global([data-modo='noite']) .marca__lado[data-lado='noite'] {
+    opacity: 1;
+  }
+
+  .marca__mais {
+    color: var(--cor-acento);
+    font-family: var(--fonte-mono);
+    font-size: 0.75rem;
+  }
+
+  /* ---- Navegação ------------------------------------------------------- */
+  .nav {
+    display: none;
+    gap: var(--esp-5);
+  }
+
+  .nav__link {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--cor-texto-suave);
+    padding-block: var(--esp-2);
+    border-bottom: 1px solid transparent;
+    transition:
+      color var(--transicao),
+      border-color var(--transicao);
+  }
+
+  .nav__link:hover,
+  .nav__link[aria-current='page'] {
+    color: var(--cor-texto-forte);
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .topo__acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+  }
+
+  .topo__cta {
+    display: none;
+  }
+
+  /* ---- Menu mobile ----------------------------------------------------- */
+  .menu {
+    position: relative;
+  }
+
+  .menu__gatilho {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: var(--alvo-toque);
+    height: var(--alvo-toque);
+    padding-inline: 12px;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .menu__gatilho::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu__gatilho span {
+    display: block;
+    height: 1.5px;
+    background-color: var(--cor-texto-forte);
+    transition: transform var(--transicao);
+  }
+
+  .menu[open] .menu__gatilho span:first-child {
+    transform: translateY(3.25px) rotate(45deg);
+  }
+
+  .menu[open] .menu__gatilho span:last-child {
+    transform: translateY(-3.25px) rotate(-45deg);
+  }
+
+  .menu__painel {
+    position: absolute;
+    top: calc(100% + var(--esp-2));
+    right: 0;
+    display: grid;
+    min-width: 12rem;
+    padding: var(--esp-3);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie);
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.28);
+  }
+
+  .menu__link {
+    display: flex;
+    align-items: center;
+    min-height: var(--alvo-toque);
+    padding-inline: var(--esp-3);
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--cor-texto);
+    border-radius: var(--raio-1);
+  }
+
+  .menu__link:hover {
+    background-color: var(--cor-superficie-2);
+    color: var(--cor-texto-forte);
+  }
+
+  /* ---- Telas estreitas -------------------------------------------------
+     O topo divide uma linha entre a assinatura das DUAS marcas, o alternador
+     e o menu. Com "Casa Coffee + Haubert" em Anton isso são 327px de conteúdo
+     natural para 280px de espaço numa tela de 320.
+
+     O que aperta é o cromo, nunca o texto: assinatura cortada e rótulo
+     Dia/Noite cortado são as duas coisas que fariam o cabeçalho parar de se
+     explicar sozinho. (princípio nº 1) A altura não muda em degrau nenhum: o
+     alvo de toque continua 48px. */
+  @media (max-width: 36rem) {
+    .topo__interno {
+      gap: var(--esp-2);
+    }
+
+    .marca {
+      font-size: clamp(0.8125rem, 4.1vw, 1.25rem);
+      gap: var(--esp-1);
+      /* A letra encolhe, o alvo de toque não: com fonte fluida, padding fixo
+         daria 39px numa ponta da escala e 50px na outra — e 50px empurraria a
+         altura do cabeçalho inteiro, que é reservada em token. Aqui a caixa é
+         o alvo de toque, exato, em qualquer ponto do clamp. */
+      min-height: var(--alvo-toque);
+      align-items: center;
+      line-height: 1;
+      padding-block: 0;
+    }
+
+    .topo__acoes {
+      gap: var(--esp-2);
+    }
+
+    /* Só a largura aperta; a altura é o alvo de toque e fica. */
+    .menu__gatilho {
+      width: 44px;
+      padding-inline: 10px;
+    }
+
+    /* Painel encostado no canto sobra espaço morto na tela pequena — e o
+       polegar agradece o alvo mais largo. */
+    .menu__painel {
+      min-width: min(15rem, calc(100vw - 2 * var(--gutter)));
+    }
+  }
+
+  /* Último degrau, para os aparelhos de 320–376px. Aqui já não sobra respiro
+     para distribuir: o que cede é o espaço morto (gaps, o ponto decorativo do
+     alternador, a largura do gatilho do menu) para que as duas marcas caibam
+     lado a lado, que foi a escolha do dono. Nenhuma palavra sai da tela. */
+  @media (max-width: 23.5rem) {
+    .topo__interno,
+    .topo__acoes {
+      gap: var(--esp-1);
+    }
+
+    .menu__gatilho {
+      width: 40px;
+      padding-inline: 8px;
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .nav {
+      display: flex;
+    }
+
+    .topo__cta {
+      display: inline-flex;
+    }
+
+    .menu {
+      display: none;
+    }
+  }
+</style>

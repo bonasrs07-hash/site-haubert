@@ -1,0 +1,72 @@
+---
+/**
+ * Abertura das páginas internas. Mesma gramática do hero da home, um grau
+ * abaixo na escala — hierarquia é o que faz a home continuar sendo a home.
+ */
+interface Props {
+  olho: string;
+  titulo: string;
+  lead?: string;
+  frase?: string;
+}
+
+const { olho, titulo, lead, frase } = Astro.props;
+---
+
+<section class="abertura">
+  <div class="casa-container abertura__interno">
+    <p class="t-eyebrow abertura__olho">
+      <span class="abertura__traco" aria-hidden="true"></span>
+      {olho}
+    </p>
+    <h1 class="t-h1 abertura__titulo">{titulo}</h1>
+    {lead && <p class="t-corpo abertura__lead">{lead}</p>}
+    {frase && <p class="abertura__frase">{frase}</p>}
+  </div>
+</section>
+
+<style>
+  .abertura {
+    margin-top: calc(-1 * var(--altura-topo));
+    padding-top: var(--altura-topo);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .abertura__interno {
+    display: grid;
+    gap: var(--esp-5);
+    padding-block: clamp(var(--esp-8), 14vh, var(--esp-10)) var(--esp-8);
+  }
+
+  .abertura__olho {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+  }
+
+  .abertura__traco {
+    display: block;
+    width: var(--esp-6);
+    height: 1px;
+    background-color: var(--cor-acento);
+  }
+
+  .abertura__titulo {
+    max-width: 16ch;
+  }
+
+  .abertura__lead {
+    color: var(--cor-texto-suave);
+  }
+
+  .abertura__frase {
+    margin: var(--esp-3) 0 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.25rem, 2.6vw, 1.875rem);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-acento);
+    max-width: 26ch;
+  }
+</style>

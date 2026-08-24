@@ -1,0 +1,349 @@
+---
+/**
+ * Reserva em três toques. (CLAUDE.md, princípio nº1)
+ *
+ *   1. abrir        2. quantas pessoas        3. abrir a conversa
+ *
+ * "Quando" já vem em Hoje e é opcional — o terceiro toque nunca é obrigatório.
+ *
+ * PROGRESSIVE ENHANCEMENT: é <details> + radios. Sem JS o painel abre, as
+ * opções marcam e o link continua funcionando com o padrão do servidor; o
+ * script só reescreve o href a cada escolha. (F-006)
+ *
+ * Fase 1 termina no WhatsApp — a equipe confirma no canal que já usa. (ADR-005)
+ */
+import { OPCOES_PESSOAS, melhorCanal } from '@/lib/reservas';
+import { buscarCasa, buscarMarcaPorModo } from '@/lib/casa';
+import { temValor } from '@/lib/texto';
+
+interface Props {
+  variante?: 'flutuante' | 'inline';
+  origem?: string;
+  id?: string;
+}
+
+const { variante = 'inline', origem = 'site', id = 'reserva' } = Astro.props;
+
+const casa = buscarCasa();
+const marcaDia = buscarMarcaPorModo('dia');
+const marcaNoite = buscarMarcaPorModo('noite');
+
+const contatos = {
+  whatsapp: temValor(casa.whatsapp) ? casa.whatsapp : undefined,
+  telefone: temValor(casa.telefone) ? casa.telefone : undefined,
+};
+
+// Estado inicial do servidor: 2 pessoas, hoje, marca do Dia. O script assume a
+// partir daqui. Se o script nunca rodar, este link já resolve.
+const padrao = { pessoas: 2, quando: 'hoje' };
+const canalPadrao = melhorCanal(marcaDia, padrao, contatos, origem);
+
+const resumo = (m: typeof marcaDia) => ({
+  slug: m.slug,
+  nomeCurto: m.nomeCurto,
+  instagramUrl: m.instagramUrl,
+});
+
+const QUANDO = [
+  { valor: 'hoje', rotulo: 'Hoje' },
+  { valor: 'amanhã', rotulo: 'Amanhã' },
+  { valor: '', rotulo: 'Outro dia' },
+];
+---
+
+<details
+  class:list={['reserva', `reserva--${variante}`]}
+  data-reserva
+  data-origem={origem}
+  data-whatsapp={contatos.whatsapp ?? ''}
+  data-telefone={contatos.telefone ?? ''}
+  data-marca-dia={JSON.stringify(resumo(marcaDia))}
+  data-marca-noite={JSON.stringify(resumo(marcaNoite))}
+>
+  <summary class="reserva__gatilho btn btn-primario">
+    <span class="reserva__chama" aria-hidden="true"></span>
+    <span>Reservar mesa</span>
+  </summary>
+
+  <div class="reserva__painel">
+    <fieldset class="reserva__grupo">
+      <legend class="t-eyebrow">Quantas pessoas</legend>
+      <div class="reserva__fichas">
+        {
+          OPCOES_PESSOAS.map((n) => (
+            <Fragment>
+              <input
+                type="radio"
+                class="so-leitor reserva__radio"
+                name={`${id}-pessoas`}
+                id={`${id}-pessoas-${n}`}
+                value={n}
+                checked={n === padrao.pessoas}
+                data-campo="pessoas"
+              />
+              <label class="reserva__ficha" for={`${id}-pessoas-${n}`}>
+                <span aria-hidden="true">{n}</span>
+                <span class="so-leitor">{n} pessoas</span>
+              </label>
+            </Fragment>
+          ))
+        }
+      </div>
+      <p class="reserva__dica">Mais de 8? É só dizer na conversa.</p>
+    </fieldset>
+
+    <fieldset class="reserva__grupo">
+      <legend class="t-eyebrow">Quando</legend>
+      <div class="reserva__fichas">
+        {
+          QUANDO.map((q, i) => (
+            <Fragment>
+              <input
+                type="radio"
+                class="so-leitor reserva__radio"
+                name={`${id}-quando`}
+                id={`${id}-quando-${i}`}
+                value={q.valor}
+                checked={q.valor === padrao.quando}
+                data-campo="quando"
+              />
+              <label class="reserva__ficha" for={`${id}-quando-${i}`}>
+                {q.rotulo}
+              </label>
+            </Fragment>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <a
+      class="btn btn-primario reserva__ir"
+      href={canalPadrao.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-ir
+      data-canal={canalPadrao.tipo}
+    >
+      <span data-ir-rotulo>{canalPadrao.rotulo}</span>
+      <span aria-hidden="true">&rarr;</span>
+    </a>
+
+    <p class="reserva__nota">
+      Você fala direto com a equipe. O site não guarda nenhum dado seu.
+    </p>
+  </div>
+</details>
+
+<script>
+  import { melhorCanal, type MarcaResumo } from '@/lib/reservas';
+  import { lerModo } from '@/lib/modo';
+
+  const VAZIO: MarcaResumo = { slug: 'casa', nomeCurto: 'CASA', instagramUrl: '#' };
+
+  function lerJson(valor: string | undefined): MarcaResumo {
+    if (!valor) return VAZIO;
+    try {
+      return JSON.parse(valor) as MarcaResumo;
+    } catch {
+      return VAZIO;
+    }
+  }
+
+  document.querySelectorAll<HTMLDetailsElement>('[data-reserva]').forEach((raiz) => {
+    const ir = raiz.querySelector<HTMLAnchorElement>('[data-ir]');
+    const rotulo = raiz.querySelector<HTMLElement>('[data-ir-rotulo]');
+    if (!ir || !rotulo) return;
+
+    const marcas = {
+      dia: lerJson(raiz.dataset.marcaDia),
+      noite: lerJson(raiz.dataset.marcaNoite),
+    };
+    const contatos = {
+      whatsapp: raiz.dataset.whatsapp || undefined,
+      telefone: raiz.dataset.telefone || undefined,
+    };
+    const origem = raiz.dataset.origem || 'site';
+
+    const marcado = (campo: string): string => {
+      const alvo = raiz.querySelector<HTMLInputElement>('[data-campo="' + campo + '"]:checked');
+      return alvo ? alvo.value : '';
+    };
+
+    const atualizar = () => {
+      const marca = marcas[lerModo()];
+      const escolha = { pessoas: Number(marcado('pessoas')) || 2, quando: marcado('quando') };
+      const canal = melhorCanal(marca, escolha, contatos, origem);
+      ir.href = canal.href;
+      ir.dataset.canal = canal.tipo;
+      rotulo.textContent = canal.rotulo;
+    };
+
+    raiz.addEventListener('change', atualizar);
+
+    // Trocar Dia/Noite troca a marca da mensagem — a reserva segue a atmosfera
+    // que a pessoa está vendo. (RN-33)
+    new MutationObserver(atualizar).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-modo'],
+    });
+
+    // Fechar com Esc, como qualquer coisa que abre por cima do conteúdo.
+    raiz.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && raiz.open) {
+        raiz.open = false;
+        raiz.querySelector('summary')?.focus();
+      }
+    });
+
+    atualizar();
+  });
+
+  // Um painel aberto por vez, e clique fora fecha.
+  document.addEventListener('click', (evento) => {
+    const dentro = (evento.target as HTMLElement).closest('[data-reserva]');
+    document.querySelectorAll<HTMLDetailsElement>('[data-reserva]').forEach((raiz) => {
+      if (raiz !== dentro) raiz.open = false;
+    });
+  });
+</script>
+
+<style>
+  .reserva {
+    position: relative;
+  }
+
+  .reserva__gatilho {
+    list-style: none;
+    user-select: none;
+    width: 100%;
+  }
+
+  .reserva__gatilho::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A brasa: o único ornamento decorativo do sistema, e ele significa algo —
+     o fogo é a linguagem da casa. Parada quando se pede menos movimento. */
+  .reserva__chama {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--raio-selo);
+    background-color: currentColor;
+    animation: brasa 2.4s ease-in-out infinite;
+  }
+
+  @keyframes brasa {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .reserva__painel {
+    display: grid;
+    gap: var(--esp-5);
+    margin-top: var(--esp-3);
+    /* Em 320px os 24px fixos comiam a linha do botão de ir e jogavam
+       "Chamar no Instagram" para duas linhas. */
+    padding: clamp(var(--esp-4), 4.5vw, var(--esp-5));
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie);
+  }
+
+  .reserva--flutuante .reserva__painel {
+    position: absolute;
+    bottom: calc(100% + var(--esp-3));
+    right: 0;
+    left: auto;
+    width: min(20rem, calc(100vw - 2 * var(--gutter)));
+    margin-top: 0;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.28);
+    /* Tela baixa (celular deitado, janela pequena) cortava o topo do painel —
+       e como ele é filho de uma barra FIXA, o pedaço cortado não voltava com
+       rolagem nenhuma: "quantas pessoas" ficava inalcançável e a reserva em
+       três toques morria ali. Aqui o painel para embaixo do cabeçalho e rola
+       por dentro. (princípio nº 1) */
+    max-height: calc(100svh - var(--altura-topo) - var(--altura-barra) - var(--esp-4));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .reserva__grupo {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--esp-3);
+  }
+
+  .reserva__grupo legend {
+    padding: 0;
+  }
+
+  .reserva__fichas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-2);
+  }
+
+  .reserva__ficha {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--alvo-toque);
+    min-height: var(--alvo-toque);
+    padding-inline: var(--esp-4);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto);
+    cursor: pointer;
+    transition:
+      background-color var(--transicao),
+      color var(--transicao),
+      border-color var(--transicao);
+  }
+
+  .reserva__ficha:hover {
+    border-color: var(--cor-texto-forte);
+  }
+
+  .reserva__radio:checked + .reserva__ficha {
+    background-color: var(--cor-texto-forte);
+    border-color: var(--cor-texto-forte);
+    color: var(--cor-superficie);
+  }
+
+  .reserva__radio:focus-visible + .reserva__ficha {
+    outline: 2px solid var(--cor-acento);
+    outline-offset: 3px;
+  }
+
+  .reserva__dica,
+  .reserva__nota {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--cor-texto-suave);
+  }
+
+  .reserva__ir {
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reserva__chama {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>
