@@ -114,10 +114,12 @@ function medirHashes() {
       const [, atributos, corpo] = m;
       if (/\bsrc=/.test(atributos) || /ld\+json/.test(atributos)) continue;
       const hash = crypto.createHash('sha256').update(corpo, 'utf8').digest('base64');
-      if (!achados.has(hash)) achados.set(hash, arquivo);
+      if (!achados.has(hash)) {
+        achados.set(hash, { arquivo, bytes: corpo.length, trecho: corpo.trim().replace(/\s+/g, ' ').slice(0, 90) });
+      }
     }
   }
-  return { hashes: [...achados.keys()].sort(), paginas: arquivos.length };
+  return { achados, hashes: [...achados.keys()].sort(), paginas: arquivos.length };
 }
 
 function montar(hashes) {
@@ -146,7 +148,7 @@ function main() {
     process.exit(1);
   }
 
-  const { hashes, paginas } = medirHashes();
+  const { achados, hashes, paginas } = medirHashes();
 
   // Uma conferência que passa sem medir nada é pior que conferência nenhuma:
   // ela dá a sensação de estar protegido. Se não achou HTML, ou não achou o
@@ -175,6 +177,24 @@ function main() {
   console.error('  O JavaScript embutido mudou e o vercel.json ficou para trás.');
   console.error('  Publicar assim entrega o site com os scripts BLOQUEADOS pela CSP');
   console.error('  — a troca Dia/Noite para de funcionar em todas as páginas.');
+  console.error('');
+
+  // Um guarda que diz "mudou" sem dizer O QUÊ obriga quem for consertar a
+  // adivinhar — e esta mensagem costuma ser lida no log de um build que falhou
+  // longe daqui, onde ninguém pode abrir o `dist/` para olhar.
+  const antigos = new Set(
+    [...(atual.match(/'sha256-([^']+)'/g) ?? [])].map((s) => s.slice(8, -1)),
+  );
+  console.error(`  Medi ${paginas} páginas e ${hashes.length} scripts embutidos:`);
+  for (const h of hashes) {
+    const info = achados.get(h);
+    console.error(`    ${antigos.has(h) ? 'ok   ' : 'NOVO '} ${h}  (${info.bytes} B, ${info.arquivo})`);
+    if (!antigos.has(h)) console.error(`           ${info.trecho}`);
+  }
+  for (const h of antigos) {
+    if (!achados.has(h)) console.error(`    SUMIU ${h}`);
+  }
+
   console.error('');
   console.error('  Conserto:  npm run csp -- --escrever   (e comite o vercel.json)');
   console.error('');
