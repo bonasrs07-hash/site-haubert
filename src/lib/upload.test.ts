@@ -1,5 +1,5 @@
 /**
- * O parser de cabeçalho WebP é a barreira que decide o que entra no acervo.
+ * O parser de cabeçalho WebP é a barreira que decide o que entra na galeria.
  * Se ele aceitar lixo, o build quebra com uma imagem que não existe; se ele
  * errar a dimensão, o site ganha salto de layout. Por isso ele é testado
  * contra arquivo de verdade, e não só contra bytes que eu mesmo montei.
@@ -30,7 +30,7 @@ function webpVP8(largura: number, altura: number): Uint8Array {
 }
 
 describe('dimensoesDoWebp', () => {
-  it('lê o tamanho de um WebP real do acervo', () => {
+  it('lê o tamanho de um WebP real do repositório', () => {
     const bytes = new Uint8Array(readFileSync('src/assets/marca/brinde-tacas.webp'));
     expect(dimensoesDoWebp(bytes)).toEqual({ largura: 245, altura: 327 });
   });

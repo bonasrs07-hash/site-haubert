@@ -30,8 +30,8 @@ export interface FotoResolvida {
   alt: string;
   largura: number;
   altura: number;
-  /** Veio do banco? Só o painel e os testes se importam. */
-  doAcervo: boolean;
+  /** Veio da galeria do painel? Só o painel e os testes se importam. */
+  daGaleria: boolean;
 }
 
 /** Vida da URL assinada. Só precisa sobreviver ao build que a criou. */
@@ -43,7 +43,7 @@ function doArquivo(padrao: { src: ImageMetadata; alt: string }): FotoResolvida {
     alt: padrao.alt,
     largura: padrao.src.width,
     altura: padrao.src.height,
-    doAcervo: false,
+    daGaleria: false,
   };
 }
 
@@ -110,7 +110,7 @@ async function lerManifesto(): Promise<Map<string, FotoResolvida>> {
         alt: linha.media!.alt,
         largura: linha.media!.largura,
         altura: linha.media!.altura,
-        doAcervo: true,
+        daGaleria: true,
       });
     }
     return mapa;
@@ -125,10 +125,10 @@ async function lerManifesto(): Promise<Map<string, FotoResolvida>> {
  * Uma leitura por build, não uma por componente. A home sozinha pede 13 vagas
  * em 3 componentes; sem isto seriam 3 idas ao banco para a mesma resposta.
  */
-let acervo: Promise<Map<ChaveVaga, FotoResolvida>> | null = null;
+let resolvidas: Promise<Map<ChaveVaga, FotoResolvida>> | null = null;
 
-export function buscarAcervo(): Promise<Map<ChaveVaga, FotoResolvida>> {
-  acervo ??= (async () => {
+export function resolverVagas(): Promise<Map<ChaveVaga, FotoResolvida>> {
+  resolvidas ??= (async () => {
     const doBanco = await lerManifesto();
     const mapa = new Map<ChaveVaga, FotoResolvida>();
     for (const vaga of VAGAS) {
@@ -136,16 +136,16 @@ export function buscarAcervo(): Promise<Map<ChaveVaga, FotoResolvida>> {
     }
     return mapa;
   })();
-  return acervo;
+  return resolvidas;
 }
 
 /** A foto de uma vaga. Nunca devolve nulo: vaga sem foto cai no padrão. */
 export async function buscarFoto(chave: ChaveVaga): Promise<FotoResolvida> {
-  return (await buscarAcervo()).get(chave)!;
+  return (await resolverVagas()).get(chave)!;
 }
 
 /** As fotos de várias vagas, na ordem pedida. */
 export async function buscarFotos(chaves: ChaveVaga[]): Promise<FotoResolvida[]> {
-  const mapa = await buscarAcervo();
+  const mapa = await resolverVagas();
   return chaves.map((c) => mapa.get(c)!);
 }

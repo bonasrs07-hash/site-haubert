@@ -43,7 +43,7 @@ interface Grupo {
   vagas: Vaga[];
 }
 
-interface ItemDoAcervo {
+interface ItemDaGaleria {
   id: string;
   nome: string;
   alt: string;
@@ -58,7 +58,7 @@ interface ItemDoAcervo {
 
 interface Props {
   grupos: Grupo[];
-  acervo: ItemDoAcervo[];
+  galeria: ItemDaGaleria[];
   atribuicoes: Record<string, string>;
   /** Vagas trocadas depois do último build, ou seja, ainda fora do site. */
   pendentes: string[];
@@ -104,11 +104,11 @@ async function pedir(url: string, corpo: unknown): Promise<{ erro?: string }> {
 
 export default function GerenciadorDeFotos({
   grupos,
-  acervo: acervoInicial,
+  galeria: galeriaInicial,
   atribuicoes: iniciais,
   pendentes: pendentesIniciais,
 }: Props) {
-  const [acervo, setAcervo] = useState(acervoInicial);
+  const [galeria, setGaleria] = useState(galeriaInicial);
   const [atribuicoes, setAtribuicoes] = useState(iniciais);
   // A confusão mais provável desta tela é achar que trocar já publica. Este
   // conjunto é a resposta, e ele vem do SERVIDOR, sobrevive a fechar a aba.
@@ -118,7 +118,7 @@ export default function GerenciadorDeFotos({
   const [publicando, setPublicando] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: 'erro' | 'certo'; texto: string } | null>(null);
 
-  const porId = useMemo(() => new Map(acervo.map((i) => [i.id, i])), [acervo]);
+  const porId = useMemo(() => new Map(galeria.map((i) => [i.id, i])), [galeria]);
   const todasAsVagas = useMemo(() => grupos.flatMap((g) => g.vagas), [grupos]);
 
   const fotoDaVaga = useCallback(
@@ -126,21 +126,21 @@ export default function GerenciadorDeFotos({
       const id = atribuicoes[vaga.chave];
       const item = id ? porId.get(id) : undefined;
       if (item?.previa) {
-        return { url: item.previa, alt: item.alt, doAcervo: true, item };
+        return { url: item.previa, alt: item.alt, daGaleria: true, item };
       }
-      return { url: vaga.padrao.url, alt: vaga.padrao.alt, doAcervo: false, item: undefined };
+      return { url: vaga.padrao.url, alt: vaga.padrao.alt, daGaleria: false, item: undefined };
     },
     [atribuicoes, porId],
   );
 
   /**
-   * Foto recém-enviada: entra no acervo E ocupa a vaga que estava aberta,
+   * Foto recém-enviada: entra na galeria E ocupa a vaga que estava aberta,
    * o botão promete "enviar e usar nesta posição", então enviar sem atribuir
    * seria a tela mentindo. O item já vem com a prévia assinada do servidor,
    * o que evita recarregar a página no meio da troca.
    */
-  async function aoEnviar(item: ItemDoAcervo, chave: string) {
-    setAcervo((lista) => [item, ...lista]);
+  async function aoEnviar(item: ItemDaGaleria, chave: string) {
+    setGaleria((lista) => [item, ...lista]);
     await usarNaVaga(chave, item.id);
   }
 
@@ -150,7 +150,7 @@ export default function GerenciadorDeFotos({
     setPendente(false);
     if (erro) return setAviso({ tipo: 'erro', texto: erro });
     setAtribuicoes((a) => ({ ...a, [chave]: mediaId }));
-    setAcervo((lista) =>
+    setGaleria((lista) =>
       lista.map((i) => ({
         ...i,
         vagas: i.id === mediaId ? [...new Set([...i.vagas, chave])] : i.vagas.filter((c) => c !== chave),
@@ -170,19 +170,19 @@ export default function GerenciadorDeFotos({
       delete copia[chave];
       return copia;
     });
-    setAcervo((lista) => lista.map((i) => ({ ...i, vagas: i.vagas.filter((c) => c !== chave) })));
+    setGaleria((lista) => lista.map((i) => ({ ...i, vagas: i.vagas.filter((c) => c !== chave) })));
     setPendentes((p) => new Set(p).add(chave));
     setVagaAberta(null);
   }
 
   async function apagar(id: string) {
-    if (!window.confirm('Apagar esta foto do acervo? Não dá para desfazer.')) return;
+    if (!window.confirm('Apagar esta foto da galeria? Não dá para desfazer.')) return;
     setPendente(true);
     const { erro } = await pedir('/api/painel/apagar', { mediaId: id });
     setPendente(false);
     if (erro) return setAviso({ tipo: 'erro', texto: erro });
-    setAcervo((lista) => lista.filter((i) => i.id !== id));
-    setAviso({ tipo: 'certo', texto: 'Foto apagada do acervo.' });
+    setGaleria((lista) => lista.filter((i) => i.id !== id));
+    setAviso({ tipo: 'certo', texto: 'Foto apagada da galeria.' });
   }
 
   async function publicar() {
@@ -239,7 +239,7 @@ export default function GerenciadorDeFotos({
                     de qualquer pessoa é clicar na foto, não no rótulo dela.
                   */}
                   <button
-                    className={`pn__vaga ${foto.doAcervo ? 'pn__vaga--sua' : ''} ${naFila ? 'pn__vaga--fila' : ''}`}
+                    className={`pn__vaga ${foto.daGaleria ? 'pn__vaga--sua' : ''} ${naFila ? 'pn__vaga--fila' : ''}`}
                     onClick={() => setVagaAberta(vaga)}
                   >
                     <span className="pn__moldura" style={{ aspectRatio: vaga.proporcao }}>
@@ -251,7 +251,7 @@ export default function GerenciadorDeFotos({
                     <span className="pn__vaga-rotulo">{vaga.rotulo}</span>
                     <span className="pn__vaga-onde">{vaga.onde}</span>
                     <span className="pn__estado">
-                      {naFila ? 'Trocada, falta publicar' : foto.doAcervo ? 'Sua foto' : 'Foto de exemplo'}
+                      {naFila ? 'Trocada, falta publicar' : foto.daGaleria ? 'Sua foto' : 'Foto de exemplo'}
                     </span>
                   </button>
                 </li>
@@ -262,19 +262,19 @@ export default function GerenciadorDeFotos({
       ))}
 
       <section className="pn__grupo">
-        <h2 className="pn__grupo-titulo">O acervo</h2>
+        <h2 className="pn__grupo-titulo">A galeria</h2>
         <p className="pn__grupo-desc">
           Tudo o que você já enviou. Foto que está no ar em alguma posição não pode ser apagada,
           troque a posição antes.
         </p>
 
-        {acervo.length === 0 ? (
+        {galeria.length === 0 ? (
           <p className="pn__vazio">
             Nada enviado ainda. Envie a primeira foto pelo botão “Trocar foto” de qualquer posição.
           </p>
         ) : (
           <ul className="pn__galeria" role="list">
-            {acervo.map((item) => (
+            {galeria.map((item) => (
               <li className="pn__item" key={item.id}>
                 <div className="pn__item-foto">
                   {item.previa ? <img src={item.previa} alt={item.alt} loading="lazy" /> : null}
@@ -323,7 +323,7 @@ export default function GerenciadorDeFotos({
       {vagaAberta && (
         <SeletorDeFoto
           vaga={vagaAberta}
-          acervo={acervo}
+          galeria={galeria}
           temAtribuicao={Boolean(atribuicoes[vagaAberta.chave])}
           onFechar={() => setVagaAberta(null)}
           onEscolher={(id) => usarNaVaga(vagaAberta.chave, id)}
@@ -336,10 +336,10 @@ export default function GerenciadorDeFotos({
   );
 }
 
-/** A folha que abre ao trocar uma foto: enviar nova, ou pegar do acervo. */
+/** A folha que abre ao trocar uma foto: enviar nova, ou pegar da galeria. */
 function SeletorDeFoto({
   vaga,
-  acervo,
+  galeria,
   temAtribuicao,
   onFechar,
   onEscolher,
@@ -348,15 +348,15 @@ function SeletorDeFoto({
   ocupado,
 }: {
   vaga: Vaga;
-  acervo: ItemDoAcervo[];
+  galeria: ItemDaGaleria[];
   temAtribuicao: boolean;
   onFechar: () => void;
   onEscolher: (id: string) => void;
   onVoltarAoPadrao: () => void;
-  onEnviado: (item: ItemDoAcervo) => void;
+  onEnviado: (item: ItemDaGaleria) => void;
   ocupado: boolean;
 }) {
-  const [aba, setAba] = useState<'enviar' | 'acervo'>(acervo.length ? 'acervo' : 'enviar');
+  const [aba, setAba] = useState<'enviar' | 'galeria'>(galeria.length ? 'galeria' : 'enviar');
   return (
     <div className="pn__folha" role="dialog" aria-modal="true" aria-label={`Trocar: ${vaga.rotulo}`}>
       <div className="pn__folha-fundo" onClick={onFechar} />
@@ -375,11 +375,11 @@ function SeletorDeFoto({
         <div className="pn__abas" role="tablist">
           <button
             role="tab"
-            aria-selected={aba === 'acervo'}
-            className={aba === 'acervo' ? 'pn__aba pn__aba--ativa' : 'pn__aba'}
-            onClick={() => setAba('acervo')}
+            aria-selected={aba === 'galeria'}
+            className={aba === 'galeria' ? 'pn__aba pn__aba--ativa' : 'pn__aba'}
+            onClick={() => setAba('galeria')}
           >
-            Do acervo ({acervo.length})
+            Da galeria ({galeria.length})
           </button>
           <button
             role="tab"
@@ -391,12 +391,12 @@ function SeletorDeFoto({
           </button>
         </div>
 
-        {aba === 'acervo' ? (
-          acervo.length === 0 ? (
-            <p className="pn__vazio">O acervo está vazio. Envie a primeira foto na outra aba.</p>
+        {aba === 'galeria' ? (
+          galeria.length === 0 ? (
+            <p className="pn__vazio">A galeria está vazia. Envie a primeira foto na outra aba.</p>
           ) : (
             <ul className="pn__escolha" role="list">
-              {acervo.map((item) => (
+              {galeria.map((item) => (
                 <li key={item.id}>
                   <button className="pn__escolha-item" onClick={() => onEscolher(item.id)} disabled={ocupado}>
                     {item.previa && <img src={item.previa} alt="" loading="lazy" />}
@@ -431,7 +431,7 @@ function FormularioDeEnvio({
   onPronto,
 }: {
   vaga: Vaga;
-  onPronto: (item: ItemDoAcervo) => void;
+  onPronto: (item: ItemDaGaleria) => void;
 }) {
   const [arquivo, setArquivo] = useState<{ blob: Blob; largura: number; altura: number; nome: string } | null>(null);
   const [previa, setPrevia] = useState<string | null>(null);
@@ -486,7 +486,7 @@ function FormularioDeEnvio({
 
     if (!resposta.ok) return setErro(dados.erro ?? 'Não deu para enviar. Tente de novo.');
     if (!dados.item) return setErro('O envio terminou sem resposta. Recarregue a página.');
-    onPronto(dados.item as ItemDoAcervo);
+    onPronto(dados.item as ItemDaGaleria);
   }
 
   return (

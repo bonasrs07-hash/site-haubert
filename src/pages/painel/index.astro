@@ -13,13 +13,13 @@
 import Painel from '@/layouts/Painel.astro';
 import GerenciadorDeFotos from '@/components/painel/GerenciadorDeFotos';
 import { GRUPOS_DE_VAGAS } from '@/constants/vagas';
-import { buscarUltimaPublicacao, listarAcervo, listarVagas } from '@/lib/midia';
+import { buscarUltimaPublicacao, listarGaleria, listarVagas } from '@/lib/midia';
 
 export const prerender = false;
 
 const sessao = Astro.locals.sessao;
-const [acervo, vagas, ultimaPublicacao] = await Promise.all([
-  listarAcervo(sessao),
+const [galeria, vagas, ultimaPublicacao] = await Promise.all([
+  listarGaleria(sessao),
   listarVagas(sessao),
   buscarUltimaPublicacao(sessao),
 ]);
@@ -61,7 +61,7 @@ const grupos = GRUPOS_DE_VAGAS.map((g) => ({
   <GerenciadorDeFotos
     client:load
     grupos={grupos}
-    acervo={acervo}
+    galeria={galeria}
     atribuicoes={atribuicoes}
     pendentes={pendentes}
   />

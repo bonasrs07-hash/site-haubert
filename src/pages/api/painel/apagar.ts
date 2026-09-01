@@ -1,6 +1,6 @@
-/** Tira uma foto da galeria. Foto no ar não sai, ver `apagarDoAcervo`. */
+/** Tira uma foto da galeria. Foto no ar não sai, ver `apagarDaGaleria`. */
 import type { APIRoute } from 'astro';
-import { apagarDoAcervo } from '@/lib/midia';
+import { apagarDaGaleria } from '@/lib/midia';
 
 export const prerender = false;
 
@@ -14,7 +14,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch {
     return json({ erro: 'Pedido inválido.' }, 400);
   }
-  const resultado = await apagarDoAcervo(locals.sessao, corpo.mediaId);
+  const resultado = await apagarDaGaleria(locals.sessao, corpo.mediaId);
   if (!resultado.ok) return json({ erro: resultado.erro }, resultado.status);
   return json({ ok: true });
 };

@@ -1,10 +1,10 @@
 /**
- * Camada de serviços, o acervo de fotos do painel. (ADR-008, P-001)
+ * Camada de serviços, o galeria de fotos do painel. (ADR-008, P-001)
  *
  * Nenhum componente e nenhum endpoint fala com o Supabase direto: falam daqui.
  * Tudo neste arquivo usa o cliente da SESSÃO (token do dono), nunca a
  * `service_role`, quem autoriza cada linha é a RLS. O único lugar do projeto
- * que lê este acervo com `service_role` é `fotos.ts`, no build, onde não existe
+ * que lê este galeria com `service_role` é `fotos.ts`, no build, onde não existe
  * usuário logado.
  */
 import type { Sessao } from './sessao';
@@ -17,7 +17,7 @@ const SEGUNDOS_DE_PREVIA = 60 * 30;
 /** Freio do botão Publicar, o Hobby da Vercel dá 100 deploys por dia. */
 export const SEGUNDOS_ENTRE_PUBLICACOES = 60;
 
-export interface ItemDoAcervo {
+export interface ItemDaGaleria {
   id: string;
   nome: string;
   alt: string;
@@ -46,7 +46,7 @@ const falha = (erro: string, status = 400): Resultado<never> => ({ ok: false, er
  * A galeria inteira, com as prévias assinadas de uma vez só.
  * Assinar em lote e não uma por item: 40 fotos seriam 40 idas ao Storage.
  */
-export async function listarAcervo(sessao: Sessao): Promise<ItemDoAcervo[]> {
+export async function listarGaleria(sessao: Sessao): Promise<ItemDaGaleria[]> {
   const { supabase, casaId } = sessao;
 
   // Campos explícitos, nunca `select *`. (docs/11_SEGURANCA)
@@ -126,7 +126,7 @@ export async function buscarUltimaPublicacao(sessao: Sessao): Promise<string | n
 }
 
 /**
- * Guarda o arquivo e registra no acervo.
+ * Guarda o arquivo e registra na galeria.
  *
  * A ordem importa: valida → sobe → registra. Se o registro falhar depois do
  * upload, o arquivo órfão é apagado, bucket com arquivo que ninguém referencia
@@ -141,7 +141,7 @@ export async function registrarEnvio(
     temPessoa: boolean;
     autorizacaoImagem: boolean;
   },
-): Promise<Resultado<{ item: ItemDoAcervo }>> {
+): Promise<Resultado<{ item: ItemDaGaleria }>> {
   const validacao = validarEnvio(entrada.bytes);
   if (!validacao.ok) return falha(validacao.erro);
 
@@ -188,7 +188,7 @@ export async function registrarEnvio(
 
   if (erroRegistro) {
     await sessao.supabase.storage.from('midia').remove([caminho]);
-    return falha('Não deu para registrar a imagem no acervo.', 502);
+    return falha('Não deu para registrar a imagem na galeria.', 502);
   }
 
   // Devolve o item já com a prévia assinada. Sem isto o painel precisaria
@@ -217,7 +217,7 @@ export async function registrarEnvio(
   };
 }
 
-/** Aponta uma vaga do site para uma foto do acervo. */
+/** Aponta uma vaga do site para uma foto da galeria. */
 export async function definirVaga(
   sessao: Sessao,
   chave: unknown,
@@ -234,7 +234,7 @@ export async function definirVaga(
     .eq('venue_id', sessao.casaId)
     .eq('id', mediaId)
     .maybeSingle();
-  if (!foto) return falha('Foto não encontrada no acervo.', 404);
+  if (!foto) return falha('Foto não encontrada na galeria.', 404);
 
   const { error } = await sessao.supabase.from('media_slots').upsert(
     {
@@ -268,7 +268,7 @@ export async function limparVaga(sessao: Sessao, chave: unknown): Promise<Result
  * Foto que está no ar não é apagada, a FK é `on delete restrict` de propósito,
  * e a mensagem aqui existe para o erro do banco não chegar cru na tela.
  */
-export async function apagarDoAcervo(sessao: Sessao, mediaId: unknown): Promise<Resultado<null>> {
+export async function apagarDaGaleria(sessao: Sessao, mediaId: unknown): Promise<Resultado<null>> {
   if (typeof mediaId !== 'string' || !mediaId) return falha('Escolha uma foto.');
 
   const { data: foto } = await sessao.supabase
@@ -277,7 +277,7 @@ export async function apagarDoAcervo(sessao: Sessao, mediaId: unknown): Promise<
     .eq('venue_id', sessao.casaId)
     .eq('id', mediaId)
     .maybeSingle();
-  if (!foto) return falha('Foto não encontrada no acervo.', 404);
+  if (!foto) return falha('Foto não encontrada na galeria.', 404);
 
   const { count } = await sessao.supabase
     .from('media_slots')
