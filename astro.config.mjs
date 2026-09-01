@@ -47,9 +47,23 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      // /privacidade e /404 saem do índice: uma é ruído de busca, a outra não
-      // deveria ser encontrada por ninguém.
-      filter: (pagina) => !pagina.includes('/privacidade') && !pagina.includes('/404'),
+      /*
+        O que NÃO entra no índice:
+          - /privacidade, que é ruído de busca
+          - /404, que não deveria ser encontrada por ninguém
+          - /painel/*, que é ferramenta de trabalho e já responde `noindex`
+            por meta e por cabeçalho.
+
+        O painel entrou aqui por descuido quando as rotas foram criadas, e o
+        resultado era um sitemap dizendo "indexe" para páginas que respondem
+        "não indexe". Contradizer a si mesmo é pior que ficar calado: o Google
+        gasta rastreio numa tela de login e a gente perde a chance de ele
+        gastar numa página que converte.
+      */
+      filter: (pagina) =>
+        !pagina.includes('/privacidade') &&
+        !pagina.includes('/404') &&
+        !pagina.includes('/painel'),
       i18n: undefined,
     }),
   ],
