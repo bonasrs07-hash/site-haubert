@@ -94,6 +94,17 @@ verificado por medição no CI, não por confiança.
 - Site continua estático, otimizado e sem depender do Supabase para servir.
 - R$ 0: Deploy Hook é gratuito no Hobby (5 hooks por projeto, 60 disparos/hora,
   100 deploys/dia — ordens de grandeza acima de um dono trocando foto).
+
+> **Correção de 2026-09-01, descoberta no deploy:** Deploy Hook **exige que o
+> projeto esteja conectado a um repositório Git**. Este ADR foi escrito
+> assumindo o contrário, e o furo só apareceu quando o projeto subiu por upload
+> da CLI. A API é explícita: *"The project is not connected to any repository so
+> it cannot have deploy hooks."*
+>
+> Não há contorno: disparar build pela API exigiria reenviar os arquivos, o que
+> uma função serverless não faz. Então o Git conectado deixou de ser
+> conveniência de fluxo e passou a ser **pré-requisito do botão Publicar**.
+> Como efeito colateral bom, resolve o item de deploy automático do Épico A.
 - O BLK-002 deixa de ser bloqueio de código e vira tarefa de conteúdo.
 - A galeria dá reuso: foto enviada uma vez serve em qualquer vaga, depois.
 
