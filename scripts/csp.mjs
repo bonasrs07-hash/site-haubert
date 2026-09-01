@@ -168,13 +168,36 @@ function main() {
   }
 
   const atual = fs.existsSync(SAIDA) ? fs.readFileSync(SAIDA, 'utf8') : '';
-  if (atual === novo) {
+
+  /**
+   * A comparação é do CONTEÚDO, nunca do texto.
+   *
+   * Custou dois deploys descobrir por quê: a Vercel reescreve o `vercel.json`
+   * minificado dentro do container antes de rodar o build. Os 1340 caracteres
+   * commitados viram 1052, e uma comparação de string acusa divergência a cada
+   * deploy mesmo com os quatro hashes idênticos. Formatação não é política.
+   */
+  const canonico = (v) =>
+    JSON.stringify(v, (_, x) =>
+      x && typeof x === 'object' && !Array.isArray(x)
+        ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1)))
+        : x,
+    );
+
+  let atualObj = null;
+  try {
+    atualObj = JSON.parse(atual);
+  } catch {
+    atualObj = null;
+  }
+
+  if (atualObj && canonico(atualObj) === canonico(montar(hashes))) {
     console.log(`  CSP confere: ${hashes.length} hashes, ${paginas} páginas.`);
     return;
   }
 
   console.error('');
-  console.error('  O JavaScript embutido mudou e o vercel.json ficou para trás.');
+  console.error('  O vercel.json commitado não bate com a política medida do build.');
   console.error('  Publicar assim entrega o site com os scripts BLOQUEADOS pela CSP');
   console.error('  — a troca Dia/Noite para de funcionar em todas as páginas.');
   console.error('');
@@ -185,14 +208,21 @@ function main() {
   const antigos = new Set(
     [...(atual.match(/'sha256-([^']+)'/g) ?? [])].map((s) => s.slice(8, -1)),
   );
-  // Quando os hashes conferem e mesmo assim o arquivo diverge, a diferença está
-  // em outro lugar do JSON — e aí só o caractere exato resolve.
-  let i = 0;
-  while (i < atual.length && i < novo.length && atual[i] === novo[i]) i++;
-  console.error(`  arquivo: ${atual.length} caracteres | gerado: ${novo.length}`);
-  console.error(`  primeira diferença no caractere ${i}:`);
-  console.error(`    arquivo: ${JSON.stringify(atual.slice(Math.max(0, i - 50), i + 50))}`);
-  console.error(`    gerado : ${JSON.stringify(novo.slice(Math.max(0, i - 50), i + 50))}`);
+  // Quando os hashes conferem e mesmo assim o conteúdo diverge, a diferença
+  // está em outro ponto da política — e aí só o caractere exato resolve. A
+  // comparação é entre as formas canônicas, senão a minificação da Vercel
+  // aparece como diferença e esconde a de verdade.
+  if (atualObj) {
+    const a = canonico(atualObj);
+    const b = canonico(montar(hashes));
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    console.error(`  primeira diferença no caractere ${i}:`);
+    console.error(`    no arquivo: ${JSON.stringify(a.slice(Math.max(0, i - 50), i + 50))}`);
+    console.error(`    esperado  : ${JSON.stringify(b.slice(Math.max(0, i - 50), i + 50))}`);
+  } else {
+    console.error('  o vercel.json não existe ou não é JSON válido.');
+  }
   console.error('');
   console.error(`  Medi ${paginas} páginas e ${hashes.length} scripts embutidos:`);
   for (const h of hashes) {
