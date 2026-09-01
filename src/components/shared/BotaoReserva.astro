@@ -135,8 +135,40 @@ const QUANDO = [
 </details>
 
 <script>
-  import { melhorCanal, type MarcaResumo } from '@/lib/reservas';
+  import { gerarCodigo, melhorCanal, type MarcaResumo } from '@/lib/reservas';
   import { lerModo } from '@/lib/modo';
+
+  /**
+   * A north star do projeto e "cliques no CTA de reserva por sessao"
+   * (docs/00_VISAO). Ate agora ninguem media: o CTA era um <a> sem
+   * instrumento, e o site ficou no ar acumulando dias que nao voltam.
+   *
+   * Duas pontas, e as duas sao FOGO-E-ESQUECE. Nada aqui pode atrasar,
+   * segurar ou quebrar a abertura do WhatsApp: metrica que atrapalha a
+   * operacao principal esta errada por definicao. (CLAUDE.md)
+   */
+  type EnviarEvento = (tipo: 'event', dados: { name: string; data?: Record<string, unknown> }) => void;
+
+  function medir(nome: string, dados: Record<string, unknown>): void {
+    try {
+      const va = (window as unknown as { va?: EnviarEvento }).va;
+      va?.('event', { name: nome, data: dados });
+    } catch {
+      // Bloqueador de anuncio, aba anonima, script fora do ar. Segue o jogo.
+    }
+  }
+
+  function registrar(corpo: Record<string, unknown>): void {
+    try {
+      // sendBeacon e nao fetch: ele sobrevive a navegacao que esta comecando
+      // no mesmo clique. Um fetch seria cancelado ao sair da pagina, que e
+      // exatamente quando este dado importa.
+      const pacote = new Blob([JSON.stringify(corpo)], { type: 'application/json' });
+      navigator.sendBeacon?.('/api/intencao', pacote);
+    } catch {
+      // idem
+    }
+  }
 
   const VAZIO: MarcaResumo = { slug: 'casa', nomeCurto: 'CASA', instagramUrl: '#' };
 
@@ -164,21 +196,59 @@ const QUANDO = [
     };
     const origem = raiz.dataset.origem || 'site';
 
+    // Um codigo por tentativa. Ele vai na mensagem do WhatsApp E no registro,
+    // e e o que deixa a equipe casar a conversa com a linha do painel.
+    let codigo = gerarCodigo();
+
     const marcado = (campo: string): string => {
       const alvo = raiz.querySelector<HTMLInputElement>('[data-campo="' + campo + '"]:checked');
       return alvo ? alvo.value : '';
     };
 
+    const escolhaAtual = () => ({
+      pessoas: Number(marcado('pessoas')) || 2,
+      quando: marcado('quando'),
+    });
+
     const atualizar = () => {
       const marca = marcas[lerModo()];
-      const escolha = { pessoas: Number(marcado('pessoas')) || 2, quando: marcado('quando') };
-      const canal = melhorCanal(marca, escolha, contatos, origem);
+      const canal = melhorCanal(marca, escolhaAtual(), contatos, origem, codigo);
       ir.href = canal.href;
       ir.dataset.canal = canal.tipo;
       rotulo.textContent = canal.rotulo;
     };
 
     raiz.addEventListener('change', atualizar);
+
+    // O toque que conta. Dispara e sai da frente: o link segue seu caminho
+    // normal para o WhatsApp, sem preventDefault e sem espera.
+    ir.addEventListener('click', () => {
+      const marca = marcas[lerModo()];
+      const escolha = escolhaAtual();
+      const canal = ir.dataset.canal ?? 'instagram';
+
+      medir('reserva_click', {
+        marca: marca.slug,
+        canal,
+        pessoas: escolha.pessoas,
+        quando: escolha.quando || 'sem data',
+        origem,
+      });
+
+      registrar({
+        marca: marca.slug,
+        codigo,
+        pessoas: escolha.pessoas,
+        quando: escolha.quando,
+        canal,
+        origem,
+      });
+
+      // Proximo toque, proximo codigo: dois cliques nao podem virar a mesma
+      // linha, senao a contagem mente para menos.
+      codigo = gerarCodigo();
+      atualizar();
+    });
 
     // Trocar Dia/Noite troca a marca da mensagem, a reserva segue a atmosfera
     // que a pessoa está vendo. (RN-33)

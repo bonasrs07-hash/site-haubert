@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request, cookies, url, clientAddress }) =
 
   if (!email || !senha) return voltarComErro(url, 'Preencha e-mail e senha.');
 
-  const freio = registrarTentativa(clientAddress ?? 'desconhecido');
+  const freio = registrarTentativa(clientAddress ?? 'desconhecido', 'login');
   if (!freio.permitido) {
     return voltarComErro(url, `Tentativas demais. Espere ${freio.segundos}s.`);
   }

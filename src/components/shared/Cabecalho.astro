@@ -16,6 +16,7 @@ const marcas = buscarMarcas();
 const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 const NAV = [
+  { href: '/cardapio', rotulo: 'Cardápio' },
   { href: '/sobre', rotulo: 'A casa' },
   { href: '/fogo', rotulo: 'O fogo' },
   { href: '/cultura', rotulo: 'Cultura' },
@@ -325,7 +326,12 @@ const ehAtual = (href: string) => rotaAtual === href;
     }
   }
 
-  @media (min-width: 60rem) {
+  /* 64rem e nao 60rem: com "Cardapio" a navegacao passou a ter cinco itens, e
+     em 960px exatos eles espremiam a assinatura ate cortar a letra. Medido: a
+     960 corta, a 1000 cabe. O degrau sobe para onde cabe de verdade, com
+     folga, em vez de ficar na borda. Entre 960 e 1024 vale o menu de hamburguer,
+     que ja existe e ja funciona. */
+  @media (min-width: 64rem) {
     .nav {
       display: flex;
     }

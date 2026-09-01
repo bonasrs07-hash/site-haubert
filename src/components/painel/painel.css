@@ -646,3 +646,135 @@
   margin-top: 0.15em;
   accent-color: var(--cor-acento);
 }
+
+/* ==========================================================================
+   Editor de cardápio
+   --------------------------------------------------------------------------
+   Nada aqui salva sozinho. Cardápio é preço, e salvar no `blur` transforma um
+   clique errado em preço errado no ar. Cada linha tem o seu "Salvar", e ele só
+   acende quando há o que salvar.
+   ========================================================================== */
+.cd__secao {
+  display: grid;
+  gap: var(--esp-4);
+  padding: var(--esp-5);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie);
+}
+
+.cd__secao-topo {
+  display: grid;
+  gap: var(--esp-4);
+  padding-bottom: var(--esp-4);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.cd__campos {
+  display: grid;
+  gap: var(--esp-3);
+}
+
+.cd__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.cd__marca {
+  min-height: auto;
+  padding-block: 0;
+  white-space: nowrap;
+}
+
+.cd__mover {
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background: none;
+  color: var(--cor-texto);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.cd__mover:hover:not(:disabled) {
+  border-color: var(--cor-texto-forte);
+}
+
+.cd__mover:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cd__salvar {
+  min-height: var(--alvo-toque);
+}
+
+.cd__itens {
+  display: grid;
+  gap: var(--esp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cd__item {
+  display: grid;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie-2);
+}
+
+.cd__item-campos,
+.cd__nova--item {
+  display: grid;
+  gap: var(--esp-3);
+}
+
+.pn__campo input {
+  width: 100%;
+  min-height: var(--alvo-toque);
+  padding-inline: var(--esp-3);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+}
+
+.pn__campo input:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
+}
+
+.cd__nova {
+  display: grid;
+  gap: var(--esp-3);
+  align-items: end;
+  padding: var(--esp-4);
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio-1);
+}
+
+@media (min-width: 44rem) {
+  .cd__campos {
+    grid-template-columns: minmax(10rem, 1fr) 2fr;
+  }
+
+  .cd__item-campos {
+    grid-template-columns: 1fr 9rem;
+  }
+
+  .cd__nova {
+    grid-template-columns: 1fr auto;
+  }
+
+  .cd__nova--item {
+    grid-template-columns: 1fr 9rem auto;
+  }
+}

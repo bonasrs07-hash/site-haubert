@@ -18,6 +18,20 @@
 const JANELA_MS = 15 * 60 * 1000;
 const TENTATIVAS_NA_JANELA = 8;
 
+/**
+ * Cada uso tem o SEU balde. Sem isto, alguem tocando no botao de reserva
+ * varias vezes gastaria as tentativas de login do dono, que sai da mesma
+ * casa e do mesmo IP.
+ */
+export type Balde = 'login' | 'intencao';
+
+const LIMITES: Record<Balde, { janelaMs: number; teto: number }> = {
+  login: { janelaMs: JANELA_MS, teto: TENTATIVAS_NA_JANELA },
+  // Intencao e barata e legitima em rajada (a pessoa muda de ideia sobre
+  // quantas pessoas). O teto existe contra script, nao contra gente.
+  intencao: { janelaMs: 60 * 1000, teto: 20 },
+};
+
 interface Registro {
   contagem: number;
   reiniciaEm: number;
@@ -31,20 +45,26 @@ export interface Veredito {
   segundos: number;
 }
 
-export function registrarTentativa(origem: string, agora = Date.now()): Veredito {
+export function registrarTentativa(
+  origem: string,
+  balde: Balde = 'login',
+  agora = Date.now(),
+): Veredito {
+  const limite = LIMITES[balde];
+  const chaveDoBalde = balde + ':' + origem;
   // Poda oportunista: sem isto o mapa cresce para sempre numa instância viva.
   for (const [chave, reg] of porOrigem) {
     if (reg.reiniciaEm <= agora) porOrigem.delete(chave);
   }
 
-  const atual = porOrigem.get(origem);
+  const atual = porOrigem.get(chaveDoBalde);
   if (!atual || atual.reiniciaEm <= agora) {
-    porOrigem.set(origem, { contagem: 1, reiniciaEm: agora + JANELA_MS });
+    porOrigem.set(chaveDoBalde, { contagem: 1, reiniciaEm: agora + limite.janelaMs });
     return { permitido: true, segundos: 0 };
   }
 
   atual.contagem += 1;
-  if (atual.contagem > TENTATIVAS_NA_JANELA) {
+  if (atual.contagem > limite.teto) {
     return { permitido: false, segundos: Math.ceil((atual.reiniciaEm - agora) / 1000) };
   }
   return { permitido: true, segundos: 0 };

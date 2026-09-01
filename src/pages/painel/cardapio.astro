@@ -1,0 +1,22 @@
+---
+/**
+ * O cardápio, editável pelo dono.
+ *
+ * Fecha o problema nº1 da `docs/00_VISAO`: "quem descobre a casa não encontra
+ * cardápio". O adiamento tinha um motivo escrito (BLK-004, RN-21): preço sem
+ * processo de atualização vira preço errado em três meses. O painel é esse
+ * processo, então o motivo caiu.
+ */
+import Painel from '@/layouts/Painel.astro';
+import EditorDeCardapio from '@/components/painel/EditorDeCardapio';
+import { listarCardapio } from '@/lib/cardapio';
+
+export const prerender = false;
+
+const sessao = Astro.locals.sessao;
+const secoes = await listarCardapio(sessao.supabase, sessao.casaId);
+---
+
+<Painel titulo="Cardápio" email={sessao.email}>
+  <EditorDeCardapio client:load secoes={secoes} />
+</Painel>

@@ -48,7 +48,19 @@ const { compacto = false } = Astro.props;
     grupo.addEventListener('click', (evento) => {
       const botao = (evento.target as HTMLElement).closest<HTMLButtonElement>('.alternador__opcao');
       const alvo = botao?.dataset.alvo;
-      if (alvo === 'dia' || alvo === 'noite') definirModo(alvo as Modo);
+      if (alvo !== 'dia' && alvo !== 'noite') return;
+      definirModo(alvo as Modo);
+
+      // "% de sessoes que alternam Dia/Noite" e o proxy do aha moment na
+      // docs/00_VISAO. Sem evento, era uma metrica declarada e nao medida.
+      try {
+        const va = (window as unknown as {
+          va?: (t: 'event', d: { name: string; data?: Record<string, unknown> }) => void;
+        }).va;
+        va?.('event', { name: 'troca_modo', data: { para: alvo } });
+      } catch {
+        // metrica nunca quebra interacao
+      }
     });
   });
 

@@ -23,6 +23,28 @@ export interface EscolhaReserva {
   quando: string; // rótulo humano: 'hoje', 'amanhã', 'sexta às 20h'
 }
 
+/**
+ * Codigo curto que casa a conversa do WhatsApp com a linha do painel.
+ *
+ * Mora AQUI e nao em `intencoes.ts` por uma razao de bundle: aquele arquivo
+ * importa Zod e o cliente Supabase, e o script do botao roda no browser.
+ * Import de servidor em modulo de cliente e como codigo de servidor vaza.
+ *
+ * Alfabeto sem os pares que se confundem lidos em voz alta: O/0, I/1, S/5.
+ * O codigo e ditado no balcao, nao copiado e colado.
+ */
+const ALFABETO_CODIGO = 'ABCDEFGHJKLMNPQRTUVWXYZ2346789';
+export const TAMANHO_CODIGO = 4;
+export const FORMATO_CODIGO = /^[A-Z0-9]{4}$/;
+
+export function gerarCodigo(sortear: () => number = Math.random): string {
+  let saida = '';
+  for (let i = 0; i < TAMANHO_CODIGO; i++) {
+    saida += ALFABETO_CODIGO[Math.floor(sortear() * ALFABETO_CODIGO.length)];
+  }
+  return saida;
+}
+
 /** Grupo entre 1 e 30. Acima disso o fluxo vira contato de eventos. (RN-34) */
 export const MIN_PESSOAS = 1;
 export const MAX_PESSOAS = 30;
@@ -36,13 +58,22 @@ export function limitarPessoas(n: number): number {
 /**
  * Mensagem pré-preenchida, no tom da marca do modo ativo. (RN-33)
  * Ex.: "Oi! Queria reservar uma mesa no HAUBERT para 4 pessoas, sexta às 20h."
+ *
+ * O `codigo` é o que costura a conversa ao registro do painel: a equipe lê
+ * "reserva K7QP" e acha a linha. Vem opcional de propósito — sem JavaScript
+ * não há código, e a mensagem tem que continuar fazendo sentido sozinha.
  */
-export function montarMensagem(marca: MarcaResumo, escolha: EscolhaReserva): string {
+export function montarMensagem(
+  marca: MarcaResumo,
+  escolha: EscolhaReserva,
+  codigo?: string,
+): string {
   const pessoas = limitarPessoas(escolha.pessoas);
   const plural = pessoas === 1 ? 'pessoa' : 'pessoas';
   const quando = escolha.quando.trim();
   const fim = quando ? `, ${quando}` : '';
-  return `Oi! Queria reservar uma mesa no ${marca.nomeCurto} para ${pessoas} ${plural}${fim}.`;
+  const marcador = codigo ? ` (reserva ${codigo})` : '';
+  return `Oi! Queria reservar uma mesa no ${marca.nomeCurto} para ${pessoas} ${plural}${fim}.${marcador}`;
 }
 
 /** Só dígitos, o wa.me não aceita '+', espaço nem parêntese. */
@@ -63,6 +94,7 @@ export function montarLinkWhatsapp(
   marca: MarcaResumo,
   escolha: EscolhaReserva,
   origem = 'site',
+  codigo?: string,
 ): string | null {
   const limpo = normalizarNumero(numero);
   if (!temWhatsapp(limpo)) return null;
@@ -70,7 +102,7 @@ export function montarLinkWhatsapp(
   // encodeURIComponent, não URLSearchParams: o segundo codifica espaço como
   // '+', e cabe a quem lê decidir se '+' é espaço ou sinal de mais. O cliente
   // do WhatsApp não é nosso, '%20' não depende da interpretação de ninguém.
-  const texto = encodeURIComponent(montarMensagem(marca, escolha));
+  const texto = encodeURIComponent(montarMensagem(marca, escolha, codigo));
   const utm = `utm_source=${origem}&utm_medium=reserva&utm_campaign=${marca.slug}`;
   return `https://wa.me/${limpo}?text=${texto}#${utm}`;
 }
@@ -91,8 +123,11 @@ export function melhorCanal(
   escolha: EscolhaReserva,
   contatos: { whatsapp?: string; telefone?: string },
   origem = 'site',
+  codigo?: string,
 ): { tipo: 'whatsapp' | 'telefone' | 'instagram'; href: string; rotulo: string } {
-  const zap = contatos.whatsapp ? montarLinkWhatsapp(contatos.whatsapp, marca, escolha, origem) : null;
+  const zap = contatos.whatsapp
+    ? montarLinkWhatsapp(contatos.whatsapp, marca, escolha, origem, codigo)
+    : null;
   if (zap) return { tipo: 'whatsapp', href: zap, rotulo: 'Abrir no WhatsApp' };
 
   const tel = contatos.telefone ? montarLinkTelefone(contatos.telefone) : null;

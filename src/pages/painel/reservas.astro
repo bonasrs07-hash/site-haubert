@@ -1,0 +1,252 @@
+---
+/**
+ * As intenções de reserva: cada toque no botão, com a escolha feita.
+ *
+ * Esta tela responde a UMA pergunta, que é a pergunta do projeto inteiro:
+ * "isso está trazendo mesa?". A `docs/00_VISAO` nomeia a métrica-guia como
+ * "cliques no CTA de reserva por sessão, cruzados com a contagem manual de
+ * reservas da casa nos primeiros 30 dias". A coluna da esquerda desse
+ * cruzamento é o que aparece aqui.
+ *
+ * SEM ilha React: é lista e resumo, não estado. Zero JavaScript nesta rota.
+ * (ADR-006)
+ *
+ * O que esta tela NÃO mostra, porque não existe: nome, telefone, e-mail. O
+ * fluxo de 3 toques não pede contato. Quem tem o contato é a conversa do
+ * WhatsApp — e o `código` é o que costura uma coisa na outra.
+ */
+import Painel from '@/layouts/Painel.astro';
+import { listarIntencoes, resumir } from '@/lib/intencoes';
+import { buscarMarcas } from '@/lib/casa';
+
+export const prerender = false;
+
+const sessao = Astro.locals.sessao;
+const intencoes = await listarIntencoes(sessao.supabase, sessao.casaId);
+const resumo = resumir(intencoes);
+
+const nomeDaMarca = new Map(buscarMarcas().map((m) => [m.slug, m.nomeCurto]));
+
+const CANAL = {
+  whatsapp: 'WhatsApp',
+  telefone: 'Telefone',
+  instagram: 'Instagram',
+} as const;
+
+const relogio = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+});
+---
+
+<Painel titulo="Reservas" email={sessao.email}>
+  <div class="rs">
+    <header class="rs__cabeca">
+      <h1 class="rs__titulo">Toques em reservar</h1>
+      <p class="rs__lead">
+        Cada linha é alguém que escolheu quantas pessoas e tocou no botão. A conversa em si
+        acontece no WhatsApp, o <strong>código</strong> é o que liga uma coisa à outra.
+      </p>
+    </header>
+
+    <ul class="rs__placar" role="list">
+      <li><span class="rs__num">{resumo.hoje}</span><span class="rs__rot">hoje</span></li>
+      <li><span class="rs__num">{resumo.seteDias}</span><span class="rs__rot">últimos 7 dias</span></li>
+      <li><span class="rs__num">{resumo.total}</span><span class="rs__rot">no total</span></li>
+      <li>
+        <span class="rs__num">{resumo.mediaPessoas || '—'}</span>
+        <span class="rs__rot">pessoas por mesa</span>
+      </li>
+    </ul>
+
+    {
+      intencoes.length === 0 ? (
+        <p class="rs__vazio">
+          Nenhum toque registrado ainda. Assim que alguém tocar em "Reservar mesa" no site, a
+          linha aparece aqui.
+        </p>
+      ) : (
+        <div class="rs__rolo">
+          <table class="rs__tabela">
+            <thead>
+              <tr>
+                <th scope="col">Quando tocou</th>
+                <th scope="col">Código</th>
+                <th scope="col">Marca</th>
+                <th scope="col">Pessoas</th>
+                <th scope="col">Para</th>
+                <th scope="col">Canal</th>
+                <th scope="col">De onde</th>
+              </tr>
+            </thead>
+            <tbody>
+              {intencoes.map((i) => (
+                <tr>
+                  <td>{relogio.format(new Date(i.criadoEm))}</td>
+                  <td class="rs__codigo">{i.codigo}</td>
+                  <td>{nomeDaMarca.get(i.marca) ?? i.marca}</td>
+                  <td>{i.pessoas}</td>
+                  <td>{i.quando || 'sem data'}</td>
+                  <td>{CANAL[i.canal as keyof typeof CANAL] ?? i.canal}</td>
+                  <td class="rs__origem">{i.origem}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+
+    <p class="rs__nota">
+      Mostra os 60 toques mais recentes. Nenhum dado pessoal é guardado aqui: o site não pede
+      nome nem telefone, e a página de privacidade continua valendo.
+    </p>
+  </div>
+</Painel>
+
+<style>
+  .rs {
+    width: 100%;
+    max-width: var(--largura-max);
+    margin-inline: auto;
+    padding: var(--esp-6) var(--gutter) var(--esp-9);
+    display: grid;
+    gap: var(--esp-6);
+  }
+
+  .rs__cabeca {
+    display: grid;
+    gap: var(--esp-2);
+  }
+
+  .rs__titulo {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .rs__lead {
+    margin: 0;
+    max-width: 56ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .rs__lead strong {
+    color: var(--cor-texto-forte);
+    font-weight: 500;
+  }
+
+  /* ---- O placar ---------------------------------------------------------- */
+  .rs__placar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: var(--esp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rs__placar li {
+    display: grid;
+    gap: var(--esp-1);
+    padding: var(--esp-4);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie-2);
+  }
+
+  .rs__num {
+    font-family: var(--fonte-display);
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1;
+    color: var(--cor-texto-forte);
+  }
+
+  .rs__rot {
+    font-family: var(--fonte-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  /* ---- A tabela ---------------------------------------------------------- */
+  /* Rola dentro do próprio contêiner: tabela larga não pode empurrar a página
+     inteira para o lado no celular. */
+  .rs__rolo {
+    overflow-x: auto;
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+  }
+
+  .rs__tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--tam-corpo-sm);
+  }
+
+  .rs__tabela th,
+  .rs__tabela td {
+    padding: var(--esp-3) var(--esp-4);
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .rs__tabela th {
+    font-family: var(--fonte-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+    background-color: var(--cor-superficie-2);
+    position: sticky;
+    top: 0;
+  }
+
+  .rs__tabela tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .rs__tabela td {
+    color: var(--cor-texto);
+  }
+
+  .rs__codigo {
+    font-family: var(--fonte-mono);
+    letter-spacing: var(--ls-meta);
+    color: var(--cor-acento);
+  }
+
+  .rs__origem {
+    font-family: var(--fonte-mono);
+    font-size: 0.75rem;
+    color: var(--cor-texto-suave);
+  }
+
+  .rs__vazio {
+    margin: 0;
+    padding: var(--esp-7) var(--esp-5);
+    border: 1px dashed var(--cor-borda);
+    border-radius: var(--raio-1);
+    text-align: center;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .rs__nota {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--cor-texto-suave);
+  }
+</style>

@@ -1,0 +1,201 @@
+---
+/**
+ * /cardapio — a resposta ao problema nº1 da `docs/00_VISAO`:
+ * "quem descobre a casa não encontra cardápio, ele não existe fora do balcão".
+ *
+ * Estática, como o resto do site. O conteúdo é lido do banco no BUILD e sai em
+ * HTML; a página não consulta nada em runtime. Trocar um preço é editar no
+ * painel e publicar, do mesmo jeito que se troca uma foto. (ADR-008)
+ *
+ * Sem cardápio no banco, cai nos seis cortes do guia, sem preço, e diz isso em
+ * voz alta em vez de fingir que é o cardápio completo. (F-006, RN-43)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import { buscarCardapioPublicado, ehPadrao, formatarPreco } from '@/lib/cardapio';
+import { PROMESSA_STEAK } from '@/constants/casa';
+
+const secoes = await buscarCardapioPublicado();
+const aindaEhOPadrao = ehPadrao(secoes);
+---
+
+<Base
+  titulo="Cardápio"
+  descricao="Os cortes da brasa do HAUBERT e o que sai da cozinha da CASA Coffee Colab, em Novo Hamburgo."
+>
+  <HeroPagina
+    olho="O que sai da cozinha"
+    titulo="Cardápio"
+    lead="Do café da manhã ao último corte da noite. O que a casa serve, na ordem em que a casa vive."
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container">
+      {
+        aindaEhOPadrao && (
+          <p class="cardapio__aviso">
+            Os valores do dia a equipe passa na conversa. O cardápio completo entra aqui assim
+            que a casa confirmar.
+          </p>
+        )
+      }
+
+      {
+        secoes.map((secao) => (
+          <section class="cardapio__secao">
+            <header class="cardapio__cabeca revelar">
+              <h2 class="cardapio__nome">{secao.nome}</h2>
+              {secao.descricao && <p class="cardapio__desc">{secao.descricao}</p>}
+            </header>
+
+            <ul class="cardapio__lista" role="list">
+              {secao.itens.map((item, i) => (
+                <li class="cardapio__item revelar" style={`--atraso:${Math.min(i, 6) * 60}ms`}>
+                  <div class="cardapio__linha">
+                    <h3 class="cardapio__item-nome">{item.nome}</h3>
+                    {formatarPreco(item.precoCents) && (
+                      <span class="cardapio__preco">{formatarPreco(item.precoCents)}</span>
+                    )}
+                  </div>
+                  {item.descricao && <p class="cardapio__item-desc">{item.descricao}</p>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      <p class="cardapio__promessa revelar">
+        <span class="t-eyebrow">A promessa</span>
+        {PROMESSA_STEAK}
+      </p>
+    </div>
+  </section>
+
+  <Faixa texto="Do primeiro café ao último brinde." velocidade={42} />
+
+  <ChamadaReserva olho="Mesa" titulo="Viu algo que quer?" origem="cardapio" id="cardapio" />
+</Base>
+
+<style>
+  .cardapio__aviso {
+    margin: 0 0 var(--esp-7);
+    padding: var(--esp-4) var(--esp-5);
+    border-left: 2px solid var(--cor-acento);
+    background-color: var(--cor-superficie-2);
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto);
+  }
+
+  .cardapio__secao + .cardapio__secao {
+    margin-top: var(--esp-8);
+  }
+
+  .cardapio__cabeca {
+    margin-bottom: var(--esp-5);
+    padding-bottom: var(--esp-4);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .cardapio__nome {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .cardapio__desc {
+    margin: var(--esp-3) 0 0;
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .cardapio__lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--esp-5);
+  }
+
+  .cardapio__item {
+    display: grid;
+    gap: var(--esp-2);
+    transition-delay: var(--atraso);
+  }
+
+  /* O filete pontilhado é o gesto de cardápio impresso: o olho anda do nome
+     até o preço sem perder a linha. Sem preço, ele não aparece. */
+  .cardapio__linha {
+    display: flex;
+    align-items: baseline;
+    gap: var(--esp-3);
+  }
+
+  .cardapio__item-nome {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .cardapio__linha:has(.cardapio__preco)::after {
+    content: '';
+    flex: 1;
+    order: 1;
+    height: 0;
+    border-bottom: 1px dotted var(--cor-borda);
+    transform: translateY(-0.25em);
+  }
+
+  .cardapio__preco {
+    order: 2;
+    flex: none;
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    color: var(--cor-acento);
+    white-space: nowrap;
+  }
+
+  .cardapio__item-desc {
+    margin: 0;
+    max-width: 46ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .cardapio__promessa {
+    display: grid;
+    gap: var(--esp-3);
+    margin: var(--esp-8) 0 0;
+    max-width: 46ch;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto);
+  }
+
+  @media (min-width: 52rem) {
+    .cardapio__lista {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: var(--esp-8);
+      row-gap: var(--esp-6);
+    }
+  }
+</style>

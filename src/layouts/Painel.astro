@@ -26,6 +26,14 @@ interface Props {
 }
 
 const { titulo, email } = Astro.props;
+
+// A navegação do painel. Cresce por dado, não por `if` espalhado em página.
+const SECOES = [
+  { href: '/painel', rotulo: 'Fotos' },
+  { href: '/painel/reservas', rotulo: 'Reservas' },
+  { href: '/painel/cardapio', rotulo: 'Cardápio' },
+];
+const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
 
 <!doctype html>
@@ -92,6 +100,22 @@ const { titulo, email } = Astro.props;
         )
       }
     </header>
+
+    {
+      email && (
+        <nav class="painel__nav" aria-label="Seções do painel">
+          {SECOES.map((s) => (
+            <a
+              class="painel__nav-link"
+              href={s.href}
+              aria-current={rotaAtual === s.href ? 'page' : undefined}
+            >
+              {s.rotulo}
+            </a>
+          ))}
+        </nav>
+      )
+    }
 
     <main class="painel__corpo">
       <slot />
@@ -192,6 +216,48 @@ const { titulo, email } = Astro.props;
     transition:
       background-color var(--transicao-modo),
       color var(--transicao-modo);
+  }
+
+  /* ---- Navegação entre seções ------------------------------------------ */
+  .painel__nav {
+    display: flex;
+    gap: var(--esp-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-inline: var(--gutter);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    background-color: var(--cor-superficie);
+  }
+
+  .painel__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .painel__nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--alvo-toque);
+    padding-inline: var(--esp-4);
+    border-bottom: 2px solid transparent;
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    color: var(--cor-texto-suave);
+    transition:
+      color var(--transicao),
+      border-color var(--transicao);
+  }
+
+  .painel__nav-link:hover {
+    color: var(--cor-texto-forte);
+  }
+
+  .painel__nav-link[aria-current='page'] {
+    color: var(--cor-texto-forte);
+    border-bottom-color: var(--cor-acento);
   }
 
   /* No celular o cabecalho passou a empilhar em tres fileiras e comia 265px
