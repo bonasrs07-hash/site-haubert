@@ -1,0 +1,30 @@
+---
+/**
+ * Os dados da casa, editáveis pelo dono.
+ *
+ * É o que destrava BLK-003 e BLK-005 — endereço, horário e WhatsApp. Nenhum
+ * dos dois estava parado por ser difícil: estavam parados porque dependiam de
+ * alguém mandar o dado por mensagem para um desenvolvedor digitar num arquivo.
+ *
+ * Leitura FRESCA, sem o cache de `casa.ts`: senão o dono salvaria e veria o
+ * valor antigo ao recarregar.
+ */
+import Painel from '@/layouts/Painel.astro';
+import EditorDaCasa from '@/components/painel/EditorDaCasa';
+import { lerCasa } from '@/lib/identidade';
+
+export const prerender = false;
+
+const sessao = Astro.locals.sessao;
+const casa = await lerCasa(sessao.supabase, sessao.casaId);
+---
+
+<Painel titulo="A casa" email={sessao.email}>
+  {
+    casa ? (
+      <EditorDaCasa client:load casa={casa} />
+    ) : (
+      <p class="pn__vazio">Não deu para ler os dados da casa.</p>
+    )
+  }
+</Painel>

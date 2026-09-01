@@ -11,8 +11,8 @@
 import AlternadorModo from './AlternadorModo.astro';
 import { buscarCasa, buscarMarcas } from '@/lib/casa';
 
-const casa = buscarCasa();
-const marcas = buscarMarcas();
+const casa = await buscarCasa();
+const marcas = await buscarMarcas();
 const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 const NAV = [

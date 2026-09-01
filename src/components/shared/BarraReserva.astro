@@ -14,7 +14,7 @@ import BotaoReserva from './BotaoReserva.astro';
 import { buscarMarcas } from '@/lib/casa';
 import { limparPendente } from '@/lib/texto';
 
-const marcas = buscarMarcas();
+const marcas = await buscarMarcas();
 ---
 
 <div class="barra" data-barra>

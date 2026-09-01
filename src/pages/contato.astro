@@ -14,8 +14,8 @@ import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
 import { buscarCasa, buscarMarcas } from '@/lib/casa';
 import { limparPendente, temValor } from '@/lib/texto';
 
-const casa = buscarCasa();
-const marcas = buscarMarcas();
+const casa = await buscarCasa();
+const marcas = await buscarMarcas();
 const temEndereco = temValor(casa.endereco);
 ---
 

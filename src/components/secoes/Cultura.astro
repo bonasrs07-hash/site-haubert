@@ -9,7 +9,7 @@
 import CabecalhoSecao from './CabecalhoSecao.astro';
 import GradeEixos from './GradeEixos.astro';
 import { EIXOS_CULTURA, EVENTOS, FRASE_CULTURA } from '@/constants/casa';
-import { buscarMarca } from '@/lib/casa';
+import { buscarMarcas } from '@/lib/casa';
 
 interface Props {
   comEixos?: boolean;
@@ -17,9 +17,13 @@ interface Props {
 
 const { comEixos = true } = Astro.props;
 
+// As marcas são resolvidas ANTES do map: `await` não cabe dentro de callback
+// síncrono, e buscar uma por evento seria N idas ao mesmo cache.
+const marcasPorSlug = new Map((await buscarMarcas()).map((m) => [m.slug, m]));
+
 const eventos = EVENTOS.map((evento) => ({
   ...evento,
-  marca: evento.marcaSlug ? buscarMarca(evento.marcaSlug) : undefined,
+  marca: evento.marcaSlug ? marcasPorSlug.get(evento.marcaSlug) : undefined,
 }));
 ---
 

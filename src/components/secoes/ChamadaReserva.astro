@@ -25,7 +25,7 @@ const {
   id = 'chamada',
 } = Astro.props;
 
-const marcas = buscarMarcas();
+const marcas = await buscarMarcas();
 ---
 
 <section class="casa-secao chamada" id="reservar">

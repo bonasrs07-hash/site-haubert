@@ -25,7 +25,7 @@ const sessao = Astro.locals.sessao;
 const intencoes = await listarIntencoes(sessao.supabase, sessao.casaId);
 const resumo = resumir(intencoes);
 
-const nomeDaMarca = new Map(buscarMarcas().map((m) => [m.slug, m.nomeCurto]));
+const nomeDaMarca = new Map((await buscarMarcas()).map((m) => [m.slug, m.nomeCurto]));
 
 const CANAL = {
   whatsapp: 'WhatsApp',

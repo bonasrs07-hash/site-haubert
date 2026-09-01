@@ -12,6 +12,8 @@ import Rodape from '@/components/shared/Rodape.astro';
 import BarraReserva from '@/components/shared/BarraReserva.astro';
 import { buscarCasa } from '@/lib/casa';
 import { ESSENCIA } from '@/constants/casa';
+import { paraSchemaOrg } from '@/lib/horario-texto';
+import { limparPendente, temValor } from '@/lib/texto';
 import type { Modo } from '@/lib/tipos';
 
 interface Props {
@@ -26,7 +28,7 @@ interface Props {
 
 const { titulo, descricao, modoForcado, canonica, semIndexacao = false } = Astro.props;
 
-const casa = buscarCasa();
+const casa = await buscarCasa();
 const urlCanonica = new URL(canonica ?? Astro.url.pathname, Astro.site ?? Astro.url.origin);
 
 // A imagem de compartilhamento é gerada a partir das fotos da marca e vive em
@@ -44,20 +46,34 @@ const tituloCompleto = `${titulo} · ${casa.nome}`;
 
 // schema.org, uma entrada por marca. É o que faz a busca local entender que
 // são dois restaurantes no mesmo endereço. (docs/09_BACKLOG, Épico D)
-const dadosEstruturados = casa.marcas.map((marca) => ({
-  '@context': 'https://schema.org',
-  '@type': 'Restaurant',
-  name: marca.nome,
-  slogan: marca.mote,
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: casa.cidade,
-    addressRegion: casa.uf,
-    addressCountry: 'BR',
-  },
-  sameAs: [marca.instagramUrl],
-  url: new URL(marca.modo === 'noite' ? '/noite' : '/', Astro.site ?? Astro.url.origin).href,
-}));
+const dadosEstruturados = casa.marcas.map((marca) => {
+  const horas = paraSchemaOrg(marca.horario);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: marca.nome,
+    slogan: marca.mote,
+    address: {
+      '@type': 'PostalAddress',
+      // A rua só entra quando existe. Endereço inventado no schema manda o
+      // cliente para a porta errada pelo Google Maps, que é pior que não
+      // aparecer. (RN-43, BLK-003)
+      ...(temValor(casa.endereco) ? { streetAddress: limparPendente(casa.endereco) } : {}),
+      addressLocality: casa.cidade,
+      addressRegion: casa.uf,
+      addressCountry: 'BR',
+    },
+    ...(temValor(casa.telefone) ? { telephone: limparPendente(casa.telefone) } : {}),
+    // Sem isto o Google sabe que existe um restaurante e não sabe se ele está
+    // aberto agora, que é exatamente o que a pessoa pesquisou.
+    ...(horas.length ? { openingHoursSpecification: horas } : {}),
+    // Liga a ficha ao cardápio que passou a existir. Sem `hasMenu`, a página
+    // nova é só mais uma URL no sitemap.
+    hasMenu: new URL('/cardapio', Astro.site ?? Astro.url.origin).href,
+    sameAs: [marca.instagramUrl],
+    url: new URL(marca.modo === 'noite' ? '/noite' : '/', Astro.site ?? Astro.url.origin).href,
+  };
+});
 ---
 
 <!doctype html>

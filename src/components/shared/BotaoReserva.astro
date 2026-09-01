@@ -24,9 +24,9 @@ interface Props {
 
 const { variante = 'inline', origem = 'site', id = 'reserva' } = Astro.props;
 
-const casa = buscarCasa();
-const marcaDia = buscarMarcaPorModo('dia');
-const marcaNoite = buscarMarcaPorModo('noite');
+const casa = await buscarCasa();
+const marcaDia = await buscarMarcaPorModo('dia');
+const marcaNoite = await buscarMarcaPorModo('noite');
 
 const contatos = {
   whatsapp: temValor(casa.whatsapp) ? casa.whatsapp : undefined,

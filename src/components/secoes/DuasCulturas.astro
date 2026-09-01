@@ -13,7 +13,7 @@ import { buscarMarcas } from '@/lib/casa';
 import { buscarFoto } from '@/lib/fotos';
 import { limparPendente } from '@/lib/texto';
 
-const marcas = buscarMarcas();
+const marcas = await buscarMarcas();
 
 // As duas vagas que o dono troca no painel. Vaga vazia cai no arquivo do
 // repositorio, entao isto nunca devolve nulo. (ADR-008)

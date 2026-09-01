@@ -778,3 +778,58 @@
     grid-template-columns: 1fr 9rem auto;
   }
 }
+
+/* ---- Editor da casa: dias e prévia ------------------------------------- */
+.ca__dias {
+  display: flex;
+  gap: var(--esp-1);
+  flex-wrap: wrap;
+}
+
+.ca__dia {
+  width: 40px;
+  height: var(--alvo-toque);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-suave);
+  font-family: var(--fonte-mono);
+  font-size: var(--tam-meta);
+  cursor: pointer;
+  transition:
+    background-color var(--transicao),
+    color var(--transicao),
+    border-color var(--transicao);
+}
+
+.ca__dia:hover {
+  border-color: var(--cor-texto-forte);
+}
+
+.ca__dia:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
+}
+
+.ca__dia--on {
+  background-color: var(--cor-texto-forte);
+  border-color: var(--cor-texto-forte);
+  color: var(--cor-superficie);
+}
+
+/* A prévia usa a MESMA função que escreve a frase no site. É o que evita
+   editar horário no escuro e descobrir o resultado no ar. */
+.ca__previa {
+  margin: var(--esp-3) 0 0;
+  padding: var(--esp-3) var(--esp-4);
+  border-left: 2px solid var(--cor-acento);
+  background-color: var(--cor-superficie-2);
+  font-size: var(--tam-corpo-sm);
+  line-height: 1.5;
+  color: var(--cor-texto-suave);
+}
+
+.ca__previa strong {
+  color: var(--cor-texto-forte);
+  font-weight: 500;
+}

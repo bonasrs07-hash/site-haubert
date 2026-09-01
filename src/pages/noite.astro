@@ -22,7 +22,7 @@ import { FRASE_NOITE, NOITE_EXPERIENCIAS } from '@/constants/casa';
 import { buscarMarcaPorModo } from '@/lib/casa';
 import { limparPendente } from '@/lib/texto';
 
-const haubert = buscarMarcaPorModo('noite');
+const haubert = await buscarMarcaPorModo('noite');
 ---
 
 <Base

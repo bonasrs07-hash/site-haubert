@@ -12,8 +12,8 @@ import BotaoReserva from '@/components/shared/BotaoReserva.astro';
 import { buscarCasa, buscarMarcas } from '@/lib/casa';
 import { ESSENCIA } from '@/constants/casa';
 
-const casa = buscarCasa();
-const marcas = buscarMarcas();
+const casa = await buscarCasa();
+const marcas = await buscarMarcas();
 ---
 
 <section class="hero">

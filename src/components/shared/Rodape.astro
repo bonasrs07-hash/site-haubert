@@ -9,7 +9,7 @@ import { buscarCasa } from '@/lib/casa';
 import { FECHO, FRASE_LOCAL } from '@/constants/casa';
 import { limparPendente, temValor } from '@/lib/texto';
 
-const casa = buscarCasa();
+const casa = await buscarCasa();
 const anoAtual = new Date().getFullYear();
 const localizacao = temValor(casa.endereco)
   ? limparPendente(casa.endereco)

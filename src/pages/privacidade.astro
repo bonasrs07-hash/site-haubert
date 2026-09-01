@@ -10,7 +10,7 @@ import Base from '@/layouts/Base.astro';
 import HeroPagina from '@/components/secoes/HeroPagina.astro';
 import { buscarCasa } from '@/lib/casa';
 
-const casa = buscarCasa();
+const casa = await buscarCasa();
 const atualizadoEm = '24 de agosto de 2026';
 ---
 
