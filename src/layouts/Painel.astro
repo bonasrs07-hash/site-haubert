@@ -17,6 +17,8 @@ import '@fontsource/space-mono/latin-400.css';
 import '@fontsource/bebas-neue/latin-400.css';
 import '@/styles/global.css';
 
+import AlternadorModo from '@/components/shared/AlternadorModo.astro';
+
 interface Props {
   titulo: string;
   /** Quem está logado. Ausente na tela de entrar. */
@@ -34,7 +36,29 @@ const { titulo, email } = Astro.props;
     <title>{titulo} · Painel</title>
     {/* O painel não é conteúdo. Nunca indexar. */}
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#f6efe7" />
+
+    {/*
+      Mesmo script anti-FOUC do site (ADR-004), pela mesma razão: o painel
+      também é pintado antes de qualquer JS, e sem isto ele nasceria claro e
+      viraria escuro na frente do dono. A chave de armazenamento é a MESMA do
+      site — quem trabalha à noite abre as duas coisas no mesmo modo.
+    */}
+    <script is:inline>
+      (function () {
+        var raiz = document.documentElement;
+        var modo = null;
+        try {
+          var salvo = window.localStorage.getItem('casa-modo');
+          if (salvo === 'dia' || salvo === 'noite') modo = salvo;
+        } catch (e) {}
+        if (!modo) {
+          var agora = new Date();
+          var minutos = agora.getHours() * 60 + agora.getMinutes();
+          modo = minutos >= 1140 || minutos < 300 ? 'noite' : 'dia';
+        }
+        raiz.setAttribute('data-modo', modo);
+      })();
+    </script>
   </head>
 
   <body class="painel">
@@ -46,6 +70,17 @@ const { titulo, email } = Astro.props;
       {
         email && (
           <div class="painel__conta">
+            {/*
+              A troca Dia/Noite aqui é PRÉVIA, não publicação: ela muda como
+              VOCÊ está vendo, para dar para julgar uma foto da noite no escuro
+              em que ela vai aparecer. O que o visitante vê continua sendo
+              decidido pela hora. Daí o rótulo, sem ele o botão sugeriria que
+              está trocando o modo do site.
+            */}
+            <div class="painel__modo">
+              <span class="painel__modo-rotulo">Ver como</span>
+              <AlternadorModo compacto />
+            </div>
             <span class="painel__email">{email}</span>
             <a class="painel__ver" href="/" target="_blank" rel="noopener">
               Ver o site
@@ -105,7 +140,21 @@ const { titulo, email } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--esp-4);
+    gap: var(--esp-3) var(--esp-4);
+  }
+
+  .painel__modo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+  }
+
+  .painel__modo-rotulo {
+    font-family: var(--fonte-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
   }
 
   .painel__email,
@@ -135,6 +184,32 @@ const { titulo, email } = Astro.props;
   .painel__sair:hover {
     color: var(--cor-texto-forte);
     border-bottom-color: var(--cor-acento);
+  }
+
+  /* O painel troca de paleta junto com o site, então a transição precisa ser
+     a mesma — sem isto o cromo saltaria e o conteúdo deslizaria. */
+  .painel {
+    transition:
+      background-color var(--transicao-modo),
+      color var(--transicao-modo);
+  }
+
+  /* No celular o cabecalho passou a empilhar em tres fileiras e comia 265px
+     antes do primeiro cartao. O e-mail sai: com UM login so, ele confirma
+     algo que o dono ja sabe, e nao e um controle. Os controles ficam. */
+  @media (max-width: 34rem) {
+    .painel__topo {
+      padding: var(--esp-3) var(--gutter);
+      gap: var(--esp-3);
+    }
+
+    .painel__email {
+      display: none;
+    }
+
+    .painel__conta {
+      gap: var(--esp-3);
+    }
   }
 
   .painel__corpo {

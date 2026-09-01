@@ -279,10 +279,15 @@
   color: var(--cor-texto);
 }
 
-/* "Falta publicar": o único que pede ação, e o único que grita. */
+/* "Falta publicar": o único que pede ação, e o único que grita.
+   O grito é a borda dobrada, NÃO um fundo preenchido. Medido: com
+   `--cor-superficie-2` atrás, o rótulo em acento caía para 4,1:1 no modo
+   noite — o acento é documentado a 4,8:1 sobre o carvão, e o grafite é mais
+   claro que o carvão. Justamente a etiqueta mais importante da tela ficaria
+   abaixo do AA. Sobre a superfície normal ela volta para 4,8:1. */
 .pn__vaga--fila {
   border-color: var(--cor-acento);
-  background-color: var(--cor-superficie-2);
+  box-shadow: inset 0 0 0 1px var(--cor-acento);
 }
 
 .pn__vaga--fila .pn__estado {
@@ -425,7 +430,7 @@
 .pn__folha-fundo {
   position: absolute;
   inset: 0;
-  background-color: rgb(0 0 0 / 0.45);
+  background-color: var(--veu-modal);
 }
 
 .pn__folha-corpo {

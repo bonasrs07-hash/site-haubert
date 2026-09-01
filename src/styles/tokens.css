@@ -112,6 +112,10 @@
   --cor-borda: var(--casa-sage);
   --cor-decor: var(--casa-terracota); /* NUNCA como texto: 3,5:1 */
   --overlay-foto: rgb(35 35 34 / 0.35);
+  /* Véu atrás de folha e modal. Escuro nos DOIS modos de propósito: ele existe
+     para apagar o que está atrás, e um véu claro sobre superfície clara não
+     apaga nada. Por isso não deriva de --cor-texto-forte, que se inverte. */
+  --veu-modal: rgb(35 35 34 / 0.45);
   --sombra-fixo: 0 -1px 0 var(--casa-sage);
 }
 
@@ -130,5 +134,6 @@
   --cor-borda: var(--haubert-caramelo);
   --cor-decor: var(--haubert-caramelo);
   --overlay-foto: rgb(19 18 18 / 0.55);
+  --veu-modal: rgb(19 18 18 / 0.68);
   --sombra-fixo: 0 -1px 0 var(--haubert-caramelo);
 }
