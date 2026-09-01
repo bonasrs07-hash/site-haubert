@@ -28,7 +28,7 @@ mobile em 4G, CTA de reserva rastreado, indexado no Google para o nome da casa.
 - [x] `@fontsource` das 4 famílias, self-hosted, subset latino
 - [x] Script inline de tema no `<head>` (anti-FOUC), ADR-004
 - [x] Layout base: cabeçalho, alternador Dia/Noite, rodapé, barra de reserva fixa
-- [ ] Deploy na Vercel + preview por branch, **não depende de BLK-006**: o
+- [x] Deploy na Vercel + preview por branch, **não depende de BLK-006**: o
       domínio trava o *lançamento*, não o *deploy*. Homologação sai em
       `*.vercel.app`, com `PUBLIC_SITE_URL` apontando para lá (senão a canônica
       e o `og:image` apontam para um domínio que ainda não existe)
@@ -128,8 +128,9 @@ disso é pular etapa.
 |---|---|---|
 | **CSP não configurada** | Já era lacuna antes do painel (Camada 4 de `docs/11_SEGURANCA` diz "configurar na Vercel" e nunca foi). Fazer agora exige resolver o `nonce`/hash do script inline de tema do [ADR-004](../08_DECISOES/adr-004-modo-dia-noite.md), feito às pressas, quebra a troca Dia/Noite no site inteiro | Médio, e **pré-existente**. O painel não piorou; só tornou a lacuna mais visível |
 | **Freio de login é por instância** | Trava em memória não é compartilhada entre as instâncias serverless da Vercel. O freio de verdade seria no banco, como já é o de publicação | Baixo com senha longa; a defesa real é o limite do próprio Supabase Auth. Está escrito em `src/lib/freio.ts` para ninguém confundir com proteção completa |
-| **Sem teste de ponta a ponta do fluxo logado** | Depende de um projeto Supabase de verdade, que ainda não existe. O que dá para testar sem ele foi testado: guarda de rota, 401 dos endpoints, validação de arquivo, orçamento de JS | Médio, o caminho feliz (entrar → enviar → publicar) nunca rodou contra um banco |
-| **Cadastro público** | É passo de console, não de código | **Alto até ser feito.** Ver Passo 4b do `INSTALACAO.md` |
+| ~~Sem teste de ponta a ponta do fluxo logado~~ | **RESOLVIDO em 01/09.** Rodou contra o banco real, em produção: entrar → enviar foto → apontar vaga → publicar. Direito de imagem barrou no servidor (422), apagar foto no ar foi recusado (400), anon lendo a tabela deu `[]` e gravando deu 42501 | — |
+| ~~Cadastro público~~ | **RESOLVIDO.** `disable_signup = true`, conferido pela API | — |
+| ~~Deploy Hook não existia~~ | **RESOLVIDO em 01/09.** Exigia repositório Git conectado, que exigia o GitHub como Login Connection na conta Vercel. Feito: o botão Publicar disparou um build real (fonte `painel-publicar`), e o segundo clique em 60s levou 429 | — |
 
 ## Ideias registradas (não priorizadas)
 
