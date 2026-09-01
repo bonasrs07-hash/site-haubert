@@ -57,6 +57,7 @@ cp .env.example .env
 | `PUBLIC_WHATSAPP` | `.env` | Sim, número E.164 |
 | `PUBLIC_VENUE_SLUG` | `.env` | Sim, qual casa este deploy serve ([ADR-002](docs/08_DECISOES/adr-002-multi-tenant-white-label.md)) |
 | `VERCEL_DEPLOY_HOOK_URL` | `.env` local + painel da Vercel | **NUNCA**, quem tem a URL dispara builds |
+| `SUPABASE_DB_URL` | `.env` local | **NUNCA**, é acesso total ao banco. Só para rodar migration |
 
 > Prefixo `PUBLIC_` significa que a variável **vai para o bundle**. Não existe
 > "PUBLIC_ mas secreto". A `service_role` nunca leva esse prefixo.
@@ -74,16 +75,27 @@ supabase db push
 O schema é [`supabase/schema.sql`](supabase/schema.sql). Toda tabela nasce com
 RLS, tabela sem policy não entra em `main`.
 
-Seeds:
+Seeds e migrations:
 
 ```bash
-supabase db execute --file supabase/seeds/001_casa_haubert.sql
+npm run migrar supabase/seeds/001_casa_haubert.sql
+npm run migrar supabase/migrations/001_media_e_vagas.sql
+npm run migrar supabase/migrations/002_intencoes_de_reserva.sql
 ```
 
-Depois do schema, as migrations:
+> As versões anteriores deste arquivo mandavam usar `supabase db execute`.
+> **Esse subcomando não existe na CLI 2.x**, era instrução quebrada. O
+> `supabase db push` também não serve aqui: ele espera nomes no formato
+> `<timestamp>_nome.sql` e reconcilia histórico remoto, e a 001 foi aplicada
+> à mão pelo SQL Editor. O `npm run migrar` aplica o arquivo dentro de uma
+> transação só: ou entra inteiro, ou não entra nada.
+
+Ele lê `SUPABASE_DB_URL` do `.env`. Pegue em **Project Settings > Database >
+Connection string > URI**, no modo **sessão (porta 5432)**; a de transação
+(6543) não executa DDL. Para conferir antes de aplicar:
 
 ```bash
-supabase db execute --file supabase/migrations/001_media_e_vagas.sql
+npm run migrar supabase/migrations/002_intencoes_de_reserva.sql -- --conferir
 ```
 
 ## Passo 4b, Painel de fotos ([ADR-008](docs/08_DECISOES/adr-008-painel-de-fotos.md))
