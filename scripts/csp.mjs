@@ -185,6 +185,15 @@ function main() {
   const antigos = new Set(
     [...(atual.match(/'sha256-([^']+)'/g) ?? [])].map((s) => s.slice(8, -1)),
   );
+  // Quando os hashes conferem e mesmo assim o arquivo diverge, a diferença está
+  // em outro lugar do JSON — e aí só o caractere exato resolve.
+  let i = 0;
+  while (i < atual.length && i < novo.length && atual[i] === novo[i]) i++;
+  console.error(`  arquivo: ${atual.length} caracteres | gerado: ${novo.length}`);
+  console.error(`  primeira diferença no caractere ${i}:`);
+  console.error(`    arquivo: ${JSON.stringify(atual.slice(Math.max(0, i - 50), i + 50))}`);
+  console.error(`    gerado : ${JSON.stringify(novo.slice(Math.max(0, i - 50), i + 50))}`);
+  console.error('');
   console.error(`  Medi ${paginas} páginas e ${hashes.length} scripts embutidos:`);
   for (const h of hashes) {
     const info = achados.get(h);
