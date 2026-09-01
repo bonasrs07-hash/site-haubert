@@ -1,0 +1,243 @@
+---
+/**
+ * /agenda — a resposta ao problema nº4 da `docs/00_VISAO`:
+ * "quem quer saber o line-up do sábado depende de story que expira em 24h".
+ *
+ * Estática, lida do banco no BUILD, publicada por rebuild. (ADR-008)
+ *
+ * Sem evento datado no banco, cai nos encontros por CADÊNCIA de
+ * `constants/casa.ts` — que é o que `/cultura` mostra hoje — e diz isso em voz
+ * alta. A página nunca fica vazia, e nunca inventa uma data. (BLK-007, RN-43)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import { buscarEventosPublicados, daquiPraFrente } from '@/lib/agenda';
+import { buscarMarcas } from '@/lib/casa';
+import { EVENTOS, FRASE_CULTURA } from '@/constants/casa';
+
+const marcas = await buscarMarcas();
+const nomeDaMarca = new Map(marcas.map((m) => [m.slug, m.nomeCurto]));
+
+const proximos = daquiPraFrente(await buscarEventosPublicados());
+const temData = proximos.length > 0;
+
+const dia = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'long',
+  day: '2-digit',
+  month: 'long',
+  timeZone: 'America/Sao_Paulo',
+});
+const hora = new Intl.DateTimeFormat('pt-BR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+});
+---
+
+<Base
+  titulo="Agenda"
+  descricao="O que acontece na CASA + HAUBERT: música, encontros e noites com data marcada, em Novo Hamburgo."
+>
+  <HeroPagina
+    olho="O que vem por aí"
+    titulo="Agenda"
+    lead="Música, arte e cidade. O que a casa programa, com dia e hora — sem depender de story que some em 24h."
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container">
+      {
+        temData ? (
+          <ul class="ag__lista" role="list">
+            {proximos.map((e, i) => (
+              <li class="ag__item revelar" style={`--atraso:${Math.min(i, 5) * 70}ms`}>
+                <div class="ag__quando">
+                  <span class="ag__dia">{dia.format(new Date(e.inicioEm))}</span>
+                  <span class="ag__hora">{hora.format(new Date(e.inicioEm))}</span>
+                </div>
+                <div class="ag__corpo">
+                  <h2 class="ag__titulo">
+                    <a href={`/evento/${e.slug}`}>{e.titulo}</a>
+                  </h2>
+                  {e.descricao && <p class="ag__desc">{e.descricao}</p>}
+                  {e.lineup.length > 0 && (
+                    <p class="ag__lineup">{e.lineup.join(' · ')}</p>
+                  )}
+                  <p class="ag__onde">
+                    {e.marcaSlug ? (nomeDaMarca.get(e.marcaSlug) ?? 'CASA + HAUBERT') : 'CASA + HAUBERT'}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div class="ag__semdata">
+            <p class="ag__aviso">
+              Ainda não há data confirmada por aqui. Estes são os encontros que a casa programa,
+              e as datas de cada edição saem no Instagram.
+            </p>
+            <ul class="ag__cadencias" role="list">
+              {EVENTOS.map((e) => (
+                <li class="ag__cadencia revelar">
+                  <p class="t-meta ag__ritmo">{e.cadencia}</p>
+                  <h2 class="ag__titulo">{e.titulo}</h2>
+                  <p class="ag__desc">{e.descricao}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <Faixa texto={FRASE_CULTURA} velocidade={44} />
+
+  <ChamadaReserva olho="Presença" titulo="Guarde sua mesa." origem="agenda" id="agenda" />
+</Base>
+
+<style>
+  .ag__lista,
+  .ag__cadencias {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+  }
+
+  .ag__item {
+    display: grid;
+    gap: var(--esp-3);
+    padding-block: var(--esp-6);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    transition-delay: var(--atraso);
+  }
+
+  .ag__item:last-child {
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .ag__quando {
+    display: flex;
+    align-items: baseline;
+    gap: var(--esp-3);
+    flex-wrap: wrap;
+  }
+
+  .ag__dia {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-acento);
+  }
+
+  .ag__hora {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    color: var(--cor-texto-suave);
+  }
+
+  .ag__corpo {
+    display: grid;
+    gap: var(--esp-2);
+  }
+
+  .ag__titulo {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .ag__titulo a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color var(--transicao);
+  }
+
+  .ag__titulo a:hover {
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .ag__desc {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .ag__lineup {
+    margin: 0;
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto);
+  }
+
+  .ag__onde {
+    margin: var(--esp-1) 0 0;
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  /* ---- Sem data confirmada --------------------------------------------- */
+  .ag__aviso {
+    margin: 0 0 var(--esp-7);
+    padding: var(--esp-4) var(--esp-5);
+    border-left: 2px solid var(--cor-acento);
+    background-color: var(--cor-superficie-2);
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto);
+  }
+
+  .ag__cadencias {
+    gap: var(--esp-5);
+  }
+
+  .ag__cadencia {
+    display: grid;
+    gap: var(--esp-2);
+    padding: var(--esp-5);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie-2);
+  }
+
+  .ag__ritmo {
+    margin: 0;
+    color: var(--cor-acento);
+  }
+
+  @media (min-width: 52rem) {
+    .ag__item {
+      grid-template-columns: 14rem 1fr;
+      gap: var(--esp-6);
+      align-items: start;
+    }
+
+    .ag__quando {
+      display: grid;
+      gap: var(--esp-1);
+      justify-items: start;
+    }
+
+    .ag__cadencias {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

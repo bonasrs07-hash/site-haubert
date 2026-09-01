@@ -833,3 +833,54 @@
   color: var(--cor-texto-forte);
   font-weight: 500;
 }
+
+/* ---- Agenda ------------------------------------------------------------ */
+/* Evento fora do site fica visualmente marcado: a diferença entre "marcado" e
+   "no ar" é a que mais confunde nesta tela. */
+.ag__rascunho {
+  border-style: dashed;
+}
+
+.ag__marca-rascunho {
+  font-family: var(--fonte-mono);
+  font-size: 0.625rem;
+  letter-spacing: var(--ls-meta);
+  text-transform: uppercase;
+  color: var(--cor-acento);
+}
+
+.ag__passados {
+  display: grid;
+  gap: var(--esp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--tam-corpo-sm);
+  color: var(--cor-texto-suave);
+}
+
+.ag__passados li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  padding-bottom: var(--esp-3);
+  border-bottom: var(--borda-fina) solid var(--cor-borda);
+}
+
+.ag__passados strong {
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+.pn__campo select {
+  width: 100%;
+  min-height: var(--alvo-toque);
+  padding-inline: var(--esp-3);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+}

@@ -17,6 +17,7 @@ const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 const NAV = [
   { href: '/cardapio', rotulo: 'Cardápio' },
+  { href: '/agenda', rotulo: 'Agenda' },
   { href: '/sobre', rotulo: 'A casa' },
   { href: '/fogo', rotulo: 'O fogo' },
   { href: '/cultura', rotulo: 'Cultura' },
@@ -334,14 +335,27 @@ const ehAtual = (href: string) => rotaAtual === href;
   @media (min-width: 64rem) {
     .nav {
       display: flex;
-    }
-
-    .topo__cta {
-      display: inline-flex;
+      gap: var(--esp-4);
     }
 
     .menu {
       display: none;
+    }
+  }
+
+  /* O "Reservar" do topo só aparece quando há folga de verdade.
+     Motivo: de 60rem para cima a barra de reserva já virou pílula flutuante no
+     canto (BarraReserva.astro), então o botão do topo é o SEGUNDO CTA na
+     mesma tela. Com seis itens de menu, esse duplicado espremia a assinatura
+     até cortá-la em 1024px exatos — medido. Some o duplicado, cabe tudo, e o
+     princípio nº 1 continua de pé porque a pílula nunca sai da tela. */
+  @media (min-width: 80rem) {
+    .nav {
+      gap: var(--esp-5);
+    }
+
+    .topo__cta {
+      display: inline-flex;
     }
   }
 </style>

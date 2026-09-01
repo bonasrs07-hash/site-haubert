@@ -1,0 +1,202 @@
+---
+/**
+ * A página de um evento.
+ *
+ * Existe por dois motivos, e o segundo é o que paga:
+ *   1. link compartilhável — story expira, URL não;
+ *   2. `schema.org/Event`, que é o que o Google usa para mostrar evento no
+ *      resultado local. É a diferença entre a casa aparecer em "o que fazer em
+ *      Novo Hamburgo sábado" e não aparecer.
+ *
+ * Gera página para TODO evento publicado, inclusive os que já passaram: quem
+ * compartilhou o link não merece um 404 na segunda-feira. Quem some da lista
+ * é a `/agenda`, não a página.
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import { buscarEventosPublicados } from '@/lib/agenda';
+import { buscarMarcas } from '@/lib/casa';
+import { temValor, limparPendente } from '@/lib/texto';
+import { buscarCasa } from '@/lib/casa';
+
+export async function getStaticPaths() {
+  const eventos = await buscarEventosPublicados();
+  return eventos.map((evento) => ({ params: { slug: evento.slug }, props: { evento } }));
+}
+
+const { evento } = Astro.props;
+const casa = await buscarCasa();
+const marcas = await buscarMarcas();
+const marca = evento.marcaSlug ? marcas.find((m) => m.slug === evento.marcaSlug) : undefined;
+
+const inicio = new Date(evento.inicioEm);
+const jaPassou = (evento.fimEm ? new Date(evento.fimEm) : inicio).getTime() < Date.now();
+
+const quando = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'long',
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+}).format(inicio);
+
+// O local só entra quando existe endereço de verdade. Evento com endereço
+// inventado manda gente para a porta errada. (RN-43, BLK-003)
+const local = temValor(casa.endereco)
+  ? {
+      '@type': 'Place',
+      name: casa.nome,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: limparPendente(casa.endereco),
+        addressLocality: casa.cidade,
+        addressRegion: casa.uf,
+        addressCountry: 'BR',
+      },
+    }
+  : {
+      '@type': 'Place',
+      name: casa.nome,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: casa.cidade,
+        addressRegion: casa.uf,
+        addressCountry: 'BR',
+      },
+    };
+
+const dadosDoEvento = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: evento.titulo,
+  startDate: evento.inicioEm,
+  ...(evento.fimEm ? { endDate: evento.fimEm } : {}),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  ...(evento.descricao ? { description: evento.descricao } : {}),
+  ...(evento.lineup.length
+    ? { performer: evento.lineup.map((n: string) => ({ '@type': 'PerformingGroup', name: n })) }
+    : {}),
+  location: local,
+  organizer: { '@type': 'Organization', name: marca?.nome ?? casa.nome },
+  url: new URL(`/evento/${evento.slug}`, Astro.site ?? Astro.url.origin).href,
+};
+---
+
+<Base titulo={evento.titulo} descricao={evento.descricao || `${evento.titulo} na ${casa.nome}.`}>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(dadosDoEvento)}
+    slot="head"
+  />
+
+  <HeroPagina
+    olho={marca ? marca.nomeCurto : casa.nome}
+    titulo={evento.titulo}
+    lead={evento.descricao || undefined}
+    frase={quando}
+  />
+
+  <section class="casa-secao">
+    <div class="casa-container ev">
+      {
+        jaPassou && (
+          <p class="ev__passou">
+            Esta edição já aconteceu. Veja o que vem por aí na{' '}
+            <a class="link" href="/agenda">
+              agenda
+            </a>
+            .
+          </p>
+        )
+      }
+
+      {
+        evento.lineup.length > 0 && (
+          <div class="ev__bloco">
+            <p class="t-eyebrow">No som</p>
+            <ul class="ev__lineup" role="list">
+              {evento.lineup.map((nome: string) => (
+                <li>{nome}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      <div class="ev__bloco">
+        <p class="t-eyebrow">Quando</p>
+        <p class="ev__quando">{quando}</p>
+      </div>
+
+      <div class="ev__bloco">
+        <p class="t-eyebrow">Onde</p>
+        <p class="ev__quando">
+          {temValor(casa.endereco) ? limparPendente(casa.endereco) : `${casa.cidade} · ${casa.uf}`}
+        </p>
+      </div>
+
+      <p class="ev__voltar">
+        <a class="btn btn-secundario" href="/agenda">Ver a agenda inteira</a>
+      </p>
+    </div>
+  </section>
+
+  <ChamadaReserva olho="Mesa" titulo="Vai vir?" origem="evento" id="evento" />
+</Base>
+
+<style>
+  .ev {
+    display: grid;
+    gap: var(--esp-6);
+  }
+
+  .ev__passou {
+    margin: 0;
+    padding: var(--esp-4) var(--esp-5);
+    border-left: 2px solid var(--cor-borda);
+    background-color: var(--cor-superficie-2);
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  .ev__bloco {
+    display: grid;
+    gap: var(--esp-3);
+    padding-top: var(--esp-5);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+  }
+
+  .ev__lineup {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-3) var(--esp-5);
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .ev__quando {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.125rem, 2.6vw, 1.5rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto);
+  }
+
+  .ev__voltar {
+    margin: var(--esp-3) 0 0;
+  }
+</style>

@@ -153,6 +153,14 @@ const dadosEstruturados = casa.marcas.map((marca) => {
       is:inline
       set:html={JSON.stringify(dadosEstruturados)}
     />
+
+    {/*
+      Espaço para a página injetar marcação própria no <head>. Quem usa hoje é
+      /evento/[slug], com `schema.org/Event`. JSON-LD funciona no body também,
+      mas marcação estrutural fora do <head> é o tipo de coisa que ninguém
+      encontra quando vai depurar por que o Google não mostrou o evento.
+    */}
+    <slot name="head" />
   </head>
 
   <body>
