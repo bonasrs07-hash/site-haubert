@@ -124,6 +124,8 @@ if (soConferir) {
   process.exit(0);
 }
 
+let processado = false;
+
 // ---- Caminho A: API de gestão --------------------------------------------
 if (token) {
   try {
@@ -154,12 +156,19 @@ if (token) {
     console.error('');
     console.error('FALHOU ao falar com a API de gestão.');
     console.error('  ' + erro.message);
-    process.exit(1);
+    process.exitCode = 1;
   }
-  process.exit(0);
+  // Sem `process.exit()` aqui: no Windows ele mata o processo antes de o
+  // stdout terminar de escoar e o libuv cospe um "Assertion failed" que não
+  // significa nada. Num script de migration, ruído assustador é pior que
+  // ruído nenhum: quem lê fica sem saber se o banco entrou ou não.
+  processado = true;
 }
 
 // ---- Caminho B: conexão direta -------------------------------------------
+if (!processado) await aplicarDireto();
+
+async function aplicarDireto() {
 const cliente = new pg.Client({
   connectionString: conexao,
   ssl: { rejectUnauthorized: false },
@@ -193,4 +202,5 @@ try {
   process.exitCode = 1;
 } finally {
   await cliente.end().catch(() => {});
+}
 }
