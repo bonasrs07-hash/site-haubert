@@ -24,7 +24,13 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
   // O site público não passa por nada disto. Também é o que mantém o build das
   // páginas estáticas sem uma ida ao banco por página.
   if (!rota.startsWith('/painel') && !rota.startsWith('/api/painel')) return proximo();
-  if (ABERTAS.has(rota)) return proximo();
+
+  // A tela de entrar é a única do painel que existe para quem NÃO tem sessão —
+  // e é onde a senha é digitada. Ela precisa da blindagem MAIS que as outras:
+  // `form-action 'self'` é o que impede um formulário injetado de postar a senha
+  // do dono em outro servidor. Ela ficava de fora porque saía por um `return`
+  // antecipado, o que só apareceu quando os cabeçalhos foram medidos.
+  if (ABERTAS.has(rota)) return blindar(await proximo());
 
   const sessao = await lerSessao(contexto.cookies);
 
@@ -33,26 +39,36 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
     // importa: a ilha React precisa saber que a sessão caiu, e não receber um
     // HTML de login dentro de um `fetch`.
     if (rota.startsWith('/api/')) {
-      return new Response(JSON.stringify({ erro: 'Sessão expirada. Entre de novo.' }), {
-        status: 401,
-        headers: { 'content-type': 'application/json' },
-      });
+      return blindar(
+        new Response(JSON.stringify({ erro: 'Sessão expirada. Entre de novo.' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+      );
     }
-    return contexto.redirect('/painel/entrar', 302);
+    return blindar(contexto.redirect('/painel/entrar', 302));
   }
 
   // A sessão viaja para a página e para o endpoint já pronta, ninguém repete
   // a validação, e ninguém esquece de fazê-la.
   contexto.locals.sessao = sessao;
 
-  const resposta = await proximo();
+  return blindar(await proximo());
+});
 
+/**
+ * Toda resposta do painel sai por aqui — inclusive o 401, o redirecionamento e
+ * a tela de entrar. Uma saída que escapa da blindagem é uma porta destrancada
+ * que ninguém sabe que existe, então não existe `return` de painel que não
+ * passe por esta função.
+ */
+function blindar(resposta: Response): Response {
   // Painel não é conteúdo público: nada de cache em CDN, nada de índice.
   resposta.headers.set('cache-control', 'no-store, must-revalidate');
   resposta.headers.set('x-robots-tag', 'noindex, nofollow');
   resposta.headers.set('content-security-policy', CSP_DO_PAINEL);
   return resposta;
-});
+}
 
 /**
  * A CSP do painel. O site público tem a dele, estrita e por hash, gerada no
