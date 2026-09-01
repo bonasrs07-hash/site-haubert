@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CASA + HAUBERT — tokens do design system
+   CASA + HAUBERT, tokens do design system
    --------------------------------------------------------------------------
    Fonte: guia SOCIAL DNA (ago/2025). Hex amostrados do original.
    Documentação: docs/02_DESIGN_SYSTEM/README.md · brand/BRAND-DNA-EXTRAIDO.md
@@ -86,7 +86,7 @@
   /* ---- Cromo fixo (o layout reserva espaço para eles) -------------------
      Derivados das peças, não medidos no olho: os dois são um alvo de toque
      mais o respiro do container mais a régua. Escrever o número à mão é o que
-     fazia o conteúdo passar 5px por baixo do topo e da barra — e no celular
+     fazia o conteúdo passar 5px por baixo do topo e da barra, e no celular
      esses 5px caem justamente na última linha de texto e no botão. */
   --altura-topo: calc(var(--alvo-toque) + 2 * var(--esp-4) + var(--borda-fina));
   --altura-barra: calc(var(--alvo-toque) + 2 * var(--esp-3) + var(--borda-fina));
@@ -97,7 +97,7 @@
 }
 
 /* ==========================================================================
-   MODO DIA — CASA Coffee Colab · "Luz. Leveza. Encontro."
+   MODO DIA, CASA Coffee Colab · "Luz. Leveza. Encontro."
    ========================================================================== */
 :root,
 [data-modo='dia'] {
@@ -116,7 +116,7 @@
 }
 
 /* ==========================================================================
-   MODO NOITE — HAUBERT Steak & Grillhouse · "Fogo. Força. Tradição."
+   MODO NOITE, HAUBERT Steak & Grillhouse · "Fogo. Força. Tradição."
    ========================================================================== */
 [data-modo='noite'] {
   --cor-superficie: var(--haubert-carvao);
@@ -124,7 +124,7 @@
   --cor-texto: var(--haubert-areia); /* 10,3:1 */
   --cor-texto-forte: var(--osso); /* 16,6:1 */
   --cor-texto-suave: var(--haubert-areia-2); /*  6,3:1 */
-  --cor-acento: var(--tijolo-claro); /*  4,8:1 — NUNCA --tijolo aqui (2,7:1) */
+  --cor-acento: var(--tijolo-claro); /*  4,8:1, NUNCA --tijolo aqui (2,7:1) */
   --cor-acento-fundo: var(--haubert-brasa);
   --cor-acento-texto: var(--osso); /* 10,6:1 sobre a brasa */
   --cor-borda: var(--haubert-caramelo);

@@ -3,7 +3,7 @@
  * A porta do painel.
  *
  * Formulário HTML puro: sem ilha, sem `fetch`, sem estado. É a única tela do
- * painel que funciona com o JavaScript desligado, e isso não é purismo — é a
+ * painel que funciona com o JavaScript desligado, e isso não é purismo, é a
  * tela cujo travamento deixaria o dono do lado de fora da própria casa.
  *
  * Não existe "criar conta" nem "esqueci a senha" aqui, e a ausência é a
@@ -18,7 +18,7 @@ export const prerender = false;
 if (await lerSessao(Astro.cookies)) return Astro.redirect('/painel', 302);
 
 // O erro chega pela URL porque o POST redireciona de volta para cá. Vem de
-// `entrar.ts`, que devolve sempre a MESMA frase para qualquer recusa — se
+// `entrar.ts`, que devolve sempre a MESMA frase para qualquer recusa, se
 // daqui saísse "e-mail não cadastrado", o formulário viraria um verificador
 // de quais e-mails existem.
 const erro = Astro.url.searchParams.get('erro');

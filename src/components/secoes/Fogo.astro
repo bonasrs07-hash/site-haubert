@@ -129,7 +129,7 @@ const fotosDoFogo = await buscarFotos(['fogo-1', 'fogo-2', 'fogo-3', 'fogo-4', '
     gap: var(--esp-2);
   }
 
-  /* No estreito a foto cai abaixo do texto, alinhada com ele — nunca sob o
+  /* No estreito a foto cai abaixo do texto, alinhada com ele, nunca sob o
      número, senão quebra a linha que costura a sequência. */
   .fogo__foto {
     grid-column: 2;
@@ -173,8 +173,8 @@ const fotosDoFogo = await buscarFotos(['fogo-1', 'fogo-2', 'fogo-3', 'fogo-4', '
     margin: var(--esp-5) 0 0;
   }
 
-  /* A partir daqui o passo abre em quatro colunas — número, nome, descrição e
-     foto — e o `display: contents` do texto é o que joga o h3 e o p direto na
+  /* A partir daqui o passo abre em quatro colunas, número, nome, descrição e
+     foto, e o `display: contents` do texto é o que joga o h3 e o p direto na
      grade do <li>. Por isso a foto precisa pedir a coluna 4 explicitamente:
      sem isso ela cairia na coluna da descrição e ocuparia a linha inteira. */
   @media (min-width: 52rem) {

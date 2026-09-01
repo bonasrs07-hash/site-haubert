@@ -30,19 +30,19 @@ const casa = buscarCasa();
 const urlCanonica = new URL(canonica ?? Astro.url.pathname, Astro.site ?? Astro.url.origin);
 
 // A imagem de compartilhamento é gerada a partir das fotos da marca e vive em
-// public/ — precisa de URL absoluta, porque quem lê é o WhatsApp e o Instagram,
+// public/, precisa de URL absoluta, porque quem lê é o WhatsApp e o Instagram,
 // não o browser. Sem ela o card sai como um retângulo cinza, que é exatamente o
 // contrário do que a casa vende. (docs/02_DESIGN_SYSTEM)
 const urlImagemOg = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 
 // Preview de branch nunca é indexado. Sem isto, a homologação entra no Google e
-// passa a competir com o site de verdade pelo nome da casa — e sai do índice
+// passa a competir com o site de verdade pelo nome da casa, e sai do índice
 // muito mais devagar do que entrou.
 const ehPreview = process.env.VERCEL_ENV === 'preview';
 const foraDoIndice = semIndexacao || ehPreview;
 const tituloCompleto = `${titulo} · ${casa.nome}`;
 
-// schema.org — uma entrada por marca. É o que faz a busca local entender que
+// schema.org, uma entrada por marca. É o que faz a busca local entender que
 // são dois restaurantes no mesmo endereço. (docs/09_BACKLOG, Épico D)
 const dadosEstruturados = casa.marcas.map((marca) => ({
   '@context': 'https://schema.org',
@@ -155,7 +155,7 @@ const dadosEstruturados = casa.marcas.map((marca) => ({
 
     {/*
       Entrada de seção: uma vez só, e desligada por prefers-reduced-motion no
-      CSS. Sem JS, `.sem-js` já deixa tudo visível — o conteúdo nunca depende
+      CSS. Sem JS, `.sem-js` já deixa tudo visível, o conteúdo nunca depende
       disto para existir. (docs/02_DESIGN_SYSTEM §5)
     */}
     <script>
@@ -177,7 +177,7 @@ const dadosEstruturados = casa.marcas.map((marca) => ({
     </script>
 
     <style>
-      /* Invisível até receber foco pelo teclado — aí vira o primeiro elemento
+      /* Invisível até receber foco pelo teclado, aí vira o primeiro elemento
          da página, por cima do cabeçalho fixo. */
       .pular {
         position: fixed;

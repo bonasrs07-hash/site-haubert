@@ -1,4 +1,4 @@
-# 08 — DECISÕES · CASA + HAUBERT — site oficial da casa
+# 08, DECISÕES · CASA + HAUBERT, site oficial da casa
 
 > ADRs (Architecture Decision Records): por que escolhemos X em vez de Y.
 
@@ -22,11 +22,11 @@
 | ADR | Decisão | Status |
 |---|---|---|
 | [001](adr-001-stack-astro-supabase.md) | Astro + Tailwind + Supabase + Vercel, `output: 'static'` com adapter | aceito |
-| [002](adr-002-multi-tenant-white-label.md) | Multi-tenant desde a linha 1 — tenant é a casa, marcas são linhas dentro dela | aceito |
+| [002](adr-002-multi-tenant-white-label.md) | Multi-tenant desde a linha 1, tenant é a casa, marcas são linhas dentro dela | aceito |
 | [003](adr-003-tipografia-substituta.md) | Substitutas gratuitas no lugar da Druk, que é paga | aceito |
 | [004](adr-004-modo-dia-noite.md) | O modo vive em `[data-modo]` no `<html>`, com script inline anti-FOUC | aceito |
 | [005](adr-005-reserva-whatsapp-fase1.md) | Reserva por WhatsApp na Fase 1; nativa só na Fase 3 | aceito |
-| [006](adr-006-fase1-sem-react.md) | Zero React no cliente na Fase 1 — 7 KB de JS no lugar de 45 | aceito |
+| [006](adr-006-fase1-sem-react.md) | Zero React no cliente na Fase 1, 7 KB de JS no lugar de 45 | aceito |
 | [007](adr-007-fotos-do-deck.md) | As fotos saem das pranchas do deck, como empréstimo até o BLK-002 | aceito, com validade |
 
 `adr-000-template.md` é o molde: copie para abrir um novo.
@@ -41,6 +41,6 @@
 
 ## Ligações
 
-- `adr-000-template.md` — comece aqui, clone para novo ADR
-- `01_ARQUITETURA/` — ADRs justificam as escolhas técnicas
-- `03_REGRAS_DE_NEGOCIO/` — se regra é decisão técnica, document em ADR
+- `adr-000-template.md`, comece aqui, clone para novo ADR
+- `01_ARQUITETURA/`, ADRs justificam as escolhas técnicas
+- `03_REGRAS_DE_NEGOCIO/`, se regra é decisão técnica, document em ADR

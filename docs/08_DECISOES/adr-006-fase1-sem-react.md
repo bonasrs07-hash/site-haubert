@@ -1,4 +1,4 @@
-# ADR-006 — A Fase 1 fecha sem React no cliente
+# ADR-006, A Fase 1 fecha sem React no cliente
 
 - **Status:** aceito
 - **Data:** 2026-08-24
@@ -9,16 +9,16 @@
 O intake definiu a stack como "Astro + Tailwind + ilhas React pontuais". Ao
 implementar a Fase 1, as duas peças que pediriam ilha foram:
 
-1. **Alternador Dia/Noite** — troca um atributo no `<html>` e grava em
+1. **Alternador Dia/Noite**, troca um atributo no `<html>` e grava em
    `localStorage`.
-2. **Folha de reserva** — escolhe número de pessoas e dia, e monta um link.
+2. **Folha de reserva**, escolhe número de pessoas e dia, e monta um link.
 
 Nenhuma das duas tem estado assíncrono, lista que cresce, validação com erro
 por campo, ou qualquer coisa que justifique um runtime de componentes.
 
 O custo de incluí-las como ilhas era concreto: `react` + `react-dom` são
 ~45 KB gzipados. O orçamento de JS do projeto é 60 KB
-([`docs/01_ARQUITETURA`](../01_ARQUITETURA/README.md)) — ou seja, as duas
+([`docs/01_ARQUITETURA`](../01_ARQUITETURA/README.md)), ou seja, as duas
 interações mais simples do site consumiriam três quartos do orçamento inteiro,
 num produto cujo objetivo declarado é SEO local e LCP em 4G.
 
@@ -30,7 +30,7 @@ A Fase 1 é entregue com **zero React no cliente**.
 - A folha de reserva é `<details>` + `<summary>` + `<input type="radio">` +
   `<label>`, com um script que reescreve o `href` a cada mudança.
 - O estado visual de "qual modo está ativo" é resolvido em CSS, a partir do
-  `[data-modo]` do `<html>` — não por JavaScript. Isso é o que faz o rótulo
+  `[data-modo]` do `<html>`, não por JavaScript. Isso é o que faz o rótulo
   certo já estar pintado no primeiro frame, antes de qualquer script.
 
 `@astrojs/react` sai da lista de `integrations` do `astro.config.mjs`. A
@@ -40,7 +40,7 @@ dependência **permanece no `package.json`**: a Fase 3 vai precisar dela.
 
 **Boas**
 
-- O site inteiro envia **7 KB de JavaScript** — 11% do orçamento.
+- O site inteiro envia **7 KB de JavaScript**, 11% do orçamento.
 - Tudo funciona sem JS: o painel de reserva abre (`<details>` é nativo), as
   opções marcam (radios são nativos) e o link continua válido com o padrão
   renderizado pelo servidor. Só a reescrita do `href` a cada escolha se perde.
@@ -56,7 +56,7 @@ dependência **permanece no `package.json`**: a Fase 3 vai precisar dela.
 
 ## Quando reverter
 
-Quando existir uma tela com **estado assíncrono real** — a reserva nativa da
+Quando existir uma tela com **estado assíncrono real**, a reserva nativa da
 Fase 3 (envio, erro por campo, confirmação) ou o painel da equipe. Aí a ilha se
 paga, e basta devolver `react()` à lista de `integrations`.
 

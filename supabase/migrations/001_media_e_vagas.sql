@@ -1,13 +1,13 @@
 -- =============================================================================
--- 001 — Acervo de mídia e as vagas de foto do site  (ADR-008)
+-- 001, Acervo de mídia e as vagas de foto do site  (ADR-008)
 -- =============================================================================
 -- Duas tabelas e uma separação que importa:
 --
---   media       — o ARQUIVO. Existe uma vez, é reusável para sempre. É a galeria.
---   media_slots — a VAGA. Diz qual arquivo está, agora, em 'foto-dia'.
+--   media,       o ARQUIVO. Existe uma vez, é reusável para sempre. É a galeria.
+--   media_slots, a VAGA. Diz qual arquivo está, agora, em 'foto-dia'.
 --
 -- Trocar a foto da home é reapontar uma vaga, não apagar um arquivo. É o que
--- permite "usar aquela foto de novo depois" sem reenviar nada — e é por isso
+-- permite "usar aquela foto de novo depois" sem reenviar nada, e é por isso
 -- que a FK de media_slots é `on delete restrict`: ninguém apaga da galeria uma
 -- foto que está no ar no site.
 --
@@ -53,7 +53,7 @@ create index if not exists media_venue_criado_idx
 -- 2. AS VAGAS DO SITE
 -- =============================================================================
 -- `chave` é o identificador da posição no site ('foto-dia', 'fogo-3', 'tira-5').
--- O catálogo de chaves vive em src/lib/vagas.ts — aqui é texto de propósito:
+-- O catálogo de chaves vive em src/lib/vagas.ts, aqui é texto de propósito:
 -- casa nova tem outras vagas, e o banco não pode saber o layout de ninguém.
 create table if not exists public.media_slots (
   venue_id       uuid not null references public.venues(id) on delete cascade,
@@ -73,12 +73,12 @@ comment on table public.media_slots is
 -- O Hobby da Vercel dá 100 deploys por dia. Um botão "Publicar" sem freio é um
 -- jeito silencioso de gastar a cota inteira num clique nervoso. O carimbo mora
 -- no banco, e não em memória, porque cada requisição da Vercel pode cair numa
--- instância diferente — trava em memória não trava nada.
+-- instância diferente, trava em memória não trava nada.
 alter table public.venues
   add column if not exists ultima_publicacao_em timestamptz;
 
 -- =============================================================================
--- 4. RLS — definição de pronto (P-005)
+-- 4. RLS, definição de pronto (P-005)
 -- =============================================================================
 alter table public.media       enable row level security;
 alter table public.media_slots enable row level security;
@@ -86,7 +86,7 @@ alter table public.media_slots enable row level security;
 -- Sem policy para `anon` DE PROPÓSITO nas duas tabelas.
 -- O site publicado não consulta isto em runtime: quem lê é o BUILD, com a
 -- service_role, que ignora RLS. Conceder leitura pública aqui exporia a galeria
--- inteira — inclusive foto enviada e ainda não publicada. (ADR-008)
+-- inteira, inclusive foto enviada e ainda não publicada. (ADR-008)
 
 drop policy if exists "equipe gerencia o acervo da propria casa" on public.media;
 create policy "equipe gerencia o acervo da propria casa"
@@ -101,7 +101,7 @@ create policy "equipe gerencia as vagas da propria casa"
   with check (public.e_membro_da_casa(venue_id));
 
 -- =============================================================================
--- 5. STORAGE — bucket privado + policies por casa
+-- 5. STORAGE, bucket privado + policies por casa
 -- =============================================================================
 -- Privado, não público. As fotos vão para um site público, mas a GALERIA não é
 -- pública: ela guarda material que o dono ainda não publicou. Quem baixa no

@@ -1,7 +1,7 @@
 /**
  * Entrada no painel. (ADR-008)
  *
- * Formulário HTML de verdade, com redirecionamento — não `fetch`. A tela de
+ * Formulário HTML de verdade, com redirecionamento, não `fetch`. A tela de
  * login é a única do painel que funciona sem JavaScript, e isso é de propósito:
  * é a porta, e porta que depende de script é porta que trava.
  *
@@ -11,7 +11,7 @@
  *   - registrar e-mail ou senha em log (docs/11_SEGURANCA).
  *
  * Não existe rota de cadastro, de convite nem de recuperação. O cadastro
- * público fica DESLIGADO no console do Supabase — sem isso, qualquer pessoa
+ * público fica DESLIGADO no console do Supabase, sem isso, qualquer pessoa
  * cria uma conta. O passo está no INSTALACAO.md porque é console, não código.
  */
 import type { APIRoute } from 'astro';

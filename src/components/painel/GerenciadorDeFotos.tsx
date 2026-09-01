@@ -1,5 +1,5 @@
 /**
- * O painel de fotos — a única ilha React do projeto. (ADR-006 exceção, ADR-008)
+ * O painel de fotos, a única ilha React do projeto. (ADR-006 exceção, ADR-008)
  *
  * Por que aqui se paga: envio com progresso, conversão da imagem no browser,
  * galeria com seleção e pré-visualização otimista são ESTADO, não conteúdo.
@@ -8,7 +8,7 @@
  *
  * A imagem é convertida para WebP AQUI, antes de subir. Três motivos, nessa
  * ordem de importância:
- *   1. o `canvas` re-codifica e descarta o EXIF junto — que é onde mora a
+ *   1. o `canvas` re-codifica e descarta o EXIF junto, que é onde mora a
  *      coordenada de GPS da foto tirada no celular;
  *   2. o dono manda 400 KB pela rede em vez de 6 MB;
  *   3. o servidor passa a esperar um formato só, o que torna a validação
@@ -60,11 +60,13 @@ interface Props {
   grupos: Grupo[];
   acervo: ItemDoAcervo[];
   atribuicoes: Record<string, string>;
+  /** Vagas trocadas depois do último build, ou seja, ainda fora do site. */
+  pendentes: string[];
 }
 
 /** Converte para WebP e limita o lado maior. Devolve o blob e as dimensões. */
 async function prepararImagem(arquivo: File) {
-  // `from-image` respeita a orientação gravada no EXIF ANTES de descartá-lo —
+  // `from-image` respeita a orientação gravada no EXIF ANTES de descartá-lo,
   // sem isso, foto de celular na vertical sobe deitada.
   const bitmap = await createImageBitmap(arquivo, { imageOrientation: 'from-image' });
   const escala = Math.min(1, LADO_MAXIMO / Math.max(bitmap.width, bitmap.height));
@@ -100,9 +102,17 @@ async function pedir(url: string, corpo: unknown): Promise<{ erro?: string }> {
   return {};
 }
 
-export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atribuicoes: iniciais }: Props) {
+export default function GerenciadorDeFotos({
+  grupos,
+  acervo: acervoInicial,
+  atribuicoes: iniciais,
+  pendentes: pendentesIniciais,
+}: Props) {
   const [acervo, setAcervo] = useState(acervoInicial);
   const [atribuicoes, setAtribuicoes] = useState(iniciais);
+  // A confusão mais provável desta tela é achar que trocar já publica. Este
+  // conjunto é a resposta, e ele vem do SERVIDOR, sobrevive a fechar a aba.
+  const [pendentes, setPendentes] = useState<Set<string>>(new Set(pendentesIniciais));
   const [vagaAberta, setVagaAberta] = useState<Vaga | null>(null);
   const [pendente, setPendente] = useState(false);
   const [publicando, setPublicando] = useState(false);
@@ -124,7 +134,7 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
   );
 
   /**
-   * Foto recém-enviada: entra no acervo E ocupa a vaga que estava aberta —
+   * Foto recém-enviada: entra no acervo E ocupa a vaga que estava aberta,
    * o botão promete "enviar e usar nesta posição", então enviar sem atribuir
    * seria a tela mentindo. O item já vem com a prévia assinada do servidor,
    * o que evita recarregar a página no meio da troca.
@@ -146,8 +156,8 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
         vagas: i.id === mediaId ? [...new Set([...i.vagas, chave])] : i.vagas.filter((c) => c !== chave),
       })),
     );
+    setPendentes((p) => new Set(p).add(chave));
     setVagaAberta(null);
-    setAviso({ tipo: 'certo', texto: 'Trocada. Publique para ir ao ar.' });
   }
 
   async function voltarAoPadrao(chave: string) {
@@ -161,8 +171,8 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
       return copia;
     });
     setAcervo((lista) => lista.map((i) => ({ ...i, vagas: i.vagas.filter((c) => c !== chave) })));
+    setPendentes((p) => new Set(p).add(chave));
     setVagaAberta(null);
-    setAviso({ tipo: 'certo', texto: 'Voltou para a foto original do site.' });
   }
 
   async function apagar(id: string) {
@@ -179,42 +189,29 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
     setPublicando(true);
     const { erro } = await pedir('/api/painel/publicar', {});
     setPublicando(false);
-    setAviso(
-      erro
-        ? { tipo: 'erro', texto: erro }
-        : {
-            tipo: 'certo',
-            texto: 'Publicando. O site novo entra no ar em 1 a 2 minutos — pode fechar esta tela.',
-          },
-    );
+    if (erro) return setAviso({ tipo: 'erro', texto: erro });
+    setPendentes(new Set());
+    setAviso({
+      tipo: 'certo',
+      texto: 'Publicando. O site novo entra no ar em 1 a 2 minutos, pode fechar esta tela.',
+    });
   }
 
   const trocadas = todasAsVagas.filter((v) => atribuicoes[v.chave]).length;
 
   return (
     <div className="pn">
-      <div className="pn__cabeca">
-        <div>
-          <p className="t-eyebrow">O que aparece no site</p>
-          <h1 className="pn__titulo">Fotos do site</h1>
-          <p className="pn__lead">
-            Cada quadro abaixo é uma posição do site. Troque a foto de uma posição e clique em{' '}
-            <strong>Publicar</strong> — o site novo entra no ar em 1 a 2 minutos. Foto enviada fica
-            guardada no acervo e pode ser usada de novo depois.
-          </p>
-        </div>
-
-        <div className="pn__publicar">
-          <button className="btn btn-primario" onClick={publicar} disabled={publicando || pendente}>
-            {publicando ? 'Publicando…' : 'Publicar no site'}
-          </button>
-          <p className="pn__contagem">
-            {trocadas === 0
-              ? 'Nenhuma posição trocada ainda'
-              : `${trocadas} de ${todasAsVagas.length} posições com foto sua`}
-          </p>
-        </div>
-      </div>
+      <header className="pn__cabeca">
+        <h1 className="pn__titulo">Fotos do site</h1>
+        <p className="pn__lead">
+          Escolha a foto que quer trocar. Ela só entra no site depois de <strong>publicar</strong>.
+        </p>
+        <p className="pn__placar">
+          <span className="pn__placar-num">{trocadas}</span> de {todasAsVagas.length} posições com
+          foto sua
+          {pendentes.size === 0 && trocadas > 0 && <span className="pn__placar-ok"> · tudo no ar</span>}
+        </p>
+      </header>
 
       {aviso && (
         <p className={`pn__aviso pn__aviso--${aviso.tipo}`} role="status">
@@ -233,16 +230,29 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
           <ul className="pn__grade" role="list">
             {grupo.vagas.map((vaga) => {
               const foto = fotoDaVaga(vaga);
+              const naFila = pendentes.has(vaga.chave);
               return (
-                <li className="pn__vaga" key={vaga.chave}>
-                  <div className="pn__moldura" style={{ aspectRatio: vaga.proporcao }}>
-                    <img src={foto.url} alt={foto.alt} loading="lazy" />
-                    {!foto.doAcervo && <span className="pn__selo">Foto original do site</span>}
-                  </div>
-                  <p className="pn__vaga-rotulo">{vaga.rotulo}</p>
-                  <p className="pn__vaga-onde">{vaga.onde}</p>
-                  <button className="btn btn-secundario pn__trocar" onClick={() => setVagaAberta(vaga)}>
-                    Trocar foto
+                <li key={vaga.chave}>
+                  {/*
+                    O cartão INTEIRO é o botão. Antes a foto era um retângulo
+                    morto com um "Trocar foto" separado embaixo, e o instinto
+                    de qualquer pessoa é clicar na foto, não no rótulo dela.
+                  */}
+                  <button
+                    className={`pn__vaga ${foto.doAcervo ? 'pn__vaga--sua' : ''} ${naFila ? 'pn__vaga--fila' : ''}`}
+                    onClick={() => setVagaAberta(vaga)}
+                  >
+                    <span className="pn__moldura" style={{ aspectRatio: vaga.proporcao }}>
+                      <img src={foto.url} alt={foto.alt} loading="lazy" />
+                      <span className="pn__acao" aria-hidden="true">
+                        Trocar foto
+                      </span>
+                    </span>
+                    <span className="pn__vaga-rotulo">{vaga.rotulo}</span>
+                    <span className="pn__vaga-onde">{vaga.onde}</span>
+                    <span className="pn__estado">
+                      {naFila ? 'Trocada, falta publicar' : foto.doAcervo ? 'Sua foto' : 'Foto de exemplo'}
+                    </span>
                   </button>
                 </li>
               );
@@ -254,7 +264,7 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
       <section className="pn__grupo">
         <h2 className="pn__grupo-titulo">O acervo</h2>
         <p className="pn__grupo-desc">
-          Tudo o que você já enviou. Foto que está no ar em alguma posição não pode ser apagada —
+          Tudo o que você já enviou. Foto que está no ar em alguma posição não pode ser apagada,
           troque a posição antes.
         </p>
 
@@ -288,6 +298,27 @@ export default function GerenciadorDeFotos({ grupos, acervo: acervoInicial, atri
           </ul>
         )}
       </section>
+
+      {/*
+        Barra fixa: só existe quando há o que publicar. O botão antes vivia no
+        topo e sumia com a rolagem, o dono trocava uma foto no fim da página e
+        não tinha mais como publicar sem voltar ao começo.
+      */}
+      {pendentes.size > 0 && (
+        <div className="pn__barra" role="status">
+          <p className="pn__barra-texto">
+            <strong>{pendentes.size}</strong>{' '}
+            {pendentes.size === 1 ? 'troca ainda não está' : 'trocas ainda não estão'} no site.
+          </p>
+          <button
+            className="btn btn-primario pn__barra-botao"
+            onClick={publicar}
+            disabled={publicando || pendente}
+          >
+            {publicando ? 'Publicando…' : 'Publicar agora'}
+          </button>
+        </div>
+      )}
 
       {vagaAberta && (
         <SeletorDeFoto
@@ -419,7 +450,7 @@ function FormularioDeEnvio({
       const { blob, largura, altura } = await prepararImagem(bruto);
       if (largura < LARGURA_MINIMA) {
         setErro(
-          `Essa imagem tem ${largura}px de largura. O mínimo é ${LARGURA_MINIMA}px — abaixo disso ela sai borrada no site.`,
+          `Essa imagem tem ${largura}px de largura. O mínimo é ${LARGURA_MINIMA}px, abaixo disso ela sai borrada no site.`,
         );
         return;
       }

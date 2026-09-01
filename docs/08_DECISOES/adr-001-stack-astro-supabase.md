@@ -1,7 +1,7 @@
-# ADR-001: Stack — Astro híbrido + Tailwind + Supabase + Vercel
+# ADR-001: Stack, Astro híbrido + Tailwind + Supabase + Vercel
 
 ## Status
-Accepted — 2026-08-24
+Accepted, 2026-08-24
 
 ## Contexto
 
@@ -14,11 +14,11 @@ que mandam na escolha da stack:
    têm estado real.
 2. **SEO local é objetivo de negócio, não detalhe.** Hoje a casa não aparece no
    Google. Se o site não indexar bem para "steakhouse Novo Hamburgo", ele
-   falhou — independentemente de quão bonito esteja.
+   falhou, independentemente de quão bonito esteja.
 3. **O uso real é celular em 4G, muitas vezes com pouca luz, na mesa.** Peso de
    JS e LCP são requisito de conversão.
 4. **O cliente precisa editar cardápio e agenda sozinho** (resposta do intake),
-   o que exige um backend com auth e painel — não dá para ser 100% estático.
+   o que exige um backend com auth e painel, não dá para ser 100% estático.
 5. **Fase bootstrap:** tudo tem que caber em tier gratuito.
 
 O padrão default da casa (Kora) é React + Vite + Supabase. Ele é ótimo para
@@ -40,7 +40,7 @@ Adotar **Astro 7 com `output: 'static'` + adapter Vercel**, com:
   CMS da equipe
 - **Vercel Hobby** como deploy, com build automático a partir do repositório
 
-Todo acesso ao Supabase passa por `src/lib/` — a camada de serviços. Componente
+Todo acesso ao Supabase passa por `src/lib/`, a camada de serviços. Componente
 nunca fala com o banco direto.
 
 ## Alternativas Consideradas
@@ -73,7 +73,7 @@ nunca fala com o banco direto.
 
 **Positivas**
 - HTML pronto no primeiro byte → SEO local e LCP resolvidos por arquitetura
-- Orçamento de JS pequeno e explícito (< 60kb na home) — ver `memory/restrictions.md`
+- Orçamento de JS pequeno e explícito (< 60kb na home), ver `memory/restrictions.md`
 - O mesmo repositório serve site público e painel da equipe
 - Custo zero: Vercel Hobby + Supabase Free
 
@@ -84,10 +84,10 @@ nunca fala com o banco direto.
   usada é pequena (layouts, slots, `astro:assets`, endpoints)
 - **`static` + adapter exige disciplina**: esquecer `prerender = false` numa rota
   dinâmica gera página congelada no build. Mitigação: checklist de PR
-- Chave `service_role` só pode existir em contexto de servidor — reforçado em
+- Chave `service_role` só pode existir em contexto de servidor, reforçado em
   `CLAUDE.md` e `docs/11_SEGURANCA/`
 
 ## Referências
-- `docs/01_ARQUITETURA/README.md` — o desenho completo
-- ADR-002 — como o multi-tenant se apoia nessa stack
-- ADR-004 — por que a troca Dia/Noite é token, e não rota
+- `docs/01_ARQUITETURA/README.md`, o desenho completo
+- ADR-002, como o multi-tenant se apoia nessa stack
+- ADR-004, por que a troca Dia/Noite é token, e não rota

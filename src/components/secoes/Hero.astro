@@ -1,10 +1,10 @@
 ---
 /**
- * Hero da home — a prova do conceito em cima da dobra.
+ * Hero da home, a prova do conceito em cima da dobra.
  *
  * O mote troca com o modo: "Luz. Leveza. Encontro." de dia, "Fogo. Força.
  * Tradição." à noite. Os dois vêm no HTML e quem escolhe é o CSS a partir do
- * `[data-modo]` — então o mote certo já está pintado no primeiro frame, sem
+ * `[data-modo]`, então o mote certo já está pintado no primeiro frame, sem
  * JS e sem flash. `visibility` (e não `display`) tira o inativo da árvore de
  * acessibilidade sem quebrar a transição. (ADR-004)
  */
@@ -20,7 +20,7 @@ const marcas = buscarMarcas();
   <div class="casa-container hero__interno">
     <p class="t-eyebrow hero__olho">
       {casa.cidade} · {casa.uf}
-      <span aria-hidden="true"> — </span>
+      <span aria-hidden="true">, </span>
       Desde o primeiro café até o último brinde
     </p>
 
@@ -41,7 +41,7 @@ const marcas = buscarMarcas();
           O h1 é esta linha, não o mote.
           Duas razões: o mote troca com o modo (dois h1 no HTML seria errado, e
           esconder um com CSS não muda o que o robô lê), e esta frase carrega
-          justamente os dois termos pelos quais a casa é procurada — "café" e
+          justamente os dois termos pelos quais a casa é procurada, "café" e
           "churrasco". Tamanho é decisão de CSS; hierarquia é decisão de HTML.
         */}
         <h1 class="hero__lead">
@@ -133,7 +133,7 @@ const marcas = buscarMarcas();
 
   .hero__lead {
     margin: 0 0 var(--esp-3);
-    /* h1 vem bold por padrão e a Bebas Neue só tem 400 — sem isto o browser
+    /* h1 vem bold por padrão e a Bebas Neue só tem 400, sem isto o browser
        sintetiza o peso e engorda a letra. */
     font-weight: 400;
     font-family: var(--fonte-titulo);
@@ -188,7 +188,7 @@ const marcas = buscarMarcas();
 
   /* Tela estreita: os dois botões passam a ocupar a linha inteira. Dois
      retângulos de larguras diferentes encostados à esquerda leem como sobra
-     de layout; empilhados e cheios leem como escolha — e o alvo do polegar
+     de layout; empilhados e cheios leem como escolha, e o alvo do polegar
      dobra de tamanho. */
   @media (max-width: 26rem) {
     .hero__acoes {

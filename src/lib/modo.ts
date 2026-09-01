@@ -24,7 +24,7 @@ export function lerModo(): Modo {
 
 /**
  * Aplica e memoriza. A escolha manual vence a hora até o visitante mudar de
- * ideia — o site nunca reescreve por conta própria. (RN-03)
+ * ideia, o site nunca reescreve por conta própria. (RN-03)
  */
 export function definirModo(modo: Modo): void {
   if (typeof document === 'undefined') return;

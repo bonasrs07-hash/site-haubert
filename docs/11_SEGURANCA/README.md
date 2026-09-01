@@ -1,26 +1,26 @@
-# 11 — Plano de Segurança
+# 11, Plano de Segurança
 
 > Segurança e custo são parte da **definição de pronto**, não etapa final.
 > Restrições legais permanentes: [`memory/restrictions.md`](../../memory/restrictions.md).
 
 ## Superfície de risco (o que realmente existe aqui)
 
-Este é um site institucional. A superfície é pequena — e é exatamente por isso
+Este é um site institucional. A superfície é pequena, e é exatamente por isso
 que o risco é subestimado. O que temos:
 
 | Ativo | Sensibilidade | Fase |
 |---|---|---|
-| Dado de reserva (nome, telefone, e-mail, data) | **Alta** — dado pessoal, LGPD | 3 |
+| Dado de reserva (nome, telefone, e-mail, data) | **Alta**, dado pessoal, LGPD | 3 |
 | Credenciais da equipe (painel) | **Alta** | 3 |
-| Conteúdo publicado (cardápio, agenda, fotos) | Média — integridade da marca | 2 |
-| Foto de clientes e equipe | **Alta** — direito de imagem | 1 |
+| Conteúdo publicado (cardápio, agenda, fotos) | Média, integridade da marca | 2 |
+| Foto de clientes e equipe | **Alta**, direito de imagem | 1 |
 | Chaves de API | Alta | 1 |
 
 **Não temos** (por escolha de escopo): pagamento, dado financeiro, dado de menor,
 dado de saúde. Isso mantém o projeto fora de PCI e reduz drasticamente a
-exposição — e é motivo suficiente para não deixar e-commerce entrar por acidente.
+exposição, e é motivo suficiente para não deixar e-commerce entrar por acidente.
 
-## Camada 1 — Segredos e chaves
+## Camada 1, Segredos e chaves
 
 | Regra | Detalhe |
 |---|---|
@@ -30,10 +30,10 @@ exposição — e é motivo suficiente para não deixar e-commerce entrar por ac
 | Rotação | Se uma chave vazar: rotacionar no Supabase, invalidar deploy, e registrar em `memory/learnings.md` |
 
 > A chave `anon` no browser **é o desenho correto** do Supabase. Ela não é o que
-> protege o dado — a RLS é. Quem trata a `anon` como segredo tende a relaxar na RLS,
+> protege o dado, a RLS é. Quem trata a `anon` como segredo tende a relaxar na RLS,
 > que é o erro que importa.
 
-## Camada 2 — Banco (RLS)
+## Camada 2, Banco (RLS)
 
 **RLS é bloqueio de merge.** Tabela sem policy não entra em `main` *(P-005)*.
 
@@ -41,7 +41,7 @@ Regras vigentes (implementadas em [`supabase/schema.sql`](../../supabase/schema.
 
 - Leitura pública **só do que está `publicado`** e de casa `ativo`
 - Escrita **só para membro da própria casa**, via `e_membro_da_casa(venue_id)`
-- `reservations` **não tem policy de leitura pública** — nenhuma
+- `reservations` **não tem policy de leitura pública**, nenhuma
 - `reservations` **não tem policy de INSERT para `anon`**: a escrita passa por
   endpoint de servidor com validação (Fase 3)
 
@@ -55,18 +55,18 @@ select count(*) from public.menu_items    where venue_id = '<casa-B>';
 
 Qualquer resultado diferente de zero é vazamento de tenant e bloqueia o deploy.
 
-## Camada 3 — Aplicação
+## Camada 3, Aplicação
 
 | Controle | Como |
 |---|---|
-| **Validação de entrada** | Formulário de reserva é entrada pública hostil. Validar com Zod no servidor — validação de cliente é UX, não segurança |
+| **Validação de entrada** | Formulário de reserva é entrada pública hostil. Validar com Zod no servidor, validação de cliente é UX, não segurança |
 | **Sem `select *`** | Campos explícitos em tabela com dado pessoal |
 | **Rate limit** | Endpoint de reserva (Fase 3): limite por IP na Edge Function. Sem isso, o formulário é um gerador de spam para a equipe |
 | **Auth antes de renderizar** | `/painel/*` verifica sessão **no servidor**, antes de emitir HTML. Esconder no cliente não é proteger |
 | **Sem log de dado sensível** | Telefone, e-mail e token nunca em `console.log` nem em log de erro |
 | **Escape de conteúdo do banco** | Texto vindo de `menu_items`/`events` é conteúdo de usuário. Sem `set:html` sem sanitização |
 
-## Camada 4 — Cabeçalhos e transporte
+## Camada 4, Cabeçalhos e transporte
 
 Configurar na Vercel:
 
@@ -87,10 +87,10 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 > `@fontsource` (ADR-003). É segurança e privacidade de graça: sem Google Fonts,
 > nenhum IP de visitante vaza para terceiro.
 >
-> O script inline de tema (ADR-004) exige um `nonce` na CSP — ou vira a única
+> O script inline de tema (ADR-004) exige um `nonce` na CSP, ou vira a única
 > exceção documentada. Não usar `'unsafe-inline'` genérico.
 
-## Camada 5 — LGPD
+## Camada 5, LGPD
 
 | Exigência | Implementação |
 |---|---|
@@ -100,17 +100,17 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 | **Retenção** | 12 meses após a data da reserva → job anonimiza (`anonimizada_em`). Logs: 90 dias |
 | **Direito de exclusão** | Página `/privacidade` com e-mail do encarregado e prazo de resposta |
 | **Transparência** | Aviso no próprio formulário: o que é coletado, para quê, por quanto tempo |
-| **Transferência internacional** | Supabase na região **São Paulo** — dado não sai do país |
+| **Transferência internacional** | Supabase na região **São Paulo**, dado não sai do país |
 
 **Direito de imagem** (BLK-008): foto de cliente ou de membro da equipe só entra
 no site com autorização registrada. Sem termo assinado, publicar apenas imagens
 sem rosto identificável.
 
-## Camada 6 — Conteúdo e marca
+## Camada 6, Conteúdo e marca
 
 Riscos que não são técnicos mas custam caro:
 
-- **Foto de banco de imagem é proibida** (`memory/restrictions.md`) — quebra o
+- **Foto de banco de imagem é proibida** (`memory/restrictions.md`), quebra o
   pilar de autenticidade da marca e expõe a cópias
 - **Comunicação de bebida alcoólica** leva aviso de consumo responsável e restrição a +18
 - **Sem dark pattern**: escassez inventada, contador falso e opt-out escondido
@@ -130,9 +130,9 @@ Riscos que não são técnicos mas custam caro:
 
 ## Resposta a incidente
 
-1. **Conter** — rotacionar chave / desabilitar policy / tirar do ar a rota afetada
-2. **Avaliar** — houve acesso a dado pessoal? Quantos titulares?
-3. **Comunicar** — se houver dado pessoal envolvido, notificar o cliente (a casa)
+1. **Conter**, rotacionar chave / desabilitar policy / tirar do ar a rota afetada
+2. **Avaliar**, houve acesso a dado pessoal? Quantos titulares?
+3. **Comunicar**, se houver dado pessoal envolvido, notificar o cliente (a casa)
    imediatamente; a ANPD e os titulares conforme a Art. 48 da LGPD
 4. **Corrigir** e registrar em `memory/learnings.md`
 5. **ADR `[URGENT]`** se a correção mudar arquitetura

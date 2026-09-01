@@ -1,4 +1,4 @@
-/** Tira uma foto da galeria. Foto no ar não sai — ver `apagarDoAcervo`. */
+/** Tira uma foto da galeria. Foto no ar não sai, ver `apagarDoAcervo`. */
 import type { APIRoute } from 'astro';
 import { apagarDoAcervo } from '@/lib/midia';
 

@@ -5,7 +5,7 @@
  * Mobile: barra fixa no rodapé. Desktop: pílula flutuante no canto.
  * Em qualquer scroll, de qualquer página, reservar está a um toque.
  *
- * O status "aberto agora" NÃO é renderizado no build — site estático guardaria
+ * O status "aberto agora" NÃO é renderizado no build, site estático guardaria
  * a resposta das 3h da manhã e serviria ao meio-dia. Quem calcula é o cliente,
  * no fuso da casa. Sem JS, sobra o horário escrito, que é sempre verdade.
  * (RN-41, F-006)
@@ -71,7 +71,7 @@ const marcas = buscarMarcas();
       const aberta = estaAbertaEm(lerFaixas(linha.dataset.faixas));
 
       // `null` = horário não confirmado. Nunca dizemos "fechado" por falta de
-      // dado — dizer que está fechado quando está aberta custa uma mesa. (RN-43)
+      // dado, dizer que está fechado quando está aberta custa uma mesa. (RN-43)
       if (aberta === null) {
         sinal.dataset.estado = 'incerto';
         sinal.title = 'Confirme o horário com a equipe';
@@ -179,7 +179,7 @@ const marcas = buscarMarcas();
       padding-bottom: var(--esp-6);
       padding-inline-end: var(--gutter);
       /* O respiro do canto continua sendo caixa de elemento fixo: sem isto
-         ele engole o clique de tudo que passa por baixo — uma faixa invisível
+         ele engole o clique de tudo que passa por baixo, uma faixa invisível
          de 32px por 64px no canto de toda página. Some para o ponteiro; a
          pílula (e o painel que sai dela) volta a receber. */
       pointer-events: none;

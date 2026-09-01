@@ -12,16 +12,16 @@ import tailwindcss from '@tailwindcss/vite';
  * A URL canônica do deploy.
  *
  * Isto não é detalhe de configuração: `site` alimenta a canônica, o sitemap e o
- * `og:image` — que precisa ser absoluto porque quem lê é o WhatsApp, não o
+ * `og:image`, que precisa ser absoluto porque quem lê é o WhatsApp, não o
  * browser. Apontar para um domínio que ainda não existe (BLK-006) entrega card
  * de compartilhamento quebrado justamente no canal onde esta casa vive.
  *
  * A ordem resolve isso sem depender de ninguém lembrar de configurar:
- *   1. `PUBLIC_SITE_URL` — a decisão explícita sempre ganha; é o que vai
+ *   1. `PUBLIC_SITE_URL`, a decisão explícita sempre ganha; é o que vai
  *      apontar para o domínio próprio quando ele existir.
  *   2. Domínio de produção da Vercel, em build de produção.
  *   3. URL do deploy (preview de branch).
- *   4. localhost — build local não é publicado, e canônica de localhost é uma
+ *   4. localhost, build local não é publicado, e canônica de localhost é uma
  *      falha barulhenta. Domínio morto é uma falha silenciosa, que é pior.
  */
 const naVercel = (v) => (v ? `https://${v}` : null);
@@ -39,7 +39,7 @@ export default defineConfig({
   adapter: vercel({ webAnalytics: { enabled: true } }),
 
   // O React entra AQUI e serve exatamente uma rota: o painel do dono, onde
-  // envio com progresso, galeria e pré-visualização são estado real — o caso
+  // envio com progresso, galeria e pré-visualização são estado real, o caso
   // que o ADR-006 previu como exceção legítima. O Astro só embarca o JS da
   // ilha nas páginas que a usam, então as páginas públicas continuam com os
   // mesmos ~7 KB de <details> e radios. Isso é medido, não presumido:
@@ -64,7 +64,7 @@ export default defineConfig({
     layout: 'constrained',
 
     // O painel guarda as fotos no Storage do Supabase, e é o BUILD que as
-    // baixa e otimiza — o site publicado serve `/_astro/*.webp` e nunca aponta
+    // baixa e otimiza, o site publicado serve `/_astro/*.webp` e nunca aponta
     // para lá. Sem esta autorização o Astro se recusa a tocar em imagem
     // remota, e com razão: otimizar o que vem de qualquer host é um jeito de
     // virar CDN de estranho. (ADR-008)

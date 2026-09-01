@@ -3,14 +3,14 @@
  *
  * HONESTIDADE SOBRE O QUE ISTO É: uma trava EM MEMÓRIA, por instância. Na
  * Vercel cada requisição pode cair numa instância diferente e cada instância
- * começa com o contador zerado — então isto atrasa um ataque, não o impede.
+ * começa com o contador zerado, então isto atrasa um ataque, não o impede.
  *
  * Está aqui mesmo assim porque a alternativa (nada) é pior, e porque o painel
  * tem exatamente uma conta: um alvo conhecido e único é o cenário em que força
  * bruta compensa. A defesa que de fato conta é o limite do próprio Supabase
  * Auth, do lado do servidor de autenticação, mais uma senha longa.
  *
- * Se um dia isto precisar valer de verdade, o lugar é o banco — como já é o
+ * Se um dia isto precisar valer de verdade, o lugar é o banco, como já é o
  * freio de publicação (`ultima_publicacao_em`). Está escrito no ADR-008 para
  * ninguém confundir esta função com proteção completa.
  */

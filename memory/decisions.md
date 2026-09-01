@@ -1,4 +1,4 @@
-# Decisões de Arquitetura — CASA + HAUBERT
+# Decisões de Arquitetura, CASA + HAUBERT
 
 ## Objetivo
 - Registrar todas as decisões arquiteturais e de produto relevantes
@@ -64,10 +64,10 @@ alternativas consideradas e as consequências. Formato Michael Nygard:
 | ID | Título | Status | Data | Supersede / Supersedido por |
 |---|---|---|---|---|
 | [ADR-001](../docs/08_DECISOES/adr-001-stack-astro-supabase.md) | Stack: Astro (static + adapter) + Tailwind + Supabase + Vercel | Accepted | 2026-08-24 | ajustado por ADR-006 |
-| [ADR-002](../docs/08_DECISOES/adr-002-multi-tenant-white-label.md) | Multi-tenant por casa, marca como dado (white-label) | Accepted | 2026-08-24 | — |
-| [ADR-003](../docs/08_DECISOES/adr-003-tipografia-substituta.md) | Tipografia: substitutas gratuitas para Druk até decisão de compra | Accepted | 2026-08-24 | — |
-| [ADR-004](../docs/08_DECISOES/adr-004-modo-dia-noite.md) | Modo Dia/Noite como troca de tema por token, não como duas rotas | Accepted | 2026-08-24 | — |
-| [ADR-005](../docs/08_DECISOES/adr-005-reserva-whatsapp-fase1.md) | Reserva por WhatsApp na Fase 1, nativa na Fase 3 | Accepted | 2026-08-24 | — |
+| [ADR-002](../docs/08_DECISOES/adr-002-multi-tenant-white-label.md) | Multi-tenant por casa, marca como dado (white-label) | Accepted | 2026-08-24 |, |
+| [ADR-003](../docs/08_DECISOES/adr-003-tipografia-substituta.md) | Tipografia: substitutas gratuitas para Druk até decisão de compra | Accepted | 2026-08-24 |, |
+| [ADR-004](../docs/08_DECISOES/adr-004-modo-dia-noite.md) | Modo Dia/Noite como troca de tema por token, não como duas rotas | Accepted | 2026-08-24 |, |
+| [ADR-005](../docs/08_DECISOES/adr-005-reserva-whatsapp-fase1.md) | Reserva por WhatsApp na Fase 1, nativa na Fase 3 | Accepted | 2026-08-24 |, |
 | [ADR-006](../docs/08_DECISOES/adr-006-fase1-sem-react.md) | Fase 1 sem React no cliente (7 KB de JS no total) | Accepted | 2026-08-24 | ajusta ADR-001 |
 
 ## Regra Principal
@@ -88,7 +88,7 @@ Copiar de `docs/08_DECISOES/adr-000-template.md`.
 2. Solicitar revisão do dono
 3. Discutir alternativas
 4. Merge quando houver consenso
-5. **Atualizar o índice acima** — ADR fora do índice é ADR perdido
+5. **Atualizar o índice acima**, ADR fora do índice é ADR perdido
 
 ## Decisões Supersedidas / Em Review
 

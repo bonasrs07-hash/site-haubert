@@ -1,5 +1,5 @@
 /**
- * Guarda do painel. (docs/11_SEGURANCA — "Auth antes de renderizar")
+ * Guarda do painel. (docs/11_SEGURANCA, "Auth antes de renderizar")
  *
  * A verificação acontece AQUI, no servidor, antes de qualquer HTML sair. Não
  * existe versão desta checagem no cliente: esconder o botão não é proteger a
@@ -10,7 +10,7 @@
  *   1. o cookie é validado contra o servidor de Auth (`lerSessao`);
  *   2. esta guarda decide se a rota sequer renderiza;
  *   3. a RLS decide, no banco, se cada linha pode ser lida ou escrita.
- * Furar as duas primeiras não dá acesso a dado nenhum — é de propósito.
+ * Furar as duas primeiras não dá acesso a dado nenhum, é de propósito.
  */
 import { defineMiddleware } from 'astro:middleware';
 import { lerSessao } from '@/lib/sessao';
@@ -41,7 +41,7 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
     return contexto.redirect('/painel/entrar', 302);
   }
 
-  // A sessão viaja para a página e para o endpoint já pronta — ninguém repete
+  // A sessão viaja para a página e para o endpoint já pronta, ninguém repete
   // a validação, e ninguém esquece de fazê-la.
   contexto.locals.sessao = sessao;
 

@@ -3,12 +3,12 @@
  *
  * Espelham as tabelas de `supabase/schema.sql`. Na Fase 1 os dados vêm de
  * `src/constants/casa.ts`; na Fase 2 passam a vir do Supabase sem que a UI
- * mude — é para isso que a camada de serviços existe. (P-001, ADR-002)
+ * mude, é para isso que a camada de serviços existe. (P-001, ADR-002)
  */
 
 export type Modo = 'dia' | 'noite';
 
-/** Tokens visuais da marca — espelham src/styles/tokens.css. (ADR-004) */
+/** Tokens visuais da marca, espelham src/styles/tokens.css. (ADR-004) */
 export interface TokensMarca {
   superficie: string;
   superficie2: string;
@@ -25,7 +25,7 @@ export interface TokensMarca {
 export interface FaixaHorario {
   dias: number[];
   abre: string; // 'HH:MM'
-  fecha: string; // 'HH:MM' — pode cruzar a meia-noite (RN-42)
+  fecha: string; // 'HH:MM', pode cruzar a meia-noite (RN-42)
 }
 
 /** Uma marca da casa: CASA (dia) ou HAUBERT (noite). */
@@ -34,7 +34,7 @@ export interface Marca {
   nome: string;
   nomeCurto: string;
   /**
-   * A marca como ela é ASSINADA no cabeçalho — grafia e caixa inclusas.
+   * A marca como ela é ASSINADA no cabeçalho, grafia e caixa inclusas.
    * Separada de `nomeCurto` de propósito: aquele é o nome que entra em frase
    * ("reservar uma mesa no HAUBERT") e não pode mudar junto com o desenho da
    * assinatura. Sai do tenant, nunca literal no componente. (ADR-002)
@@ -57,7 +57,7 @@ export interface Marca {
   };
 }
 
-/** A casa — o tenant. */
+/** A casa, o tenant. */
 export interface Casa {
   slug: string;
   nome: string;

@@ -1,15 +1,15 @@
 -- =============================================================================
--- SEED — a casa servida por este deploy e suas duas marcas
+-- SEED, a casa servida por este deploy e suas duas marcas
 -- =============================================================================
 -- Espelha `src/constants/casa.ts`, que já anunciava esta migração no próprio
--- cabeçalho. Toda a copy vem do guia SOCIAL DNA transcrito em `brand/` — nada
+-- cabeçalho. Toda a copy vem do guia SOCIAL DNA transcrito em `brand/`, nada
 -- aqui foi inventado pelo desenvolvedor. (P-003, P-006)
 --
 -- Idempotente de propósito: rodar duas vezes não duplica nem sobrescreve o que
 -- a equipe já tiver editado pelo painel.
 --
 -- O QUE FICA NULO, E POR QUÊ: endereço, telefone e whatsapp são BLK-003 e
--- BLK-005. Nulo é o dado honesto enquanto o cliente não confirma — preencher
+-- BLK-005. Nulo é o dado honesto enquanto o cliente não confirma, preencher
 -- com chute faz o site afirmar endereço errado, que é pior que não afirmar.
 -- =============================================================================
 
@@ -31,7 +31,7 @@ on conflict (slug) do nothing;
 -- 2. AS DUAS MARCAS
 -- =============================================================================
 -- `horario` no shape do schema: {"dia": ["abre","fecha"]}. Ambos pendentes de
--- confirmação do cliente (BLK-003) — o que está aqui é o que o guia declara.
+-- confirmação do cliente (BLK-003), o que está aqui é o que o guia declara.
 
 insert into public.brands (venue_id, slug, nome, mote, modo, instagram, horario, copy, ordem)
 select

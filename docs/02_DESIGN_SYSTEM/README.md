@@ -1,9 +1,9 @@
-# Design System — CASA + HAUBERT
+# Design System, CASA + HAUBERT
 
 > **A marca não se inventa aqui.** Tudo abaixo é derivado do guia SOCIAL DNA
 > (ago/2025) em `brand/`, com os hex amostrados pixel a pixel das pranchas
 > originais. Extração completa: `brand/BRAND-DNA-EXTRAIDO.md`.
-> Tokens executáveis: [`src/styles/tokens.css`](../../src/styles/tokens.css) — a
+> Tokens executáveis: [`src/styles/tokens.css`](../../src/styles/tokens.css), a
 > implementação é a fonte única. Este documento explica as decisões; o arquivo
 > é o que roda.
 
@@ -15,14 +15,14 @@
 ## Contexto
 - Duas marcas, um sistema: **CASA** (dia, clara) e **HAUBERT** (noite, escura)
 - Uso real: **celular, na mesa, com pouca luz** → contraste e alvo de toque são requisito
-- Referência estrutural de layout: `disturbancebrands.com` — editorial escuro,
+- Referência estrutural de layout: `disturbancebrands.com`, editorial escuro,
   display gigante com tracking negativo, corpo monoespaçado, muito respiro
 
 ## Regras Gerais
 1. **Cor literal em componente é bug.** Use sempre `var(--cor-*)`.
 2. **Nenhum componente sabe se é dia ou noite.** Ele pinta com token; o token resolve.
 3. **Contraste mínimo AA (4.5:1) para texto de corpo nos dois modos.** Testado, não presumido.
-4. **Zero JS para trocar cor** — a troca é atributo no `<html>` (ADR-004).
+4. **Zero JS para trocar cor**, a troca é atributo no `<html>` (ADR-004).
 5. Espaçamento sai da escala. Valor mágico (`margin-top: 37px`) não passa em review.
 
 ## Validações
@@ -63,7 +63,7 @@
 
 ### 1.1 Paletas de marca (hex amostrado do guia)
 
-**CASA — modo Dia.** *Claro, natural, urbano, daylight. Acolhedor e leve.*
+**CASA, modo Dia.** *Claro, natural, urbano, daylight. Acolhedor e leve.*
 
 | Token | Hex | Nome | Uso |
 |---|---|---|---|
@@ -73,7 +73,7 @@
 | `--casa-tinta` | `#232322` | Tinta | Texto principal |
 | `--casa-terracota` | `#BE6A44` | Terracota | Preenchimento decorativo |
 
-**HAUBERT — modo Noite.** *Escuro, quente, intenso, noturno. Robusto e autoral.*
+**HAUBERT, modo Noite.** *Escuro, quente, intenso, noturno. Robusto e autoral.*
 
 | Token | Hex | Nome | Uso |
 |---|---|---|---|
@@ -83,7 +83,7 @@
 | `--haubert-caramelo` | `#784920` | Caramelo queimado | Bordas, detalhe |
 | `--haubert-areia` | `#D0BDA1` | Areia quente | Texto principal |
 
-**Sistema** — comuns aos dois modos
+**Sistema**, comuns aos dois modos
 
 | Token | Hex | Uso |
 |---|---|---|
@@ -126,11 +126,11 @@
 
 > Todos os valores acima foram medidos no site em execução (luminância
 > relativa, WCAG 2.1), não estimados. `#D9553A` passa em AA com folga de
-> 0,23 — margem estreita: qualquer escurecimento futuro do acento da Noite
+> 0,23, margem estreita: qualquer escurecimento futuro do acento da Noite
 > precisa ser remedido antes de entrar.
 
 ### 1.4 Regras de aplicação
-- **Terracota (`#BE6A44`) não é cor de texto.** 3,5:1 sobre osso — só decoração e fill grande.
+- **Terracota (`#BE6A44`) não é cor de texto.** 3,5:1 sobre osso, só decoração e fill grande.
 - Foto escura recebe overlay `rgba(19,18,18,.55)` antes de qualquer texto por cima.
 - Estado de foco: contorno de 2px em `--cor-acento` com 2px de deslocamento. Nunca `outline: none` sem substituto.
 
@@ -141,16 +141,16 @@
 ### 2.1 Famílias
 
 O guia especifica **Druk / Bebas Neue** nos títulos e **Space Grotesk / Neue Haas
-Grotesk** no texto. Druk e Neue Haas são pagas — ver **ADR-003**.
+Grotesk** no texto. Druk e Neue Haas são pagas, ver **ADR-003**.
 
 | Token | Fonte (Fase 1) | Licença | Papel |
 |---|---|---|---|
 | `--fonte-display` | **Anton** | OFL | Manifesto, números gigantes. *Substituta de Druk* |
 | `--fonte-titulo` | **Bebas Neue** | OFL | Título de seção (como no guia) |
 | `--fonte-corpo` | **Space Grotesk** | OFL | Corpo (como no guia) |
-| `--fonte-mono` | **Space Mono** | OFL | Micro-label em caixa alta — é o gesto das legendas do guia |
+| `--fonte-mono` | **Space Mono** | OFL | Micro-label em caixa alta, é o gesto das legendas do guia |
 
-Servidas via `@fontsource` (self-hosted). Sem chamada ao Google Fonts — ver
+Servidas via `@fontsource` (self-hosted). Sem chamada ao Google Fonts, ver
 `docs/11_SEGURANCA/`.
 
 ### 2.2 Escala
@@ -191,7 +191,7 @@ Base **8px**. Escala: `4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128 �
 | `--gutter` | `clamp(1.25rem, 5vw, 4rem)` | Margem lateral |
 
 Grid de 12 colunas no desktop, 4 no mobile. Seções editoriais quebram o grid de
-propósito (imagem sangrando até a borda) — mas sempre a partir de uma coluna.
+propósito (imagem sangrando até a borda), mas sempre a partir de uma coluna.
 
 ---
 
@@ -213,7 +213,7 @@ Detalhamento em `docs/06_COMPONENTES/`.
 ## 5. Movimento
 
 - Transição padrão: `180ms cubic-bezier(.2,.6,.2,1)`
-- Troca Dia/Noite: transição de `background-color` e `color` em **320ms** —
+- Troca Dia/Noite: transição de `background-color` e `color` em **320ms**,
   o suficiente para o olho perceber a casa mudando, sem parecer lento
 - Entrada de seção: `opacity` + `translateY(16px)`, uma vez só, via `IntersectionObserver`
 - **`prefers-reduced-motion: reduce` desliga tudo.** Sem exceção
@@ -231,19 +231,19 @@ Nenhuma seção escreve `<img>` na mão.
   geração para economizar poucos KB num arquivo que já pesa ~10 KB. Quando
   entrar acervo original em alta, AVIF volta à mesa.
 - **Proporções:** `16:11` (cartão de marca), `4:3` (ladrilho de elemento),
-  `3:4` (tira de atmosfera), `21:5` (faixa larga). **Não há hero fotográfico**
-  — ver o limite de resolução no [ADR-007](../08_DECISOES/adr-007-fotos-do-deck.md).
+  `3:4` (tira de atmosfera), `21:5` (faixa larga). **Não há hero fotográfico**,
+  ver o limite de resolução no [ADR-007](../08_DECISOES/adr-007-fotos-do-deck.md).
 - **Teto:** 200kb acima da dobra, 120kb abaixo. Hoje a home inteira serve
   ~13 imagens somando bem menos que isso, todas `loading="lazy"` fora da
   primeira tela.
 - **`srcset` sobe até a largura nativa do arquivo** e nunca além: pedir
   upscale de um recorte de prancha só gera peso e borrão.
-- **Véu:** `--overlay-foto` é token e muda com o modo — a mesma foto assenta
+- **Véu:** `--overlay-foto` é token e muda com o modo, a mesma foto assenta
   mais clara de dia e mais funda à noite, sem segundo arquivo.
 - **Tratamento:** luz real, cor quente, sem filtro saturado.
 - **Banco de imagem genérico continua proibido** (`memory/restrictions.md`). As
   fotos atuais não são banco: saem das pranchas da própria marca, e entram sob
-  as quatro regras do ADR-007 — entre elas, a de que nenhum `alt` afirma que a
+  as quatro regras do ADR-007, entre elas, a de que nenhum `alt` afirma que a
   cena é a casa real.
 - **`alt` descreve a cena, não a marca:** *"brasa viva sob carvão"*, nunca
   *"HAUBERT"* e nunca *"nosso salão"*.

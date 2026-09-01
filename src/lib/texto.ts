@@ -1,9 +1,9 @@
 /**
- * Apresentação de texto — em especial o que ainda não veio do cliente.
+ * Apresentação de texto, em especial o que ainda não veio do cliente.
  *
  * O marcador PENDENTE existe para o time, não para o visitante: ele NUNCA
  * chega à tela. Onde falta dado, a página mostra o que é verdade ou não mostra
- * nada — jamais um campo vazio nem um placeholder inventado. (F-006, RN-43)
+ * nada, jamais um campo vazio nem um placeholder inventado. (F-006, RN-43)
  */
 import { PENDENTE, ehPendente } from './tipos';
 

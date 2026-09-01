@@ -3,40 +3,54 @@
  *
  * Arquivo separado do componente porque a regra vale aqui igual: estilo por
  * token, markup sem cor literal. Ilha React não é desculpa para escrever
- * `#131212` — o dia em que este painel servir outra casa, ele tem que trocar
+ * `#131212`, o dia em que este painel servir outra casa, ele tem que trocar
  * de paleta junto com o site. (memory/restrictions.md, ADR-002)
+ *
+ * Três decisões guiam o desenho, e as três vieram de olhar a tela renderizada
+ * em vez de imaginá-la:
+ *
+ *   1. A FOTO é o botão. O alvo mais óbvio numa tela de trocar foto é a
+ *      própria foto, não um rótulo embaixo dela.
+ *   2. O estado precisa ser lido de relance, e são TRÊS coisas diferentes:
+ *      o que ainda é exemplo, o que já é seu, e o que ainda não foi publicado.
+ *   3. Densidade. São 15 posições; com um cartão por tela no celular a última
+ *      ficava a nove rolagens de distância.
  */
 
 .pn {
   width: 100%;
   max-width: var(--largura-max);
   margin-inline: auto;
-  padding: var(--esp-7) var(--gutter) var(--esp-9);
+  padding: var(--esp-6) var(--gutter) var(--esp-9);
   display: grid;
-  gap: var(--esp-8);
+  gap: var(--esp-7);
+}
+
+/* Espaço para a barra fixa não cobrir o fim da página. */
+.pn:has(.pn__barra) {
+  padding-bottom: calc(var(--esp-10) + env(safe-area-inset-bottom));
 }
 
 /* ---- Cabeça ------------------------------------------------------------ */
 .pn__cabeca {
   display: grid;
-  gap: var(--esp-5);
-  align-items: start;
+  gap: var(--esp-2);
 }
 
 .pn__titulo {
-  margin: var(--esp-2) 0 0;
+  margin: 0;
   font-family: var(--fonte-titulo);
-  font-size: clamp(2rem, 6vw, 3rem);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   line-height: 1;
   text-transform: uppercase;
   color: var(--cor-texto-forte);
 }
 
 .pn__lead {
-  margin: var(--esp-3) 0 0;
-  max-width: 60ch;
+  margin: 0;
+  max-width: 48ch;
   font-size: var(--tam-corpo-sm);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--cor-texto-suave);
 }
 
@@ -45,31 +59,21 @@
   font-weight: 500;
 }
 
-.pn__publicar {
-  display: grid;
-  gap: var(--esp-2);
-  justify-items: start;
-}
-
-.pn__contagem {
-  margin: 0;
+.pn__placar {
+  margin: var(--esp-2) 0 0;
   font-family: var(--fonte-mono);
-  font-size: 0.6875rem;
+  font-size: var(--tam-meta);
   letter-spacing: var(--ls-meta);
   text-transform: uppercase;
   color: var(--cor-texto-suave);
 }
 
-@media (min-width: 56rem) {
-  .pn__cabeca {
-    grid-template-columns: 1fr auto;
-    gap: var(--esp-7);
-  }
+.pn__placar-num {
+  color: var(--cor-texto-forte);
+}
 
-  .pn__publicar {
-    justify-items: end;
-    text-align: right;
-  }
+.pn__placar-ok {
+  color: var(--cor-acento);
 }
 
 /* ---- Aviso ------------------------------------------------------------- */
@@ -109,7 +113,7 @@
   color: var(--cor-texto-forte);
 }
 
-/* ---- Grupos e vagas ---------------------------------------------------- */
+/* ---- Grupos ------------------------------------------------------------ */
 .pn__grupo {
   display: grid;
   gap: var(--esp-2);
@@ -117,10 +121,10 @@
 
 .pn__grupo-titulo {
   margin: 0;
-  padding-top: var(--esp-5);
+  padding-top: var(--esp-4);
   border-top: var(--borda-fina) solid var(--cor-borda);
   font-family: var(--fonte-titulo);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   line-height: 1.1;
   text-transform: uppercase;
   color: var(--cor-texto-forte);
@@ -129,32 +133,64 @@
 .pn__grupo-desc {
   margin: 0 0 var(--esp-4);
   max-width: 60ch;
-  font-size: var(--tam-corpo-sm);
-  line-height: 1.55;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   color: var(--cor-texto-suave);
 }
 
-.pn__grade,
-.pn__galeria,
-.pn__escolha {
+/* Duas colunas já no celular de 390px: 15 posições numa coluna só viravam
+   nove rolagens até a última. */
+.pn__grade {
   display: grid;
-  gap: var(--esp-5);
+  gap: var(--esp-4);
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
 }
 
+/* No desktop o cartão cresce: 9,5rem existe para caber DUAS colunas num
+   celular de 390px, e não porque esse seja um bom tamanho de cartão. */
+@media (min-width: 64rem) {
+  .pn__grade,
+  .pn__galeria {
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--esp-5);
+  }
+}
+
+/* ---- O cartão, que É o botão ------------------------------------------- */
 .pn__vaga {
   display: grid;
-  gap: var(--esp-2);
+  gap: var(--esp-1);
   align-content: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--esp-2);
+  border: var(--borda-fina) solid var(--cor-borda);
+  border-radius: var(--raio-1);
+  background-color: var(--cor-superficie);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--transicao),
+    background-color var(--transicao);
+}
+
+.pn__vaga:hover {
+  border-color: var(--cor-texto-forte);
+  background-color: var(--cor-superficie-2);
+}
+
+.pn__vaga:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
 }
 
 .pn__moldura {
   position: relative;
+  display: block;
   overflow: hidden;
-  border: var(--borda-fina) solid var(--cor-borda);
   border-radius: var(--raio-1);
   background-color: var(--cor-superficie-2);
 }
@@ -166,12 +202,63 @@
   display: block;
 }
 
-.pn__selo {
+/* A dica de ação, em duas formas conforme o aparelho.
+   No TOQUE ela precisa estar sempre visível (não existe hover para revelá-la),
+   então é uma pastilha pequena no canto: a primeira versão era uma tarja
+   preta de largura inteira, repetida em 15 cartões, cobrindo um quarto de
+   cada foto — justamente a foto que o dono está tentando avaliar.
+   No MOUSE ela vira a tarja, porque ali é transitória e serve de estado de
+   hover. */
+.pn__acao {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  padding: var(--esp-1) var(--esp-2);
-  background-color: var(--cor-superficie);
+  top: var(--esp-2);
+  right: var(--esp-2);
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--raio-selo);
+  background-color: color-mix(in srgb, var(--cor-texto-forte) 78%, transparent);
+  color: var(--cor-superficie);
+  font-family: var(--fonte-mono);
+  font-size: 0.5625rem;
+  letter-spacing: var(--ls-meta);
+  text-transform: uppercase;
+}
+
+@media (hover: hover) {
+  .pn__acao {
+    inset: auto 0 0 0;
+    padding: var(--esp-2);
+    border-radius: 0;
+    font-size: 0.625rem;
+    text-align: center;
+    background-color: color-mix(in srgb, var(--cor-texto-forte) 82%, transparent);
+    opacity: 0;
+    transition: opacity var(--transicao);
+  }
+
+  .pn__vaga:hover .pn__acao,
+  .pn__vaga:focus-visible .pn__acao {
+    opacity: 1;
+  }
+}
+
+.pn__vaga-rotulo {
+  margin-top: var(--esp-1);
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--cor-texto-forte);
+}
+
+.pn__vaga-onde {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--cor-texto-suave);
+}
+
+/* ---- Os três estados, legíveis de relance ------------------------------ */
+.pn__estado {
+  margin-top: var(--esp-1);
   font-family: var(--fonte-mono);
   font-size: 0.625rem;
   letter-spacing: var(--ls-meta);
@@ -179,25 +266,23 @@
   color: var(--cor-texto-suave);
 }
 
-.pn__vaga-rotulo {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: 1.125rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--cor-texto-forte);
+/* "Sua foto": discreto de propósito, é o estado de repouso e não um troféu. */
+.pn__vaga--sua {
+  border-color: color-mix(in srgb, var(--cor-acento) 45%, var(--cor-borda));
 }
 
-.pn__vaga-onde {
-  margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-  color: var(--cor-texto-suave);
+.pn__vaga--sua .pn__estado {
+  color: var(--cor-texto);
 }
 
-.pn__trocar {
-  width: 100%;
-  margin-top: var(--esp-2);
+/* "Falta publicar": o único que pede ação, e o único que grita. */
+.pn__vaga--fila {
+  border-color: var(--cor-acento);
+  background-color: var(--cor-superficie-2);
+}
+
+.pn__vaga--fila .pn__estado {
+  color: var(--cor-acento);
 }
 
 .pn__vazio {
@@ -210,7 +295,49 @@
   color: var(--cor-texto-suave);
 }
 
+/* ---- Barra fixa de publicação ------------------------------------------ */
+.pn__barra {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 80;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-3) var(--esp-5);
+  padding: var(--esp-3) var(--gutter) calc(var(--esp-3) + env(safe-area-inset-bottom));
+  border-top: var(--borda-fina) solid var(--cor-acento);
+  background-color: color-mix(in srgb, var(--cor-superficie) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.pn__barra-texto {
+  margin: 0;
+  font-size: var(--tam-corpo-sm);
+  line-height: 1.4;
+  color: var(--cor-texto);
+  text-align: center;
+}
+
+.pn__barra-texto strong {
+  color: var(--cor-acento);
+}
+
+.pn__barra-botao {
+  flex: none;
+}
+
 /* ---- Acervo ------------------------------------------------------------ */
+.pn__galeria {
+  display: grid;
+  gap: var(--esp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+}
+
 .pn__item {
   display: grid;
   gap: var(--esp-1);
@@ -233,8 +360,9 @@
 }
 
 .pn__item-nome {
-  margin: var(--esp-2) 0 0;
-  font-size: var(--tam-corpo-sm);
+  margin: var(--esp-1) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
   color: var(--cor-texto);
   overflow-wrap: anywhere;
 }
@@ -298,12 +426,12 @@
 
 .pn__folha-corpo {
   position: relative;
-  width: min(48rem, 100%);
+  width: min(52rem, 100%);
   max-height: 92svh;
   overflow-y: auto;
   overscroll-behavior: contain;
   display: grid;
-  gap: var(--esp-5);
+  gap: var(--esp-4);
   padding: var(--esp-5) var(--gutter) var(--esp-7);
   border-top: var(--borda-fina) solid var(--cor-borda);
   border-radius: var(--raio-1) var(--raio-1) 0 0;
@@ -332,16 +460,22 @@
 .pn__folha-titulo {
   margin: var(--esp-1) 0;
   font-family: var(--fonte-titulo);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1;
   text-transform: uppercase;
   color: var(--cor-texto-forte);
 }
 
+/* Grudada no topo da folha: com a galeria rolando, as abas eram a única
+   forma de voltar para "Enviar nova" e sumiam na primeira rolagem. */
 .pn__abas {
   display: flex;
   gap: var(--esp-2);
   border-bottom: var(--borda-fina) solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--cor-superficie);
 }
 
 .pn__aba {
@@ -364,24 +498,38 @@
 }
 
 .pn__escolha {
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   gap: var(--esp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .pn__escolha-item {
   display: grid;
   gap: var(--esp-1);
   width: 100%;
+  height: 100%;
   padding: var(--esp-2);
   border: var(--borda-fina) solid var(--cor-borda);
   border-radius: var(--raio-1);
   background-color: var(--cor-superficie);
   cursor: pointer;
   text-align: left;
+  transition:
+    border-color var(--transicao),
+    background-color var(--transicao);
 }
 
 .pn__escolha-item:hover:not(:disabled) {
   border-color: var(--cor-acento);
+  background-color: var(--cor-superficie-2);
+}
+
+.pn__escolha-item:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
 }
 
 .pn__escolha-item img {
@@ -406,14 +554,14 @@
 /* ---- Envio ------------------------------------------------------------- */
 .pn__envio {
   display: grid;
-  gap: var(--esp-5);
+  gap: var(--esp-4);
 }
 
 .pn__solta {
   display: grid;
   gap: var(--esp-3);
   justify-items: center;
-  padding: var(--esp-6);
+  padding: var(--esp-5);
   border: 1px dashed var(--cor-borda);
   border-radius: var(--raio-1);
   background-color: var(--cor-superficie-2);
@@ -428,7 +576,7 @@
 
 .pn__solta img {
   width: 100%;
-  max-width: 22rem;
+  max-width: 20rem;
   object-fit: cover;
   border-radius: var(--raio-1);
   display: block;

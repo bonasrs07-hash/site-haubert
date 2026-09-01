@@ -1,7 +1,7 @@
 /**
  * Envio de foto para o acervo. (ADR-008)
  *
- * A sessão já foi validada pelo middleware — se esta linha executa, existe um
+ * A sessão já foi validada pelo middleware, se esta linha executa, existe um
  * membro da casa do outro lado. O que ainda NÃO foi validado é o arquivo, e é
  * isso que `registrarEnvio` faz antes de qualquer byte tocar o Storage.
  */

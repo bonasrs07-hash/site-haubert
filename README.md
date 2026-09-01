@@ -1,4 +1,4 @@
-# CASA + HAUBERT — site oficial da casa
+# CASA + HAUBERT, site oficial da casa
 
 > **Uma essência. Dois conceitos. Uma conexão que fica.**
 > CASA Coffee Colab de dia · HAUBERT Steak & Grillhouse depois das 19h.
@@ -20,7 +20,7 @@ endereço e horários confirmados (BLK-003) e fotos em alta (BLK-002).
 
 | Se você quer… | Leia |
 |---|---|
-| Entender as regras do projeto | [`CLAUDE.md`](CLAUDE.md) — a constituição |
+| Entender as regras do projeto | [`CLAUDE.md`](CLAUDE.md), a constituição |
 | Entender o produto | [`docs/00_VISAO/`](docs/00_VISAO/README.md) |
 | Entender a marca | [`brand/BRAND-DNA-EXTRAIDO.md`](brand/BRAND-DNA-EXTRAIDO.md) |
 | Entender a arquitetura | [`docs/01_ARQUITETURA/`](docs/01_ARQUITETURA/README.md) + [ADRs](docs/08_DECISOES/) |
@@ -32,13 +32,13 @@ endereço e horários confirmados (BLK-003) e fotos em alta (BLK-002).
 ## Estrutura
 
 ```
-CLAUDE.md              constituição do projeto — leia antes de qualquer mudança
+CLAUDE.md              constituição do projeto, leia antes de qualquer mudança
 brand/                 o guia SOCIAL DNA original + a extração de marca
 memory/                identidade · decisões · padrões · aprendizados · restrições · bugs
 docs/00_→11_           visão → arquitetura → design system → … → segurança
 supabase/              schema.sql (fonte de verdade), migrations, seeds
 src/
-  constants/casa.ts    o seed da casa — único lugar onde "HAUBERT" é dado
+  constants/casa.ts    o seed da casa, único lugar onde "HAUBERT" é dado
   lib/                 camada de serviços: casa, horário, reservas, modo, supabase
   styles/              tokens.css (as duas paletas) + global.css (ponte Tailwind)
   layouts/Base.astro   <head>, script de tema anti-FOUC, schema.org
@@ -51,7 +51,7 @@ src/
 
 | Rota | O que é |
 |---|---|
-| `/` | Home — o funil inteiro, do hero à reserva |
+| `/` | Home, o funil inteiro, do hero à reserva |
 | `/noite` | HAUBERT, com o modo Noite forçado. É o link da bio do @haubert.steakhouse |
 | `/sobre` | O manifesto longo, os pilares, o compromisso |
 | `/fogo` | Os 5 elementos do método e os 6 cortes |
@@ -66,7 +66,7 @@ src/
 `@tailwindcss/vite` · **Supabase** (Postgres + RLS + Auth + Storage) a partir da
 Fase 2 · deploy **Vercel**.
 
-**A Fase 1 envia 7 KB de JavaScript** — nenhuma ilha React, fotos incluídas
+**A Fase 1 envia 7 KB de JavaScript**, nenhuma ilha React, fotos incluídas
 (`<Image>` do Astro resolve tudo no build). O alternador e a
 folha de reserva são HTML nativo (`<details>`, radios) com script curto; o
 estado visual do tema é CSS derivado de `[data-modo]`, então já está correto no
@@ -78,8 +78,8 @@ no [ADR-006](docs/08_DECISOES/adr-006-fase1-sem-react.md).
 ## As três regras que não se negociam
 
 1. **Reservar custa no máximo 3 toques** a partir de qualquer tela
-2. **Cor, nome e copy de marca vêm do dado**, nunca do código — `#131212` escrito num componente é bug
-3. **RLS é definição de pronto** — tabela sem policy não entra em `main`
+2. **Cor, nome e copy de marca vêm do dado**, nunca do código, `#131212` escrito num componente é bug
+3. **RLS é definição de pronto**, tabela sem policy não entra em `main`
 
 ## Comandos
 

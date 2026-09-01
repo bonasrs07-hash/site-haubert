@@ -1,6 +1,6 @@
 # Este repositório é escrito no Windows e construído no Linux (Vercel). Sem
 # normalizar, o CRLF entra no histórico e o primeiro diff feito do outro lado
-# marca o arquivo inteiro como alterado sem uma linha real de mudança — ruído
+# marca o arquivo inteiro como alterado sem uma linha real de mudança, ruído
 # que esconde a revisão de verdade.
 * text=auto eol=lf
 

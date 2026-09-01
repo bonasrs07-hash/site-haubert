@@ -1,9 +1,9 @@
 /**
- * Horário e relógio da casa — funções puras, sem nenhuma dependência de dado.
+ * Horário e relógio da casa, funções puras, sem nenhuma dependência de dado.
  *
  * Vive separado de `casa.ts` de propósito: a barra de reserva precisa destas
  * funções no browser, e importá-las de `casa.ts` arrastaria `constants/casa.ts`
- * inteiro — toda a copy do site — para dentro do bundle do cliente. (P-002)
+ * inteiro, toda a copy do site, para dentro do bundle do cliente. (P-002)
  */
 import type { FaixaHorario, Modo } from './tipos';
 
@@ -12,7 +12,7 @@ export const FUSO_DA_CASA = 'America/Sao_Paulo';
 
 /** Hora, em minutos desde a meia-noite, a partir da qual o padrão é Noite. (RN-02) */
 export const CORTE_NOITE_MIN = 19 * 60;
-/** Antes disso ainda é madrugada — segue Noite. (RN-02) */
+/** Antes disso ainda é madrugada, segue Noite. (RN-02) */
 export const FIM_DA_NOITE_MIN = 5 * 60;
 
 /**
@@ -20,7 +20,7 @@ export const FIM_DA_NOITE_MIN = 5 * 60;
  *
  * A hora define o PADRÃO, nunca restringe: o visitante alterna quando quiser.
  * (RN-03) A mesma regra está duplicada, de propósito, no script inline do
- * `<head>` — lá ela precisa rodar antes de qualquer módulo carregar, senão a
+ * `<head>`, lá ela precisa rodar antes de qualquer módulo carregar, senão a
  * página pisca. (ADR-004)
  */
 export function modoPelaHora(minutosDoDia: number): Modo {
@@ -61,7 +61,7 @@ function paraMinutos(hhmm: string): number {
  * Estas faixas estão abertas agora?
  *
  * Faixa que cruza a meia-noite conta para o dia em que começou. (RN-42)
- * Lista vazia devolve `null` — que a UI traduz para "consulte pelo WhatsApp",
+ * Lista vazia devolve `null`, que a UI traduz para "consulte pelo WhatsApp",
  * nunca para "fechado". Dizer que está fechado por falta de dado custa uma
  * mesa; dizer "confirme" não custa nada. (RN-43)
  */

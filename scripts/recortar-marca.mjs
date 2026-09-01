@@ -3,17 +3,17 @@
  *
  *   node scripts/recortar-marca.mjs
  *
- * POR QUE ISTO EXISTE — o cliente ainda não entregou acervo fotográfico
+ * POR QUE ISTO EXISTE, o cliente ainda não entregou acervo fotográfico
  * (BLK-002). O que existe são as 13 pranchas em `brand/`, e dentro delas há
  * fotografia embutida. Este script recorta essas fotos, converte para WebP e
  * grava só o que o site importa de fato.
  *
  * As coordenadas são FRAÇÃO da prancha, não pixel: se um PNG for reexportado
  * em outro tamanho, o recorte continua caindo no lugar certo. Elas foram
- * medidas na mão sobre a prancha renderizada — quando mexer, confira o
+ * medidas na mão sobre a prancha renderizada, quando mexer, confira o
  * resultado com o olho, não com a fé.
  *
- * LIMITE DE ORIGEM — a foto tem, dentro da prancha, de 250 a 660 px de
+ * LIMITE DE ORIGEM, a foto tem, dentro da prancha, de 250 a 660 px de
  * largura. É o teto. Serve para cartão e ladrilho; não serve para fundo
  * full-bleed. Ver `src/constants/imagens.ts` e o ADR-007.
  */
@@ -80,7 +80,7 @@ for (const [prancha, recortes] of Object.entries(PRANCHAS)) {
 }
 
 // Recorte que saiu da lista some da pasta: asset órfão em src/ é o mesmo
-// problema que doc zumbi em docs/ — alguém acha e acha que vale.
+// problema que doc zumbi em docs/, alguém acha e acha que vale.
 const orfaos = (await readdir(DESTINO)).filter((f) => !esperados.includes(f));
 for (const f of orfaos) {
   await unlink(path.join(DESTINO, f));

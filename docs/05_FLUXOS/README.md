@@ -1,6 +1,6 @@
-# 05 — Fluxos
+# 05, Fluxos
 
-## F-001 — Reserva (o fluxo que justifica o site)
+## F-001, Reserva (o fluxo que justifica o site)
 
 **Princípio nº1: no máximo três toques.** Fase 1 termina no WhatsApp (ADR-005).
 
@@ -27,13 +27,13 @@ wa.me/<numero>?text=<mensagem no tom da marca>
 
 **Regras**
 - O botão nunca some ao rolar. No mobile é `position: fixed`, respeitando `env(safe-area-inset-bottom)`
-- A marca da mensagem segue o modo ativo — quem está no modo Noite fala do HAUBERT
+- A marca da mensagem segue o modo ativo, quem está no modo Noite fala do HAUBERT
 - Nenhum dado pessoal é coletado nem armazenado pelo site
-- O link carrega UTM e dispara `reserva_click` no analytics — é a métrica da Fase 1
+- O link carrega UTM e dispara `reserva_click` no analytics, é a métrica da Fase 1
 - Desktop abre WhatsApp Web; o telefone fica visível como alternativa
 - Sem WhatsApp configurado (BLK-005): degradar para telefone e e-mail, nunca para botão morto
 
-**Fase 3 — reserva nativa** (aditiva, não substitutiva):
+**Fase 3, reserva nativa** (aditiva, não substitutiva):
 ```
 ③ toque → envia → POST /api/reserva (servidor)
               → valida com Zod · rate limit por IP
@@ -45,7 +45,7 @@ O botão WhatsApp continua existindo como fallback.
 
 ---
 
-## F-002 — Chegada e escolha do modo (o *aha moment*)
+## F-002, Chegada e escolha do modo (o *aha moment*)
 
 ```
 Visitante chega em /
@@ -67,14 +67,14 @@ Visitante vê o alternador e entende que existem duas casas
 ```
 
 **Regras**
-- O script é **inline e síncrono**. Se for assíncrono, a página pisca (FOUC) — ver `memory/bugs.md`
+- O script é **inline e síncrono**. Se for assíncrono, a página pisca (FOUC), ver `memory/bugs.md`
 - A hora define o **padrão**, nunca a prisão: o alternador está sempre disponível
 - O alternador tem rótulo textual e `aria-pressed`. Nunca só um ícone de lua
-- `/noite` é rota SSR real e indexável, com canônica própria — o SEO da steakhouse não pode depender de JS
+- `/noite` é rota SSR real e indexável, com canônica própria, o SEO da steakhouse não pode depender de JS
 
 ---
 
-## F-003 — Consulta de cardápio
+## F-003, Consulta de cardápio
 
 ```
 /cardapio  (SSR, cache 5min)
@@ -93,14 +93,14 @@ CTA de reserva ao fim de cada seção
 ```
 
 **Regras**
-- Só entra o que está `publicado` — a equipe rascunha à vontade
-- Preço nulo não renderiza campo vazio: some (Fase 1 não divulga preço — BLK-004)
+- Só entra o que está `publicado`, a equipe rascunha à vontade
+- Preço nulo não renderiza campo vazio: some (Fase 1 não divulga preço, BLK-004)
 - Estado vazio com copy da marca: *"O cardápio está sendo atualizado. Volta já."*
-- QR code da mesa aponta direto para `/cardapio?modo=noite` — é o uso real
+- QR code da mesa aponta direto para `/cardapio?modo=noite`, é o uso real
 
 ---
 
-## F-004 — Agenda cultural
+## F-004, Agenda cultural
 
 ```
 /agenda (SSR, cache 5min)
@@ -117,12 +117,12 @@ Lista por data ascendente · evento passado não aparece
 
 **Regras**
 - Evento sem `brand_id` é da casa inteira e aparece nos dois modos
-- OG image por evento — o compartilhamento no grupo do WhatsApp é o canal real
+- OG image por evento, o compartilhamento no grupo do WhatsApp é o canal real
 - Estado vazio: *"A agenda da semana ainda está sendo escrita. Volta amanhã."*
 
 ---
 
-## F-005 — Publicação pela equipe (Fase 3)
+## F-005, Publicação pela equipe (Fase 3)
 
 ```
 /painel  →  sessão verificada NO SERVIDOR (não no cliente)
@@ -143,13 +143,13 @@ Salvar como rascunho  →  Publicar  →  revalida o cache da rota pública
 
 **Regras**
 - Toda escrita passa pela RLS; a UI é conveniência, não a barreira
-- Upload vai para `midia/venues/{venue_id}/...` — o caminho carrega o isolamento
+- Upload vai para `midia/venues/{venue_id}/...`, o caminho carrega o isolamento
 - Publicar e despublicar são um toque, reversíveis
 - Nenhuma ação destrutiva sem confirmação explícita
 
 ---
 
-## F-006 — Erro e degradação
+## F-006, Erro e degradação
 
 | Situação | Comportamento |
 |---|---|

@@ -1,12 +1,12 @@
 -- =============================================================================
--- CASA + HAUBERT — fonte de verdade do banco
+-- CASA + HAUBERT, fonte de verdade do banco
 -- =============================================================================
 -- Multi-tenant por CASA (venue). Dentro de uma casa existem N marcas.  (ADR-002)
 --
 -- REGRA INEGOCIÁVEL: toda tabela de domínio carrega venue_id e tem RLS.
 -- Tabela sem RLS no Supabase é tabela pública. Não existe "ligo depois".
 --
--- Fase 1 não usa reservations (reserva vai por WhatsApp — ADR-005). A tabela
+-- Fase 1 não usa reservations (reserva vai por WhatsApp, ADR-005). A tabela
 -- nasce aqui mesmo assim, para que a política de acesso seja pensada antes de
 -- existir dado pessoal dentro dela.
 -- =============================================================================
@@ -14,7 +14,7 @@
 create extension if not exists "pgcrypto";
 
 -- =============================================================================
--- 1. TENANT — a casa
+-- 1. TENANT, a casa
 -- =============================================================================
 create table if not exists public.venues (
   id           uuid primary key default gen_random_uuid(),
@@ -37,7 +37,7 @@ comment on column public.venues.features is
   'Feature flags por tenant. Ex: {"reserva_nativa": false, "agenda": true}';
 
 -- =============================================================================
--- 2. MARCAS — CASA (dia) e HAUBERT (noite)
+-- 2. MARCAS, CASA (dia) e HAUBERT (noite)
 -- =============================================================================
 create table if not exists public.brands (
   id           uuid primary key default gen_random_uuid(),
@@ -57,7 +57,7 @@ create table if not exists public.brands (
 );
 
 comment on column public.brands.tokens is
-  'Espelha docs/02_DESIGN_SYSTEM/tokens.css. Validar o shape com Zod na camada de serviços — JSONB não tem checagem de tipo.';
+  'Espelha docs/02_DESIGN_SYSTEM/tokens.css. Validar o shape com Zod na camada de serviços, JSONB não tem checagem de tipo.';
 comment on column public.brands.copy is
   'Copy vinda de brand/BRAND-DNA-EXTRAIDO.md. Nenhuma frase inventada pelo dev.';
 
@@ -93,7 +93,7 @@ comment on column public.menu_items.preco_cents is
   'Centavos, inteiro. Nunca float para dinheiro. Nulo = preço não divulgado (Fase 1).';
 
 -- =============================================================================
--- 4. AGENDA — eventos, DJs, collabs
+-- 4. AGENDA, eventos, DJs, collabs
 -- =============================================================================
 create table if not exists public.events (
   id          uuid primary key default gen_random_uuid(),
@@ -116,7 +116,7 @@ create index if not exists events_venue_inicio_idx
   on public.events (venue_id, inicio_em desc) where publicado;
 
 -- =============================================================================
--- 5. RESERVAS — Fase 3 (na Fase 1 a reserva vai por WhatsApp, ADR-005)
+-- 5. RESERVAS, Fase 3 (na Fase 1 a reserva vai por WhatsApp, ADR-005)
 -- =============================================================================
 create table if not exists public.reservations (
   id            uuid primary key default gen_random_uuid(),
@@ -142,7 +142,7 @@ comment on table public.reservations is
   'Dado pessoal (LGPD). Base legal: execução de contrato. Retenção: 12 meses, depois anonimizar via job. Nunca logar telefone ou e-mail.';
 
 -- =============================================================================
--- 6. EQUIPE — quem pode editar no painel
+-- 6. EQUIPE, quem pode editar no painel
 -- =============================================================================
 create table if not exists public.venue_members (
   venue_id  uuid not null references public.venues(id) on delete cascade,
@@ -153,7 +153,7 @@ create table if not exists public.venue_members (
 );
 
 -- =============================================================================
--- 7. RLS — definição de pronto (P-005)
+-- 7. RLS, definição de pronto (P-005)
 -- =============================================================================
 alter table public.venues         enable row level security;
 alter table public.brands         enable row level security;

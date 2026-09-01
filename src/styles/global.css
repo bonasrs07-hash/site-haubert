@@ -97,7 +97,7 @@
 }
 
 /* ==========================================================================
-   Tipografia — a escala do design system, como classes
+   Tipografia, a escala do design system, como classes
    ========================================================================== */
 @layer components {
   .t-display {
@@ -253,7 +253,7 @@
 }
 
 /* ==========================================================================
-   Entrada de seção — uma vez só, e nunca contra a vontade do usuário
+   Entrada de seção, uma vez só, e nunca contra a vontade do usuário
    ========================================================================== */
 @layer utilities {
   .revelar {

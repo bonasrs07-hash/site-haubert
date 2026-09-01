@@ -1,7 +1,7 @@
 /**
  * Acervo de imagens da marca.
  *
- * ORIGEM — todas as fotos deste arquivo são recortes das pranchas do guia
+ * ORIGEM, todas as fotos deste arquivo são recortes das pranchas do guia
  * SOCIAL DNA (`brand/`). Aquele material é CONCEITO, não registro: as cenas
  * foram criadas para comunicar atmosfera numa apresentação e não fotografam a
  * casa real, a equipe real nem os pratos reais.
@@ -9,10 +9,10 @@
  * A consequência prática está em cada `alt` daqui: nenhum deles afirma "este é
  * o nosso salão" ou "esta é a nossa equipe". Eles descrevem a cena, que é o
  * que a imagem de fato entrega. Quando o acervo do cliente chegar (BLK-002),
- * troca-se o import e o texto do `alt` — nenhuma seção do site precisa mudar.
+ * troca-se o import e o texto do `alt`, nenhuma seção do site precisa mudar.
  * O raciocínio inteiro está no ADR-007.
  *
- * RESOLUÇÃO — os recortes têm de 250 a 660 px de largura, que é o tamanho em
+ * RESOLUÇÃO, os recortes têm de 250 a 660 px de largura, que é o tamanho em
  * que a foto existe dentro da prancha. Isso basta para cartão e ladrilho e não
  * basta para fundo full-bleed, onde a imagem apareceria borrada. Por isso não
  * existe hero fotográfico neste site: é limitação de origem, não de estilo.
@@ -56,7 +56,7 @@ export const FOTO_NOITE: Foto = {
 };
 
 // ============================================================================
-// OS CINCO ELEMENTOS DO FOGO — a ordem casa com ELEMENTOS_DO_FOGO
+// OS CINCO ELEMENTOS DO FOGO, a ordem casa com ELEMENTOS_DO_FOGO
 // ============================================================================
 
 export const FOTOS_DO_FOGO: Foto[] = [
@@ -68,7 +68,7 @@ export const FOTOS_DO_FOGO: Foto[] = [
 ];
 
 // ============================================================================
-// ATMOSFERA — a tira da home
+// ATMOSFERA, a tira da home
 // ============================================================================
 
 export const TIRA_ATMOSFERA: Foto[] = [
@@ -86,7 +86,7 @@ export const TIRA_ATMOSFERA: Foto[] = [
 
 export const FOTO_NEON: Foto = {
   src: neonLocal,
-  // O neon é objeto físico e fala inglês. O alt diz o que está escrito nele —
+  // O neon é objeto físico e fala inglês. O alt diz o que está escrito nele,
   // quem usa leitor de tela tem direito à mesma informação de quem enxerga.
   alt: 'Letreiro de neon laranja numa parede escura, escrito "Support Your Local Everything".',
 };

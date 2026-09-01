@@ -1,4 +1,4 @@
-# Padrões Consolidados — CASA + HAUBERT
+# Padrões Consolidados, CASA + HAUBERT
 
 > "Como fazemos aqui." Padrão registrado aqui vale mais que preferência pessoal.
 > Divergir exige justificativa no PR; divergir sempre vira ADR.
@@ -41,7 +41,7 @@
 
 ---
 
-## P-001 — Toda leitura do banco passa por `src/lib/`
+## P-001, Toda leitura do banco passa por `src/lib/`
 
 **O padrão.** Componente (`.astro` ou `.tsx`) nunca importa o cliente Supabase.
 Ele chama uma função da camada de serviços, que devolve dado já no formato da UI.
@@ -62,10 +62,10 @@ cache ou mudar o shape do dado mexe em um arquivo, não em vinte.
 
 ---
 
-## P-002 — Astro por padrão, ilha React só quando o runtime se paga
+## P-002, Astro por padrão, ilha React só quando o runtime se paga
 
 **O padrão.** Conteúdo é `.astro` e envia zero JS. Vira ilha React quando há
-**estado assíncrono real** — envio, erro por campo, confirmação, lista que muda
+**estado assíncrono real**, envio, erro por campo, confirmação, lista que muda
 sozinha. "Tem interação" não basta.
 
 **Onde a Fase 1 parou.** Nenhuma ilha. As duas peças interativas saíram em
@@ -78,7 +78,7 @@ HTML nativo + script curto ([ADR-006](../docs/08_DECISOES/adr-006-fase1-sem-reac
 | Sinal "aberto agora" | script lê as faixas de um `data-` e calcula no fuso da casa |
 
 **Por quê.** Orçamento de JS da home: **< 60 kb** (`memory/restrictions.md`).
-`react` + `react-dom` custam ~45 kb gzip — três quartos do orçamento para duas
+`react` + `react-dom` custam ~45 kb gzip, três quartos do orçamento para duas
 interações sem estado assíncrono. **Medido no build: 7 KB, 11% do orçamento.**
 
 **Quando não usar.** Se dá para resolver com CSS ou HTML nativo (`:hover`,
@@ -92,7 +92,7 @@ vezes na mesma página, ele roda **uma vez só**. Sempre `querySelectorAll` +
 
 ---
 
-## P-003 — A marca vem do dado, nunca do código
+## P-003, A marca vem do dado, nunca do código
 
 **O padrão.** Componente recebe `brand` e renderiza. Não existe
 `if (marca === 'haubert')` na UI.
@@ -120,10 +120,10 @@ podem nomear marcas.
 
 ---
 
-## P-004 — Cor só por token semântico
+## P-004, Cor só por token semântico
 
 **O padrão.** `var(--cor-superficie)`, nunca `#131212`; e nunca o token bruto
-(`var(--haubert-carvao)`) num componente — o bruto é para `tokens.css` resolver.
+(`var(--haubert-carvao)`) num componente, o bruto é para `tokens.css` resolver.
 
 **Por quê.** É o que faz a troca Dia/Noite funcionar sem tocar em componente.
 
@@ -131,7 +131,7 @@ podem nomear marcas.
 
 ---
 
-## P-005 — RLS antes do primeiro `INSERT`
+## P-005, RLS antes do primeiro `INSERT`
 
 **O padrão.** A migration que cria a tabela cria a policy na mesma migration.
 Nunca "depois eu ligo a RLS".
@@ -151,7 +151,7 @@ comum da stack.
 
 ---
 
-## P-006 — Copy sai de `brand/`
+## P-006, Copy sai de `brand/`
 
 **O padrão.** Antes de escrever qualquer frase visível, procure em
 `brand/BRAND-DNA-EXTRAIDO.md` §2. O guia já tem manifesto, mote e frases
@@ -161,11 +161,11 @@ proprietárias prontos.
 enfraquece o que foi construído.
 
 **Quando não usar.** Microcopy funcional (rótulo de campo, mensagem de erro)
-pode ser escrita — desde que no tom documentado em `memory/identity.md`.
+pode ser escrita, desde que no tom documentado em `memory/identity.md`.
 
 ---
 
-## P-007 — Nomes: domínio em português, técnico em inglês
+## P-007, Nomes: domínio em português, técnico em inglês
 
 ```ts
 // ✅
@@ -182,7 +182,7 @@ o técnico é conversa com a plataforma.
 
 ---
 
-## P-008 — Imagem sempre por `astro:assets`
+## P-008, Imagem sempre por `astro:assets`
 
 **O padrão.** `<Image />` do Astro, com `widths`, `formats={['avif','webp']}` e
 `loading="lazy"` abaixo da dobra. `<img src="/foto.jpg">` cru não passa em review.
@@ -191,7 +191,7 @@ o técnico é conversa com a plataforma.
 
 ---
 
-## P-009 — Estados sempre presentes
+## P-009, Estados sempre presentes
 
 Toda superfície que depende de dado nasce com os quatro estados:
 **carregando · vazio · erro · sucesso**. O estado vazio tem copy da marca, não

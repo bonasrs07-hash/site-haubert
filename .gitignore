@@ -9,7 +9,7 @@ dist/
 .output/
 .vercel/
 
-# Ambiente — segredo nunca é versionado
+# Ambiente, segredo nunca é versionado
 .env
 .env.*
 !.env.example
@@ -37,7 +37,7 @@ brand/*.psd
 brand/*.ai
 
 # Preferência local de quem opera o Claude Code neste repositório (janela de
-# contexto, permissões da máquina). Não é regra do projeto — regra do projeto
+# contexto, permissões da máquina). Não é regra do projeto, regra do projeto
 # mora no CLAUDE.md e é versionada.
 .claude/settings.local.json
 

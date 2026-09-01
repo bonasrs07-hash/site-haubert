@@ -5,7 +5,7 @@
  * A seção que responde à dúvida número um de quem chega pelo Instagram: "é um
  * café ou é uma steakhouse?". Resposta: é uma casa, com dois horários.
  *
- * Cada cartão é clicável e troca o modo — é o segundo caminho para a mesma
+ * Cada cartão é clicável e troca o modo, é o segundo caminho para a mesma
  * decisão que o alternador do topo oferece. Duas portas, um destino. (RN-03)
  */
 import Foto from '@/components/shared/Foto.astro';
@@ -101,7 +101,7 @@ const fotoNoite = await buscarFoto('foto-noite');
     display: grid;
     gap: var(--esp-3);
     align-content: start;
-    /* 32px fixos numa tela de 320px deixam 216px de linha para o manifesto —
+    /* 32px fixos numa tela de 320px deixam 216px de linha para o manifesto,
        o texto vira uma coluna de três palavras. A moldura acompanha a tela. */
     padding: clamp(var(--esp-4), 5vw, var(--esp-6));
     border: var(--borda-fina) solid var(--cor-borda);
@@ -122,7 +122,7 @@ const fotoNoite = await buscarFoto('foto-noite');
     background-color: var(--cor-superficie-2);
   }
 
-  /* Área clicável cobrindo o cartão, atrás do conteúdo — os links de dentro
+  /* Área clicável cobrindo o cartão, atrás do conteúdo, os links de dentro
      continuam alcançáveis. */
   .duas__acender {
     position: absolute;

@@ -4,13 +4,13 @@
  *
  *   1. abrir        2. quantas pessoas        3. abrir a conversa
  *
- * "Quando" já vem em Hoje e é opcional — o terceiro toque nunca é obrigatório.
+ * "Quando" já vem em Hoje e é opcional, o terceiro toque nunca é obrigatório.
  *
  * PROGRESSIVE ENHANCEMENT: é <details> + radios. Sem JS o painel abre, as
  * opções marcam e o link continua funcionando com o padrão do servidor; o
  * script só reescreve o href a cada escolha. (F-006)
  *
- * Fase 1 termina no WhatsApp — a equipe confirma no canal que já usa. (ADR-005)
+ * Fase 1 termina no WhatsApp, a equipe confirma no canal que já usa. (ADR-005)
  */
 import { OPCOES_PESSOAS, melhorCanal } from '@/lib/reservas';
 import { buscarCasa, buscarMarcaPorModo } from '@/lib/casa';
@@ -180,7 +180,7 @@ const QUANDO = [
 
     raiz.addEventListener('change', atualizar);
 
-    // Trocar Dia/Noite troca a marca da mensagem — a reserva segue a atmosfera
+    // Trocar Dia/Noite troca a marca da mensagem, a reserva segue a atmosfera
     // que a pessoa está vendo. (RN-33)
     new MutationObserver(atualizar).observe(document.documentElement, {
       attributes: true,
@@ -222,7 +222,7 @@ const QUANDO = [
     display: none;
   }
 
-  /* A brasa: o único ornamento decorativo do sistema, e ele significa algo —
+  /* A brasa: o único ornamento decorativo do sistema, e ele significa algo,
      o fogo é a linguagem da casa. Parada quando se pede menos movimento. */
   .reserva__chama {
     width: 8px;
@@ -264,7 +264,7 @@ const QUANDO = [
     width: min(20rem, calc(100vw - 2 * var(--gutter)));
     margin-top: 0;
     box-shadow: 0 12px 40px rgb(0 0 0 / 0.28);
-    /* Tela baixa (celular deitado, janela pequena) cortava o topo do painel —
+    /* Tela baixa (celular deitado, janela pequena) cortava o topo do painel,
        e como ele é filho de uma barra FIXA, o pedaço cortado não voltava com
        rolagem nenhuma: "quantas pessoas" ficava inalcançável e a reserva em
        três toques morria ali. Aqui o painel para embaixo do cabeçalho e rola

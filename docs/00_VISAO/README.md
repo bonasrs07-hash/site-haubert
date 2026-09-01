@@ -1,4 +1,4 @@
-# 00 — Visão de Produto
+# 00, Visão de Produto
 
 ## O problema
 
@@ -11,13 +11,13 @@ de feed. As duas contas somam **~42 mil seguidores** (@casa.coffee 31,2K +
 
 E aí a jornada quebra:
 
-1. Quem descobre a casa **não encontra cardápio** — ele não existe fora do balcão
+1. Quem descobre a casa **não encontra cardápio**, ele não existe fora do balcão
 2. Quem quer reservar **manda DM** e espera alguém ver
 3. Quem procura "steakhouse Novo Hamburgo" no Google **não acha a casa**
 4. Quem quer saber o line-up do sábado depende de **story que expira em 24h**
 
 Ou seja: a marca gera demanda e a demanda vaza. O Instagram é ótimo para gerar
-desejo e péssimo como infraestrutura de conversão — não indexa, não tem cardápio
+desejo e péssimo como infraestrutura de conversão, não indexa, não tem cardápio
 navegável, não guarda agenda e não tem CTA persistente.
 
 ## A north star
@@ -36,12 +36,12 @@ Métricas de apoio:
 
 Um site que faz na tela o que a casa faz no salão às 19h: **muda de pele**.
 
-- **Modo Dia — CASA Coffee Colab.** Claro, leve, urbano. Café, comida boa, trabalho, cultura.
-- **Modo Noite — HAUBERT Steak & Grillhouse.** Escuro, quente, intenso. Fogo, corte, drink, música.
+- **Modo Dia, CASA Coffee Colab.** Claro, leve, urbano. Café, comida boa, trabalho, cultura.
+- **Modo Noite, HAUBERT Steak & Grillhouse.** Escuro, quente, intenso. Fogo, corte, drink, música.
 - **Uma casa.** Mesmo endereço, mesma equipe, mesma reserva.
 
 Sobre isso: cardápio navegável, agenda cultural confiável, e um botão de reserva
-que nunca sai da tela — **três toques, no máximo**.
+que nunca sai da tela, **três toques, no máximo**.
 
 E, atrás, um painel onde a própria equipe atualiza cardápio, agenda e fotos sem
 depender de desenvolvedor.
@@ -59,9 +59,9 @@ Escopo fechado importa tanto quanto escopo aberto:
 
 ## Por que agora
 
-- A marca acabou de ser fechada (guia de ago/2025) — o custo de aplicar é mínimo agora e cresce depois
+- A marca acabou de ser fechada (guia de ago/2025), o custo de aplicar é mínimo agora e cresce depois
 - A audiência já existe: 42K seguidores sem destino claro
-- Concorrência local usa template genérico ou só Instagram — a barra está baixa
+- Concorrência local usa template genérico ou só Instagram, a barra está baixa
 - A stack escolhida (ADR-001) mantém tudo em tier gratuito
 
 ## Diferencial competitivo
@@ -73,7 +73,7 @@ Escopo fechado importa tanto quanto escopo aberto:
 | Linktree | Roteamento de links | Qualquer coisa de marca |
 | **CASA + HAUBERT** | A atmosfera da casa na tela + reserva em 3 toques | (Delivery e e-commerce, por escolha) |
 
-O diferencial não é "ter site". É o site **parecer a casa** — e ser o único da
+O diferencial não é "ter site". É o site **parecer a casa**, e ser o único da
 região que traduz o conceito de marca em mecânica de produto.
 
 ## Estratégia de funil
@@ -81,8 +81,8 @@ região que traduz o conceito de marca em mecânica de produto.
 | Etapa | Onde acontece | O que o site faz |
 |---|---|---|
 | **Atenção** | Instagram, Google local, boca a boca | Recebe do link na bio e da busca; o modo Dia/Noite prende nos primeiros 2s |
-| **Confiança** | O próprio site | Foto real, gente real, manifesto, cortes, agenda viva — a prova é a atmosfera |
-| **Oferta** | CTA persistente | Reserva em 3 toques, no canal que a equipe já usa (WhatsApp — ADR-005) |
+| **Confiança** | O próprio site | Foto real, gente real, manifesto, cortes, agenda viva, a prova é a atmosfera |
+| **Oferta** | CTA persistente | Reserva em 3 toques, no canal que a equipe já usa (WhatsApp, ADR-005) |
 | **Retorno** | Agenda + eventos | Line-up compartilhável traz o mesmo público de volta toda semana |
 
 > **Escassez, quando existir, é real.** Mesa limitada em data específica e vaga
@@ -93,17 +93,17 @@ região que traduz o conceito de marca em mecânica de produto.
 
 | Fase | Entrega | Critério de saída |
 |---|---|---|
-| **0 — Fundação** ← *aqui* | Governança, docs, design system, ADRs, plano de segurança | Checklist de validação da skill fechado |
-| **1 — Site institucional** | Home Dia/Noite, sobre, cultura, contato, reserva via WhatsApp, SEO local + schema.org | Site no ar em domínio próprio, LCP < 2s, CTA rastreado |
-| **2 — Conteúdo vivo** | Cardápio e agenda vindos do Supabase, página de evento com OG image | Cliente vê cardápio atualizado sem deploy |
-| **3 — Painel da equipe** | Auth, CRUD de cardápio/agenda/fotos, reserva nativa com confirmação | Equipe publica sozinha por 30 dias sem suporte |
-| **4 — Produto** | Empacotar como template multi-tenant para outras casas | Segunda casa rodando no mesmo código |
+| **0, Fundação** ← *aqui* | Governança, docs, design system, ADRs, plano de segurança | Checklist de validação da skill fechado |
+| **1, Site institucional** | Home Dia/Noite, sobre, cultura, contato, reserva via WhatsApp, SEO local + schema.org | Site no ar em domínio próprio, LCP < 2s, CTA rastreado |
+| **2, Conteúdo vivo** | Cardápio e agenda vindos do Supabase, página de evento com OG image | Cliente vê cardápio atualizado sem deploy |
+| **3, Painel da equipe** | Auth, CRUD de cardápio/agenda/fotos, reserva nativa com confirmação | Equipe publica sozinha por 30 dias sem suporte |
+| **4, Produto** | Empacotar como template multi-tenant para outras casas | Segunda casa rodando no mesmo código |
 
 ## Riscos
 
 | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|
-| **Fotos ruins** (BLK-002) | Alta | Crítico — o site é visual | Orçar ensaio ou negociar acervo original antes da Fase 1 |
+| **Fotos ruins** (BLK-002) | Alta | Crítico, o site é visual | Orçar ensaio ou negociar acervo original antes da Fase 1 |
 | Cliente não confirma insumos (endereço, WhatsApp, cardápio) | Média | Bloqueia lançamento | Lista única de pendências em `memory/bugs.md`, cobrada semanalmente |
 | Equipe não adota o painel (Fase 3) | Média | Conteúdo envelhece e o site perde valor | Fase 3 só começa com o processo de confirmação acordado com a casa |
 | Reserva por WhatsApp sem métrica limpa | Alta | Não sabemos o ROI | Contagem manual cruzada nos primeiros 30 dias (ADR-005) |

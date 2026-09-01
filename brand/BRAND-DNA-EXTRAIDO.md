@@ -1,4 +1,4 @@
-# HAUBERT + CASA — DNA extraído do deck "SOCIAL DNA" (ago/2025)
+# HAUBERT + CASA, DNA extraído do deck "SOCIAL DNA" (ago/2025)
 
 Fonte: `HAUBERT.zip` → 13 pranchas (boards 001–016 + capa + perfis).
 Extração de cores feita por amostragem de pixel nos swatches originais (2949×1868).
@@ -15,11 +15,11 @@ Duas operações no MESMO espaço físico, em Novo Hamburgo / RS:
 | Mote | **Luz. Leveza. Encontro.** | **Fogo. Força. Tradição.** |
 | Turno | Dia | Noite (a partir das 19h) |
 | Categoria | Coffee shop / urban culture house | Steakhouse autoral |
-| Instagram | @casa.coffee — 1.482 posts · 31,2K seg. | @haubert.steakhouse — 642 posts · 10,8K seg. |
+| Instagram | @casa.coffee, 1.482 posts · 31,2K seg. | @haubert.steakhouse, 642 posts · 10,8K seg. |
 | Tom de voz | Próximo, humano, moderno, convidativo | Confiante, direto, maduro, apaixonado pelo que faz |
 | Estética | Claro, natural, urbano, daylight. Acolhedor e leve. | Escuro, quente, intenso, noturno. Robusto e autoral. |
 
-**A regra que une:** *"After 7, CASA é HAUBERT."* — mesma casa, nova atmosfera.
+**A regra que une:** *"After 7, CASA é HAUBERT."*, mesma casa, nova atmosfera.
 *"Same house. Different energy."*
 
 ## 2. Frases proprietárias (usar como copy real do site)
@@ -51,7 +51,7 @@ Autenticidade · Conexão · Experiência · Design & Atmosfera · Hospitalidade
 
 ## 5. Paletas (hex amostrado do original)
 
-### PALETA CASA — "claro, natural, urbano, daylight"
+### PALETA CASA, "claro, natural, urbano, daylight"
 | Hex | Nome sugerido |
 |---|---|
 | `#DACFBB` | Areia / linho |
@@ -60,7 +60,7 @@ Autenticidade · Conexão · Experiência · Design & Atmosfera · Hospitalidade
 | `#232322` | Tinta (quase preto) |
 | `#BE6A44` | Terracota |
 
-### PALETA HAUBERT — "escuro, quente, intenso, noturno"
+### PALETA HAUBERT, "escuro, quente, intenso, noturno"
 | Hex | Nome sugerido |
 |---|---|
 | `#131212` | Carvão |
@@ -74,7 +74,7 @@ Autenticidade · Conexão · Experiência · Design & Atmosfera · Hospitalidade
 |---|---|
 | `#F6EFE7` | Fundo osso / cream (papel do deck) |
 | `#F1EEEA` | Cream alternativo |
-| `#A0361F` | **Acento tijolo/ember** — headlines de destaque e links (modal do deck) |
+| `#A0361F` | **Acento tijolo/ember**, headlines de destaque e links (modal do deck) |
 
 ## 6. Estética visual (board 002)
 
@@ -87,7 +87,7 @@ Pessoas reais (clientes, equipe, parceiros, amigos).
 
 ## 7. Conteúdo / eixos de narrativa (viram seções do site)
 
-Fire (técnica, fogo, processo) · Steak (produto e desejo — Ancho, Rib Eye,
+Fire (técnica, fogo, processo) · Steak (produto e desejo, Ancho, Rib Eye,
 T-Bone, Picanha, Filé Mignon, Brisket) · People (o time que faz a casa) ·
 Culture (música, arte, cidade) · Table (experiência, encontro, comunidade) ·
 Night (a transformação depois das 19h) · Eventos/DJs/Collabs
@@ -96,7 +96,7 @@ Night (a transformação depois das 19h) · Eventos/DJs/Collabs
 
 ## 8. O que o ZIP NÃO tem (pendências de asset)
 
-- [ ] Logos vetoriais (CASA e HAUBERT) — hoje só existem rasterizados nas pranchas
+- [ ] Logos vetoriais (CASA e HAUBERT), hoje só existem rasterizados nas pranchas
 - [ ] Arquivos de fonte (Bebas Neue e Space Grotesk são gratuitas; **Druk é paga**)
 - [ ] Banco de fotos em alta (as pranchas têm thumbs pequenos)
 - [ ] Endereço completo, telefone, horário oficial, links de reserva

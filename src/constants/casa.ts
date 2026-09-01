@@ -1,5 +1,5 @@
 /**
- * SEED DA CASA — o único lugar do código onde "HAUBERT" aparece como dado. (P-003)
+ * SEED DA CASA, o único lugar do código onde "HAUBERT" aparece como dado. (P-003)
  *
  * Toda a copy abaixo vem do guia SOCIAL DNA (ago/2025), transcrita das pranchas
  * originais em `brand/`. Nada aqui foi inventado pelo desenvolvedor. (P-006)
@@ -7,7 +7,7 @@
  * Na Fase 2 este arquivo vira `supabase/seeds/001_casa_haubert.sql` e a leitura
  * passa a ser do banco. O shape é o mesmo de propósito.
  *
- * Campos marcados com PENDENTE aguardam o cliente — ver memory/bugs.md.
+ * Campos marcados com PENDENTE aguardam o cliente, ver memory/bugs.md.
  */
 import type { Casa, Corte, ElementoFogo, Evento, Marca, Pilar } from '@/lib/tipos';
 import { PENDENTE } from '@/lib/tipos';
@@ -88,7 +88,7 @@ export const CASA: Casa = {
 };
 
 // ============================================================================
-// CONTEÚDO INSTITUCIONAL — prancha 001 (SOCIAL MANIFESTO)
+// CONTEÚDO INSTITUCIONAL, prancha 001 (SOCIAL MANIFESTO)
 // ============================================================================
 
 export const HEADLINE_MAE = 'Não venda o lugar. Faça as pessoas quererem pertencer.';
@@ -96,7 +96,7 @@ export const HEADLINE_MAE = 'Não venda o lugar. Faça as pessoas quererem perte
 export const ESSENCIA = 'Uma essência. Dois conceitos. Uma conexão que fica.';
 
 /**
- * O neon do salão diz "Support Your Local Everything." — e continua dizendo,
+ * O neon do salão diz "Support Your Local Everything.", e continua dizendo,
  * porque é objeto físico da casa e aparece assim na foto de /cultura. O que o
  * SITE fala é português: esta é a voz da casa, não a legenda do neon. (ADR-007)
  */
@@ -108,10 +108,10 @@ export const PILARES: Pilar[] = [
   { nome: 'Experiência', descricao: 'Do primeiro café ao último brinde. Cada detalhe importa.' },
   { nome: 'Design & Atmosfera', descricao: 'Luz, textura e aroma. Ambientes que acolhem.' },
   { nome: 'Hospitalidade', descricao: 'Receber bem é o nosso padrão. Fazer você se sentir em casa.' },
-  { nome: 'Cultura', descricao: 'Música, arte, esporte, moda — e tudo que move a cidade.' },
+  { nome: 'Cultura', descricao: 'Música, arte, esporte, moda, e tudo que move a cidade.' },
 ];
 
-/** Prancha 001 — a faixa de seis eixos que define a casa. */
+/** Prancha 001, a faixa de seis eixos que define a casa. */
 export const O_QUE_ENTREGAMOS: Pilar[] = [
   { nome: 'Café de verdade', descricao: 'Feito com técnica, tempo e propósito.' },
   { nome: 'Comida boa', descricao: 'Ingredientes reais. Sabor que fica.' },
@@ -125,7 +125,7 @@ export const COMPROMISSO =
   'Criar uma comunidade real, onde bons momentos viram memórias e memórias viram parte de quem somos.';
 
 // ============================================================================
-// FOGO — prancha 003
+// FOGO, prancha 003
 // ============================================================================
 
 export const ELEMENTOS_DO_FOGO: ElementoFogo[] = [
@@ -159,7 +159,7 @@ export const ELEMENTOS_DO_FOGO: ElementoFogo[] = [
 export const FRASE_FOGO = 'O fogo não é o espetáculo. O fogo é a língua. E a gente fala.';
 
 // ============================================================================
-// CORTES — prancha 004. Sem preço na Fase 1 (BLK-004).
+// CORTES, prancha 004. Sem preço na Fase 1 (BLK-004).
 // ============================================================================
 
 export const CORTES: Corte[] = [
@@ -175,7 +175,7 @@ export const PROMESSA_STEAK =
   'Entregar verdade em cada detalhe. Do corte ao serviço, do fogo à mesa. Fazer do simples, algo memorável.';
 
 // ============================================================================
-// CULTURA E EVENTOS — pranchas 006 e 013
+// CULTURA E EVENTOS, pranchas 006 e 013
 // ============================================================================
 
 export const EVENTOS: Evento[] = [
@@ -219,7 +219,7 @@ export const EIXOS_CULTURA: Pilar[] = [
 export const FRASE_CULTURA = 'A cultura não é acessório. É essência.';
 
 // ============================================================================
-// A CASA À NOITE — prancha 008
+// A CASA À NOITE, prancha 008
 // ============================================================================
 
 export const NOITE_EXPERIENCIAS: Pilar[] = [
@@ -232,7 +232,7 @@ export const NOITE_EXPERIENCIAS: Pilar[] = [
 export const FRASE_NOITE = 'Mesma casa. Nova atmosfera. Outra experiência.';
 
 // ============================================================================
-// FECHO — prancha 016 (CLOSING MANIFESTO)
+// FECHO, prancha 016 (CLOSING MANIFESTO)
 // ============================================================================
 
 export const FECHO = [

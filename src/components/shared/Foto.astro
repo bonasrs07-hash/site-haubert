@@ -2,18 +2,18 @@
 /**
  * Moldura padrão de foto.
  *
- * Existe para que nenhuma seção precise repetir proporção, borda e véu — e,
+ * Existe para que nenhuma seção precise repetir proporção, borda e véu, e,
  * principalmente, para que a troca Dia/Noite alcance a imagem. O véu é o token
  * `--overlay-foto`, que já muda com o modo: a mesma foto assenta mais clara de
  * dia e mais funda à noite, sem segundo arquivo e sem uma linha de JS.
  *
- * `<Image>` do Astro faz o trabalho pesado no build — converte, gera o srcset e
+ * `<Image>` do Astro faz o trabalho pesado no build, converte, gera o srcset e
  * escreve width/height, que é o que impede o salto de layout quando a imagem
  * chega. Custo em JavaScript: zero. (ADR-006)
  *
  * A foto chega como `FotoResolvida` (ver `src/lib/fotos.ts`): ou é um arquivo
  * do repositório, ou é uma URL do acervo que o dono trocou no painel. Para o
- * `<Image>` a diferença é só o tipo de `src` — o Astro baixa e otimiza os dois
+ * `<Image>` a diferença é só o tipo de `src`, o Astro baixa e otimiza os dois
  * no build, e o site publicado serve `/_astro/*.webp` nos dois casos. É por
  * isso que o painel não custa nada em desempenho. (ADR-008)
  */
@@ -27,7 +27,7 @@ interface Props {
   /** Larguras do srcset. Padrão serve ladrilho; cartão grande pede mais. */
   larguras?: number[];
   sizes?: string;
-  /** Sai do lazy — use só na imagem que aparece acima da dobra. */
+  /** Sai do lazy, use só na imagem que aparece acima da dobra. */
   prioridade?: boolean;
   /** Escurece a foto para receber texto por cima. */
   veu?: boolean;
@@ -48,7 +48,7 @@ const {
 // prancha só gera peso e borrão. (constants/imagens.ts explica a origem)
 //
 // O topo da escada é sempre a largura NATIVA do arquivo. Sem isso o srcset
-// pararia no degrau pedido abaixo dela — numa tela 2x o browser escolheria
+// pararia no degrau pedido abaixo dela, numa tela 2x o browser escolheria
 // 480px tendo 578px disponíveis, e jogaria fora resolução que já pagamos.
 // A margem de 3% evita o degrau inútil: pedir 1400 num arquivo de 1401 gera
 // um segundo derivado que ninguém escolhe e que ninguém deixa de baixar.
@@ -61,7 +61,7 @@ const escala = [...new Set([...cabem, foto.largura])].sort((a, b) => a - b);
     /*
       Os dois ramos existem porque o `<Image>` tipa `src` como união
       discriminada: no arquivo local ele lê as dimensões do próprio
-      `ImageMetadata`, e na URL remota ele EXIGE `width`/`height` — não tem
+      `ImageMetadata`, e na URL remota ele EXIGE `width`/`height`, não tem
       como descobrir sozinho sem baixar. Passar os dois casos de uma vez não
       compila, e forçar o tipo esconderia justamente o erro que importa: foto
       remota sem dimensão gera salto de layout.

@@ -1,7 +1,7 @@
 /**
  * Validação de arquivo enviado no painel. (docs/11_SEGURANCA, ADR-008)
  *
- * Funções puras, sem rede e sem banco — por isso nascem com teste.
+ * Funções puras, sem rede e sem banco, por isso nascem com teste.
  *
  * A postura: **nada do que o cliente afirma sobre o arquivo é aceito.** Nem o
  * nome, nem o `Content-Type` do multipart, nem a largura que a ilha React
@@ -11,7 +11,7 @@
  * errada num bucket.
  *
  * Só WebP entra: a ilha converte no browser antes de enviar. Isso não é
- * capricho de formato — o `canvas` re-codifica a imagem e, ao fazer isso,
+ * capricho de formato, o `canvas` re-codifica a imagem e, ao fazer isso,
  * **descarta o EXIF**, que é onde mora a coordenada de GPS da foto tirada no
  * celular. Aceitar o JPEG cru significaria guardar a localização de quem
  * fotografou, sem necessidade nenhuma.
@@ -19,7 +19,7 @@
 
 /**
  * Teto do master. O número não é gosto: a função serverless da Vercel recusa
- * corpo de requisição acima de ~4,5 MB, e recusa ANTES do nosso código rodar —
+ * corpo de requisição acima de ~4,5 MB, e recusa ANTES do nosso código rodar,
  * o dono veria um erro de plataforma sem explicação. Melhor barrar aqui, com
  * frase em português, num limite que a ilha já respeita: ela reencoda para
  * WebP com no máximo 2400px, o que costuma dar menos de 600 KB.
@@ -96,7 +96,7 @@ export function validarEnvio(bytes: Uint8Array): ResultadoValidacao {
   if (dimensoes.largura < LARGURA_MINIMA) {
     return {
       ok: false,
-      erro: `A imagem tem ${dimensoes.largura}px de largura. O mínimo é ${LARGURA_MINIMA}px — abaixo disso ela sai borrada no site.`,
+      erro: `A imagem tem ${dimensoes.largura}px de largura. O mínimo é ${LARGURA_MINIMA}px, abaixo disso ela sai borrada no site.`,
     };
   }
   return { ok: true, dimensoes };
@@ -107,7 +107,7 @@ export function validarEnvio(bytes: Uint8Array): ResultadoValidacao {
  *
  * O primeiro segmento é o slug da casa porque é ele que a policy do Storage
  * lê para saber de quem é o arquivo (`casa_do_caminho`). O resto é data e um
- * identificador aleatório — nome de arquivo enviado pelo usuário nunca vira
+ * identificador aleatório, nome de arquivo enviado pelo usuário nunca vira
  * caminho: é assim que se escreve por cima do arquivo dos outros.
  */
 export function montarCaminho(casaSlug: string, id: string, agora: Date): string {

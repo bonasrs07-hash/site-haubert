@@ -1,4 +1,4 @@
-# Aprendizados — CASA + HAUBERT
+# Aprendizados, CASA + HAUBERT
 
 > Memória viva. Erro que não vira aprendizado registrado é erro que volta.
 > Registre no momento em que aprendeu, não no fim do projeto.
@@ -39,14 +39,14 @@
 
 ---
 
-## 2026-08-24 — O vermelho da marca não serve como texto no modo escuro
+## 2026-08-24, O vermelho da marca não serve como texto no modo escuro
 
 **O que descobrimos.** O acento tijolo do guia (`#A0361F`) dá apenas **2,7:1**
 sobre o carvão `#131212`. Reprova em WCAG AA até para texto grande.
 
 **Por que importa.** O guia foi desenhado para pranchas impressas em fundo osso,
 onde o mesmo vermelho dá 6,1:1. Aplicar a paleta de impressão direto na web, sem
-recalcular, teria produzido um site bonito e ilegível — exatamente no modo
+recalcular, teria produzido um site bonito e ilegível, exatamente no modo
 HAUBERT, que é o mais importante à noite.
 
 **O que fazemos.** O modo Noite usa `--tijolo-claro` (`#D9553A`, 4,8:1) para
@@ -58,16 +58,16 @@ virar token. Guia de marca é para impressão até que se prove o contrário.
 
 ---
 
-## 2026-08-24 — O ZIP de marca não tinha o que o nome prometia
+## 2026-08-24, O ZIP de marca não tinha o que o nome prometia
 
-**O que aconteceu.** O arquivo veio nomeado "Color Palette 2..14" — 13 PNGs de
+**O que aconteceu.** O arquivo veio nomeado "Color Palette 2..14", 13 PNGs de
 5MB. Não eram paletas: eram as **16 pranchas do guia SOCIAL DNA completo**
 (manifesto, pilares, tom de voz, feed system, campanha, launch grid). Duas
 pranchas por arquivo em alguns casos.
 
 **Por que importa.** Se tivéssemos confiado no nome do arquivo, teríamos
 extraído cinco hex e jogado fora o manifesto, as frases proprietárias, o tom de
-voz por marca e a estrutura de conteúdo — que é 90% do valor do material e o que
+voz por marca e a estrutura de conteúdo, que é 90% do valor do material e o que
 sustenta a copy do site inteiro.
 
 **O que fazemos.** Todo insumo de cliente é aberto e lido antes de ser
@@ -76,21 +76,21 @@ que ninguém precise reabrir 74MB de PNG.
 
 ---
 
-## 2026-08-24 — Multi-tenant aqui não é sobre ter muitos clientes
+## 2026-08-24, Multi-tenant aqui não é sobre ter muitos clientes
 
 **O que descobrimos.** O reflexo era modelar single-tenant, já que o cliente é
 um só. Mas a casa **já é duas marcas** com paleta, tom, horário e cardápio
 próprios dividindo o mesmo endereço. Sem `brands` como tabela, o site viraria um
 campo minado de `if (noite)`.
 
-**Por que importa.** O multi-tenant se paga já no primeiro cliente — antes
+**Por que importa.** O multi-tenant se paga já no primeiro cliente, antes
 mesmo de existir um segundo. A Fase 4 (produto) vira consequência, não motivo.
 
 **Onde ficou.** ADR-002.
 
 ---
 
-## 2026-08-24 — A referência visual e o guia da marca combinam por acaso feliz
+## 2026-08-24, A referência visual e o guia da marca combinam por acaso feliz
 
 **O que descobrimos.** Ao inspecionar `disturbancebrands.com`: fundo `#181818`,
 texto creme `#FFF8E7`, corpo em **Space Mono**, display em grotesca larga com
@@ -100,7 +100,7 @@ Isso é quase exatamente o que as pranchas do guia HAUBERT já fazem: fundo osso
 ou carvão, legendas monoespaçadas em caixa alta com tracking largo, e títulos
 condensados pesados com tracking negativo.
 
-**Por que importa.** A referência não precisa ser traduzida para a marca — ela
+**Por que importa.** A referência não precisa ser traduzida para a marca, ela
 **já é** a marca em outro meio. Isso reduz o risco de o site parecer uma cópia
 do estúdio de referência em vez de parecer a casa.
 
@@ -110,7 +110,7 @@ guia. Nenhuma cor, fonte ou frase da referência entra no projeto.
 
 ---
 
-## 2026-08-24 — As duas interações da Fase 1 não pagavam um runtime de componentes
+## 2026-08-24, As duas interações da Fase 1 não pagavam um runtime de componentes
 
 **O que descobrimos.** O intake previa "ilhas React pontuais". Na hora de
 implementar, o alternador Dia/Noite e a folha de reserva revelaram-se: um
@@ -126,7 +126,7 @@ ativo" saiu inteiramente em CSS, derivado do `[data-modo]` do `<html>`.
 
 **Resultado medido no build: 7 KB de JS, 11% do orçamento.** E o bônus não
 planejado: como o estado ativo é CSS e não JS, o rótulo certo já está pintado no
-primeiro frame — não existe janela entre "pintou" e "está correto".
+primeiro frame, não existe janela entre "pintou" e "está correto".
 
 **Por que importa.** A pergunta útil não é "essa interação é complexa?" e sim
 "o runtime custa menos do que aquilo que ele resolve?". Aqui não custava.
@@ -135,10 +135,10 @@ primeiro frame — não existe janela entre "pintou" e "está correto".
 
 ---
 
-## 2026-08-24 — O `<script>` de componente Astro roda uma vez, não uma vez por instância
+## 2026-08-24, O `<script>` de componente Astro roda uma vez, não uma vez por instância
 
 **O que descobrimos.** `BotaoReserva` aparece duas vezes na home (na barra fixa
-e na chamada final). O Astro deduplica o `<script>` do componente no bundle —
+e na chamada final). O Astro deduplica o `<script>` do componente no bundle,
 ele executa **uma vez** para a página inteira, não uma vez por instância.
 
 **Por que importa.** `document.querySelector('[data-reserva]')` teria ligado só
@@ -148,14 +148,14 @@ servidor. O bug seria silencioso: o link funciona, só ignora as escolhas.
 **O que fazemos.** Todo script de componente começa com `querySelectorAll` +
 `forEach`, e cada instância lê a própria configuração de `data-*` em vez de
 importar constantes. Serve de fronteira também: foi assim que a barra parou de
-arrastar `constants/casa.ts` inteiro — toda a copy do site — para o bundle do
+arrastar `constants/casa.ts` inteiro, toda a copy do site, para o bundle do
 cliente.
 
 **Onde ficou.** P-002.
 
 ---
 
-## 2026-08-24 — Aba oculta congela transição CSS e finge bug de tema
+## 2026-08-24, Aba oculta congela transição CSS e finge bug de tema
 
 **O que descobrimos.** Ao verificar a troca Dia/Noite pelo painel do browser, os
 tokens mudavam (`--cor-superficie` virava carvão) mas `body` continuava creme, e

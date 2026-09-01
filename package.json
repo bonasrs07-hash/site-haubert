@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Site oficial da casa — CASA Coffee Colab (dia) + HAUBERT Steak & Grillhouse (noite), Novo Hamburgo/RS",
+  "description": "Site oficial da casa, CASA Coffee Colab (dia) + HAUBERT Steak & Grillhouse (noite), Novo Hamburgo/RS",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

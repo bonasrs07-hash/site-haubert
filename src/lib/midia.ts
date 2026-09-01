@@ -1,9 +1,9 @@
 /**
- * Camada de serviços — o acervo de fotos do painel. (ADR-008, P-001)
+ * Camada de serviços, o acervo de fotos do painel. (ADR-008, P-001)
  *
  * Nenhum componente e nenhum endpoint fala com o Supabase direto: falam daqui.
  * Tudo neste arquivo usa o cliente da SESSÃO (token do dono), nunca a
- * `service_role` — quem autoriza cada linha é a RLS. O único lugar do projeto
+ * `service_role`, quem autoriza cada linha é a RLS. O único lugar do projeto
  * que lê este acervo com `service_role` é `fotos.ts`, no build, onde não existe
  * usuário logado.
  */
@@ -14,7 +14,7 @@ import { ehChaveDeVaga } from '@/constants/vagas';
 /** Vida da URL de pré-visualização no painel. Curta: é só para a tela. */
 const SEGUNDOS_DE_PREVIA = 60 * 30;
 
-/** Freio do botão Publicar — o Hobby da Vercel dá 100 deploys por dia. */
+/** Freio do botão Publicar, o Hobby da Vercel dá 100 deploys por dia. */
 export const SEGUNDOS_ENTRE_PUBLICACOES = 60;
 
 export interface ItemDoAcervo {
@@ -35,6 +35,7 @@ export interface ItemDoAcervo {
 export interface EstadoDaVaga {
   chave: string;
   mediaId: string | null;
+  atualizadoEm: string;
 }
 
 type Resultado<T> = { ok: true; valor: T } | { ok: false; erro: string; status: number };
@@ -97,16 +98,38 @@ export async function listarAcervo(sessao: Sessao): Promise<ItemDoAcervo[]> {
 export async function listarVagas(sessao: Sessao): Promise<EstadoDaVaga[]> {
   const { data } = await sessao.supabase
     .from('media_slots')
-    .select('chave, media_id')
+    .select('chave, media_id, atualizado_em')
     .eq('venue_id', sessao.casaId);
-  return (data ?? []).map((v) => ({ chave: v.chave, mediaId: v.media_id }));
+  return (data ?? []).map((v) => ({
+    chave: v.chave,
+    mediaId: v.media_id,
+    atualizadoEm: v.atualizado_em,
+  }));
+}
+
+/**
+ * Quando o site foi publicado pela última vez.
+ *
+ * É o que separa "troquei a foto" de "a foto está no ar", a distinção mais
+ * fácil de confundir neste painel, porque a troca aparece na tela na hora e no
+ * site só depois do build. Sem este carimbo, o aviso de pendência seria
+ * decorativo: some ao recarregar a página e mente para quem fechou a aba no
+ * meio. (ADR-008)
+ */
+export async function buscarUltimaPublicacao(sessao: Sessao): Promise<string | null> {
+  const { data } = await sessao.supabase
+    .from('venues')
+    .select('ultima_publicacao_em')
+    .eq('id', sessao.casaId)
+    .maybeSingle();
+  return data?.ultima_publicacao_em ?? null;
 }
 
 /**
  * Guarda o arquivo e registra no acervo.
  *
  * A ordem importa: valida → sobe → registra. Se o registro falhar depois do
- * upload, o arquivo órfão é apagado — bucket com arquivo que ninguém referencia
+ * upload, o arquivo órfão é apagado, bucket com arquivo que ninguém referencia
  * é cota queimada em silêncio.
  */
 export async function registrarEnvio(
@@ -130,7 +153,7 @@ export async function registrarEnvio(
   }
   if (alt.length > 300) return falha('A descrição passou de 300 caracteres.');
 
-  // Direito de imagem (BLK-008, memory/restrictions.md — restrição ALTA).
+  // Direito de imagem (BLK-008, memory/restrictions.md, restrição ALTA).
   // A ilha já barra isto na tela, mas tela é UX; a regra tem que existir aqui,
   // onde ela não depende do JavaScript de ninguém. (docs/11_SEGURANCA)
   if (entrada.temPessoa && !entrada.autorizacaoImagem) {
@@ -170,7 +193,7 @@ export async function registrarEnvio(
 
   // Devolve o item já com a prévia assinada. Sem isto o painel precisaria
   // recarregar a página inteira só para conseguir mostrar o que acabou de
-  // enviar — e recarregar no meio de uma troca é onde o dono se perde.
+  // enviar, e recarregar no meio de uma troca é onde o dono se perde.
   const { data: assinada } = await sessao.supabase.storage
     .from('midia')
     .createSignedUrl(caminho, SEGUNDOS_DE_PREVIA);
@@ -242,7 +265,7 @@ export async function limparVaga(sessao: Sessao, chave: unknown): Promise<Result
 
 /**
  * Apaga uma foto da galeria.
- * Foto que está no ar não é apagada — a FK é `on delete restrict` de propósito,
+ * Foto que está no ar não é apagada, a FK é `on delete restrict` de propósito,
  * e a mensagem aqui existe para o erro do banco não chegar cru na tela.
  */
 export async function apagarDoAcervo(sessao: Sessao, mediaId: unknown): Promise<Resultado<null>> {

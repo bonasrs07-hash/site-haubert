@@ -1,11 +1,11 @@
 # ADR-002: Multi-tenant por casa, marca como dado (white-label)
 
 ## Status
-Accepted — 2026-08-24
+Accepted, 2026-08-24
 
 ## Contexto
 
-O cliente é **um só** — a casa de Novo Hamburgo. A tentação óbvia é modelar
+O cliente é **um só**, a casa de Novo Hamburgo. A tentação óbvia é modelar
 single-tenant e hardcodar tudo. Três fatos empurram na direção oposta:
 
 1. **A casa já é duas marcas.** CASA Coffee Colab e HAUBERT Steak & Grillhouse
@@ -19,7 +19,7 @@ single-tenant e hardcodar tudo. Três fatos empurram na direção oposta:
    nome, cor, logo ou regra de cliente hardcodada.
 
 A pergunta que resolve o desenho é: *qual é a unidade de isolamento?* Não é a
-marca — CASA e HAUBERT compartilham reservas, equipe e endereço. É a **casa**.
+marca, CASA e HAUBERT compartilham reservas, equipe e endereço. É a **casa**.
 
 ## Decisão
 
@@ -44,7 +44,7 @@ Regras que decorrem:
 3. **Copy institucional também é dado.** Mote, manifesto, frases proprietárias e
    horário vivem em `brands`, não em string literal no `.astro`.
 4. **Nenhum componente conhece o nome "HAUBERT".** Ele recebe `brand` e renderiza.
-   Um `grep -i haubert src/` só pode dar match em seed, config e conteúdo —
+   Um `grep -i haubert src/` só pode dar match em seed, config e conteúdo,
    nunca em componente.
 5. **Feature flags por tenant** (`venues.features` JSONB) já previstas, mesmo
    sem uso na Fase 1: `reserva_nativa`, `cardapio_dinamico`, `agenda`.
@@ -59,7 +59,7 @@ Regras que decorrem:
 
 **Tenant = marca** (CASA e HAUBERT como dois tenants)
 - Prós: isolamento máximo entre as duas identidades
-- Contras: reserva, equipe, endereço e fotos são compartilhados — passariam a
+- Contras: reserva, equipe, endereço e fotos são compartilhados, passariam a
   precisar de duplicação ou de tabela cross-tenant, que é exatamente o que a RLS
   deveria impedir. Reprovado
 
@@ -87,6 +87,6 @@ Regras que decorrem:
   shape com Zod na camada de serviços e ter um token default de fallback
 
 ## Referências
-- `docs/04_MODELAGEM/README.md` — schema e policies
-- `docs/11_SEGURANCA/README.md` — teste de isolamento
-- ADR-004 — a troca Dia/Noite consumindo `brands.tokens`
+- `docs/04_MODELAGEM/README.md`, schema e policies
+- `docs/11_SEGURANCA/README.md`, teste de isolamento
+- ADR-004, a troca Dia/Noite consumindo `brands.tokens`

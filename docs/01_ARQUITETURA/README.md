@@ -1,11 +1,11 @@
-# 01 — Arquitetura
+# 01, Arquitetura
 
 > Decisão registrada em **[ADR-001](../08_DECISOES/adr-001-stack-astro-supabase.md)**.
 > Multi-tenancy em **[ADR-002](../08_DECISOES/adr-002-multi-tenant-white-label.md)**.
 
 ## Modelo
 
-**Modelo A-híbrido** — front-end renderizado no build/edge consumindo um BaaS
+**Modelo A-híbrido**, front-end renderizado no build/edge consumindo um BaaS
 direto pela camada de serviços. Sem API própria na Fase 1.
 
 ```
@@ -13,7 +13,7 @@ direto pela camada de serviços. Sem API própria na Fase 1.
 │  Vercel (Hobby)                                          │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐ │
-│  │  Astro 7 — output: 'static' + adapter Vercel       │ │
+│  │  Astro 7, output: 'static' + adapter Vercel       │ │
 │  │                                                     │ │
 │  │  ESTÁTICO (build)          SSR (edge)              │ │
 │  │  /            home         /agenda                 │ │
@@ -26,8 +26,8 @@ direto pela camada de serviços. Sem API própria na Fase 1.
 │  │               CarrosselCortes                       │ │
 │  └───────────────────────┬────────────────────────────┘ │
 └──────────────────────────┼──────────────────────────────┘
-                           │  src/lib/  (camada de serviços)
-                           │  — o ÚNICO ponto que fala com o backend
+                           │  src/lib/  (camada de serviços),
+                           │  o ÚNICO ponto que fala com o backend
                            ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Supabase (região São Paulo)                             │
@@ -37,7 +37,7 @@ direto pela camada de serviços. Sem API própria na Fase 1.
 └─────────────────────────────────────────────────────────┘
                            │
                            ▼
-                     wa.me (reserva, Fase 1 — ADR-005)
+                     wa.me (reserva, Fase 1, ADR-005)
 ```
 
 ## Por que cada peça
@@ -52,10 +52,10 @@ direto pela camada de serviços. Sem API própria na Fase 1.
 
 ## Camadas
 
-### 1. Apresentação — `src/pages/`, `src/components/`
+### 1. Apresentação, `src/pages/`, `src/components/`
 Layouts e seções. **Não conhece o Supabase.** Recebe dado já formatado.
 
-### 2. Serviços — `src/lib/` *(P-001)*
+### 2. Serviços, `src/lib/` *(P-001)*
 O único ponto que fala com o backend. Uma função por caso de uso, tipada,
 devolvendo o shape que a UI precisa. Trocar de provedor mexe só aqui.
 
@@ -69,11 +69,11 @@ src/lib/
   reservas.ts        montarLinkWhatsapp(...)  ← Fase 1: não toca o banco
 ```
 
-### 3. Dados — `supabase/`
+### 3. Dados, `supabase/`
 `schema.sql` é a fonte de verdade. Migrations versionadas. **RLS em toda
 tabela** *(P-005)*.
 
-### 4. Estado de UI — o atributo `data-modo` no `<html>`
+### 4. Estado de UI, o atributo `data-modo` no `<html>`
 Não há contexto de UI. O único estado global de interface é o modo
 (dia/noite), e ele vive como atributo no `<html>`: o CSS lê direto e o
 JS troca com um `setAttribute`. Sem React na Fase 1, contexto seria
@@ -84,7 +84,7 @@ cerimônia sem função ([ADR-006](../08_DECISOES/adr-006-fase1-sem-react.md)).
 | Rota | Modo | Motivo |
 |---|---|---|
 | `/` | Estático | Conteúdo institucional; muda em deploy |
-| `/noite` | Estático | Rota do HAUBERT com o modo forçado e canônica própria (ADR-004). Não há dado dinâmico a buscar — SSR aqui só adicionaria latência |
+| `/noite` | Estático | Rota do HAUBERT com o modo forçado e canônica própria (ADR-004). Não há dado dinâmico a buscar, SSR aqui só adicionaria latência |
 | `/sobre`, `/fogo`, `/cultura`, `/contato` | Estático | Institucional |
 | `/privacidade`, `/404` | Estático, `noindex` | Não devem ser encontradas na busca |
 | `/cardapio` | SSR + cache 5min | Vem do banco; a equipe edita |
@@ -111,7 +111,7 @@ Detalhe em [`docs/11_SEGURANCA/`](../11_SEGURANCA/README.md).
 |---|---|---|
 | Local | `npm run dev` (:4321) | Projeto Supabase de dev |
 | Preview | Deploy por branch na Vercel | Projeto Supabase de dev |
-| Produção | Domínio próprio (pendente — BLK-006) | Projeto Supabase de prod |
+| Produção | Domínio próprio (pendente, BLK-006) | Projeto Supabase de prod |
 
 Variáveis em `.env.example`. Nada de segredo no repositório.
 
@@ -130,8 +130,8 @@ Estourar teto é bloqueio de merge, não observação.
 
 | Gatilho | Movimento |
 |---|---|
-| Segunda casa (Fase 4) | Nada estrutural — é seed + domínio (ADR-002) |
+| Segunda casa (Fase 4) | Nada estrutural, é seed + domínio (ADR-002) |
 | Reserva nativa (Fase 3) | Endpoint de servidor + tabela `reservations` + e-mail transacional |
 | Regra de negócio ficando complexa | Extrair para Edge Function; a camada de serviços já isola a UI |
 | Volume acima do tier gratuito | Supabase Pro; sem mudança de código |
-| E-commerce | Aí sim reavaliar Next.js — registrado como alternativa no ADR-001 |
+| E-commerce | Aí sim reavaliar Next.js, registrado como alternativa no ADR-001 |

@@ -5,7 +5,7 @@
  * Controle segmentado, não interruptor: o visitante vê as DUAS atmosferas e
  * qual está ativa. É a tradução em UI do "mesma casa, outra energia".
  *
- * O estado visual vem do `[data-modo]` no <html>, via CSS — por isso o rótulo
+ * O estado visual vem do `[data-modo]` no <html>, via CSS, por isso o rótulo
  * certo já está pintado antes de qualquer JS rodar. O script só troca o
  * atributo. (ADR-004, princípio nº1: intuitividade)
  */
@@ -52,7 +52,7 @@ const { compacto = false } = Astro.props;
     });
   });
 
-  // Qualquer parte da página pode trocar o modo — o alternador só acompanha.
+  // Qualquer parte da página pode trocar o modo, o alternador só acompanha.
   new MutationObserver(sincronizar).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-modo'],
@@ -92,7 +92,7 @@ const { compacto = false } = Astro.props;
       color var(--transicao);
   }
 
-  /* A pílula mede 48px, mas cada botão dentro dela mede 40 — e 40 é menos que
+  /* A pílula mede 48px, mas cada botão dentro dela mede 40, e 40 é menos que
      o `--alvo-toque` da casa. Em vez de engordar o controle (o que empurraria
      o cabeçalho inteiro para baixo), o alvo cresce por fora do desenho: a
      área de toque chega a 48px sem mover um pixel do que se vê. */
@@ -124,7 +124,7 @@ const { compacto = false } = Astro.props;
 
   /* 320–376px: o ponto é decoração `aria-hidden`, e o estado ativo continua
      dito pelo fundo cheio e pela paleta da página inteira. Ele sai para que o
-     RÓTULO caiba — entre enfeite e palavra, sai o enfeite. */
+     RÓTULO caiba, entre enfeite e palavra, sai o enfeite. */
   @media (max-width: 23.5rem) {
     .alternador--compacto .alternador__opcao {
       padding-inline: 6px;

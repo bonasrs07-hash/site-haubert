@@ -1,5 +1,5 @@
 /**
- * Camada de serviços — a casa e suas marcas.
+ * Camada de serviços, a casa e suas marcas.
  *
  * O ÚNICO ponto que sabe de onde o dado vem. Componente chama daqui e recebe o
  * shape pronto para a UI. (P-001)
@@ -7,7 +7,7 @@
  * Fase 1: lê de `src/constants/casa.ts`.
  * Fase 2: troca a origem para o Supabase sem que nenhum componente mude.
  *
- * As funções de relógio moram em `horario.ts` — puras e sem dado, para poderem
+ * As funções de relógio moram em `horario.ts`, puras e sem dado, para poderem
  * ir ao browser sozinhas.
  */
 import { CASA, MARCA_CASA, MARCA_HAUBERT } from '@/constants/casa';
@@ -40,7 +40,7 @@ export function buscarMarcaPorModo(modo: Modo): Marca {
   return modo === 'noite' ? MARCA_HAUBERT : MARCA_CASA;
 }
 
-/** A outra marca — usada pelo alternador e pelas chamadas cruzadas. */
+/** A outra marca, usada pelo alternador e pelas chamadas cruzadas. */
 export function buscarMarcaOposta(modo: Modo): Marca {
   return modo === 'noite' ? MARCA_CASA : MARCA_HAUBERT;
 }

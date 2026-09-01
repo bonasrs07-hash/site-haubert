@@ -1,7 +1,7 @@
 /**
  * Clientes Supabase.
  *
- * A Fase 1 não consulta o banco — o conteúdo vem de `src/constants/casa.ts`.
+ * A Fase 1 não consulta o banco, o conteúdo vem de `src/constants/casa.ts`.
  * Este arquivo existe para que a Fase 2 troque a origem do dado dentro da
  * camada de serviços, sem que nenhum componente saiba. (P-001, ADR-001)
  *
@@ -19,7 +19,7 @@ let clientePublico: SupabaseClient | null = null;
 
 /**
  * Cliente público (chave `anon`). Toda a proteção vem das policies de RLS.
- * Devolve `null` quando o ambiente não está configurado — o site tem que
+ * Devolve `null` quando o ambiente não está configurado, o site tem que
  * continuar servindo o conteúdo estático mesmo sem banco. (F-006)
  */
 export function supabasePublico(): SupabaseClient | null {
@@ -31,7 +31,7 @@ export function supabasePublico(): SupabaseClient | null {
 }
 
 /**
- * Cliente de servidor (`service_role`). Ignora RLS — use apenas em endpoint
+ * Cliente de servidor (`service_role`). Ignora RLS, use apenas em endpoint
  * Astro ou Edge Function, e só quando a operação realmente exigir.
  *
  * Lança se for chamado no browser: é a última barreira contra o vazamento mais
@@ -53,7 +53,7 @@ export function supabaseServidor(): SupabaseClient {
 /**
  * Cliente com o token DO USUÁRIO logado no painel.
  *
- * É este que o painel usa para tudo — não a `service_role`. A diferença não é
+ * É este que o painel usa para tudo, não a `service_role`. A diferença não é
  * estilo: com o token do usuário, quem autoriza cada linha é a RLS
  * (`e_membro_da_casa`), que é a barreira que a gente realmente testa. Painel
  * escrito com `service_role` funciona igual e passa a depender de o código
@@ -70,7 +70,7 @@ export function supabaseComToken(token: string): SupabaseClient | null {
   });
 }
 
-/** Cliente anônimo novo, para o login — que acontece ANTES de existir token. */
+/** Cliente anônimo novo, para o login, que acontece ANTES de existir token. */
 export function supabaseAnonimo(): SupabaseClient | null {
   if (!url || !chaveAnon) return null;
   return createClient(url, chaveAnon, {

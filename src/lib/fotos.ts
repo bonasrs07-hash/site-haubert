@@ -1,17 +1,17 @@
 /**
- * Camada de serviços — as fotos do site. (ADR-008, P-001)
+ * Camada de serviços, as fotos do site. (ADR-008, P-001)
  *
  * Resolve cada VAGA (`src/constants/vagas.ts`) na foto que deve aparecer nela.
  * Isto roda no BUILD, nunca no browser: o site publicado serve os derivados
  * `/_astro/*.webp` que o `astro:assets` gerou, e não aponta para o Supabase.
  *
  * Por que service_role aqui: no build não existe usuário logado, e as tabelas
- * `media`/`media_slots` não têm policy de leitura para `anon` de propósito —
+ * `media`/`media_slots` não têm policy de leitura para `anon` de propósito,
  * a galeria guarda foto que o dono ainda não publicou. Este arquivo é servidor
  * puro; `supabaseServidor()` explode se alguém o arrastar para o cliente.
  *
- * REGRA QUE NÃO SE NEGOCIA: se qualquer coisa der errado — sem `.env`, banco
- * fora do ar, vaga vazia, URL que não assina — a resposta é o arquivo
+ * REGRA QUE NÃO SE NEGOCIA: se qualquer coisa der errado, sem `.env`, banco
+ * fora do ar, vaga vazia, URL que não assina, a resposta é o arquivo
  * versionado em `src/assets/marca/`. O build NUNCA falha por causa do banco.
  * Site com a foto da semana passada é um problema pequeno; site que não
  * compila é o fim do dia. (F-006)
@@ -22,7 +22,7 @@ import { supabaseServidor } from './supabase';
 
 /**
  * Uma foto pronta para o `<Image>`: ou um arquivo do repositório
- * (`ImageMetadata`) ou uma URL remota — e, nos dois casos, as dimensões, que o
+ * (`ImageMetadata`) ou uma URL remota, e, nos dois casos, as dimensões, que o
  * Astro exige explicitamente para otimizar imagem remota.
  */
 export interface FotoResolvida {
@@ -59,7 +59,7 @@ interface LinhaDoManifesto {
 
 /**
  * Lê do banco quais fotos estão em quais vagas e assina as URLs.
- * Devolve um mapa vazio em qualquer cenário de falha — quem chama trata isso
+ * Devolve um mapa vazio em qualquer cenário de falha, quem chama trata isso
  * como "usar o padrão", que é o comportamento correto.
  */
 async function lerManifesto(): Promise<Map<string, FotoResolvida>> {

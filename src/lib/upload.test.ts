@@ -15,7 +15,7 @@ import {
   validarEnvio,
 } from './upload';
 
-/** Cabeçalho VP8 com perda — o que o `canvas` do browser produz. */
+/** Cabeçalho VP8 com perda, o que o `canvas` do browser produz. */
 function webpVP8(largura: number, altura: number): Uint8Array {
   const b = new Uint8Array(40);
   b.set([...'RIFF'].map((c) => c.charCodeAt(0)), 0);
@@ -97,7 +97,7 @@ describe('validarEnvio', () => {
 });
 
 describe('montarCaminho', () => {
-  it('começa pelo slug da casa — é o que a policy do Storage lê', () => {
+  it('começa pelo slug da casa, é o que a policy do Storage lê', () => {
     const caminho = montarCaminho('casa-haubert', 'abc123', new Date('2026-08-29T12:00:00Z'));
     expect(caminho).toBe('casa-haubert/2026/08/abc123.webp');
     expect(caminho.split('/')[0]).toBe('casa-haubert');

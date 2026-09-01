@@ -1,12 +1,12 @@
 # ADR-005: Reserva por WhatsApp na Fase 1, reserva nativa na Fase 3
 
 ## Status
-Accepted — 2026-08-24
+Accepted, 2026-08-24
 
 ## Contexto
 
 Reservar mesa é a conversão nº1 do site e o Princípio nº1 do projeto: **três
-toques, no máximo**. Hoje a casa recebe reserva por DM do Instagram — canal que
+toques, no máximo**. Hoje a casa recebe reserva por DM do Instagram, canal que
 perde pedido, não tem histórico e depende de alguém olhando o celular.
 
 Há duas maneiras de resolver:
@@ -21,7 +21,7 @@ O que pesa na decisão:
 1. **A equipe já vive no WhatsApp.** Um painel novo compete com o hábito
    instalado; reserva que chega em lugar que ninguém olha é reserva perdida.
 2. **Reserva nativa sem confirmação é pior que WhatsApp.** Se o cliente envia o
-   formulário e ninguém confirma, a experiência quebra — e a culpa vai para o site.
+   formulário e ninguém confirma, a experiência quebra, e a culpa vai para o site.
 3. **Confirmação exige processo, não só código**: quem responde, em quanto tempo,
    o que fazer com overbooking. Isso ainda não existe na casa.
 4. **LGPD**: guardar nome, telefone e e-mail em banco exige base legal, política
@@ -31,7 +31,7 @@ O que pesa na decisão:
 
 ## Decisão
 
-**Fase 1 — reserva por WhatsApp com mensagem pré-preenchida.**
+**Fase 1, reserva por WhatsApp com mensagem pré-preenchida.**
 
 - Botão persistente em todas as telas (`position: fixed` no mobile)
 - O usuário escolhe **quantas pessoas** e **quando** numa ilha React leve;
@@ -40,10 +40,10 @@ O que pesa na decisão:
   > *"Oi! Queria reservar uma mesa no HAUBERT para 4 pessoas, sexta às 20h."*
 - **Três toques**: abrir → escolher pessoas/horário → enviar
 - Nenhum dado pessoal transita ou é armazenado pelo site
-- O link carrega UTM e dispara evento de analytics no clique — é a métrica de
+- O link carrega UTM e dispara evento de analytics no clique, é a métrica de
   conversão da Fase 1
 
-**Fase 3 — reserva nativa**, quando existirem: painel da equipe em uso, processo
+**Fase 3, reserva nativa**, quando existirem: painel da equipe em uso, processo
 de confirmação definido com a casa, e e-mail transacional configurado.
 A migração é aditiva: o botão WhatsApp continua como fallback.
 
@@ -62,7 +62,7 @@ A migração é aditiva: o botão WhatsApp continua como fallback.
 
 **Formulário que envia e-mail, sem banco**
 - Prós: sem tabela, sem RLS, sem retenção
-- Contras: e-mail é pior que WhatsApp para uma equipe de salão — ninguém
+- Contras: e-mail é pior que WhatsApp para uma equipe de salão, ninguém
   responde caixa de entrada durante o serviço. Reprovado
 
 **Só telefone**
@@ -82,11 +82,11 @@ A migração é aditiva: o botão WhatsApp continua como fallback.
   combinar clique com a contagem manual da casa por 30 dias para achar a taxa
 - **Sem histórico de cliente** → nenhuma base para CRM/recorrência na Fase 1.
   Aceito; é objetivo da Fase 3
-- **Depende de o cliente ter WhatsApp Business ativo e atendido** — BLK-005
+- **Depende de o cliente ter WhatsApp Business ativo e atendido**, BLK-005
 - Deep link `wa.me` se comporta diferente em desktop (abre WhatsApp Web).
   Mitigação: testar nos dois e oferecer telefone como alternativa visível
 
 ## Referências
-- `docs/05_FLUXOS/README.md` — o fluxo de reserva desenhado
-- `memory/bugs.md` — BLK-005 (número de WhatsApp pendente)
-- `CLAUDE.md` — Princípio nº1
+- `docs/05_FLUXOS/README.md`, o fluxo de reserva desenhado
+- `memory/bugs.md`, BLK-005 (número de WhatsApp pendente)
+- `CLAUDE.md`, Princípio nº1

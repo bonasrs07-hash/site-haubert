@@ -2,18 +2,18 @@
  * Sessão do painel. (ADR-008, docs/11_SEGURANCA)
  *
  * O dono entra com e-mail e senha; os tokens do Supabase Auth ficam em cookies
- * `httpOnly`. É servidor puro — nada aqui chega ao browser, e a ilha React do
+ * `httpOnly`. É servidor puro, nada aqui chega ao browser, e a ilha React do
  * painel nunca vê um token.
  *
  * A regra que sustenta tudo: **a sessão é validada contra o servidor de Auth a
  * cada requisição**, com `getUser()`. Ler o JWT do cookie e acreditar nele é o
- * erro clássico — cookie é entrada do usuário, e assinatura só vale se alguém
+ * erro clássico, cookie é entrada do usuário, e assinatura só vale se alguém
  * conferir. `getSession()` não confere; `getUser()` confere.
  *
  * Estar logado não é estar autorizado: depois de saber QUEM é, ainda é preciso
  * saber se essa pessoa pertence a ESTA casa (`venue_members`). Quem decide isso
  * de verdade é a RLS, no banco; a checagem daqui existe para não renderizar o
- * painel para quem não tem nada a fazer nele. (ADR-002 — nada de e-mail de dono
+ * painel para quem não tem nada a fazer nele. (ADR-002, nada de e-mail de dono
  * hardcodado)
  */
 import type { AstroCookies } from 'astro';
@@ -63,7 +63,7 @@ export function limparSessao(cookies: AstroCookies): void {
 
 /**
  * Quem está aí? Devolve `null` para qualquer coisa que não seja um membro
- * válido desta casa — sem distinguir "não logado" de "logado e sem acesso".
+ * válido desta casa, sem distinguir "não logado" de "logado e sem acesso".
  * Quem chama trata os dois do mesmo jeito: manda para a tela de entrar.
  */
 export async function lerSessao(cookies: AstroCookies): Promise<Sessao | null> {
@@ -114,7 +114,7 @@ export async function lerSessao(cookies: AstroCookies): Promise<Sessao | null> {
   if (!casa) return null;
 
   // A prova de acesso. Vale a pena olhar para o que acontece se esta consulta
-  // for burlada: nada — a RLS de `media` e `media_slots` refaz a mesma
+  // for burlada: nada, a RLS de `media` e `media_slots` refaz a mesma
   // pergunta no banco, em toda escrita.
   const { data: membro } = await supabase
     .from('venue_members')

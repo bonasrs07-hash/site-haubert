@@ -78,7 +78,7 @@ describe('estaAbertaEm', () => {
 
   it('fecha à meia-noite: 23:59 aberto, 00:01 fechado quando o dia seguinte não abre', () => {
     // Domingo abre; segunda não. Um minuto depois da meia-noite de domingo
-    // ainda é a noite de domingo — e ela vai até 00:00, ou seja, acabou.
+    // ainda é a noite de domingo, e ela vai até 00:00, ou seja, acabou.
     const soDomingo: FaixaHorario[] = [{ dias: [0], abre: '19:00', fecha: '00:00' }];
     expect(estaAbertaEm(soDomingo, emBrasilia('2026-08-31T02:59:00Z'))).toBe(true); // dom 23:59
     expect(estaAbertaEm(soDomingo, emBrasilia('2026-08-31T03:01:00Z'))).toBe(false); // seg 00:01

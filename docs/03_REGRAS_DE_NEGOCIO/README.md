@@ -1,4 +1,4 @@
-# 03 — Regras de Negócio
+# 03, Regras de Negócio
 
 > Uma seção por módulo. Regra escrita **antes** de codar a feature.
 > Regra que só existe no código é regra perdida.
@@ -7,12 +7,12 @@
 
 | # | Regra | Origem |
 |---|---|---|
-| RN-01 | A casa opera em dois modos: **Dia (CASA)** e **Noite (HAUBERT)** | `brand/` — "After 7, CASA é HAUBERT" |
+| RN-01 | A casa opera em dois modos: **Dia (CASA)** e **Noite (HAUBERT)** | `brand/`, "After 7, CASA é HAUBERT" |
 | RN-02 | O corte é **19h**. A partir das 19h e até as 5h, o padrão é Noite | Guia SOCIAL DNA, prancha 008 |
 | RN-03 | A hora define o **padrão**, nunca restringe. O visitante pode alternar a qualquer momento | Princípio nº1 |
 | RN-04 | A escolha manual do visitante **sobrepõe a hora** e persiste entre visitas | Princípio nº1 |
 | RN-05 | O modo ativo determina qual marca é pré-selecionada na reserva | F-001 |
-| RN-06 | Adicionar uma terceira marca não exige código — só linha em `brands` | ADR-002 |
+| RN-06 | Adicionar uma terceira marca não exige código, só linha em `brands` | ADR-002 |
 
 ## Módulo: Cardápio
 
@@ -20,7 +20,7 @@
 |---|---|
 | RN-10 | Item só aparece publicamente se `publicado = true` **e** sua seção também estiver publicada |
 | RN-11 | Cardápio é **por marca**: cortes pertencem ao HAUBERT, cafés à CASA |
-| RN-12 | Preço nulo significa "não divulgado" — o campo some, não renderiza vazio |
+| RN-12 | Preço nulo significa "não divulgado", o campo some, não renderiza vazio |
 | RN-13 | Preço é sempre `integer` em centavos. Exibição formatada em BRL na apresentação |
 | RN-14 | Ordenação segue `ordem`; empate desempata por `nome` |
 | RN-15 | Item sem foto usa um bloco tipográfico da marca, nunca placeholder cinza genérico |
@@ -46,7 +46,7 @@
 | RN-34 | Grupo entre 1 e 30 pessoas. Acima disso, o fluxo direciona para contato de eventos | 1 |
 | RN-35 | Fase 3: reserva nasce `pendente`. Só a equipe confirma. O site nunca confirma sozinho | 3 |
 | RN-36 | Fase 3: reserva é anonimizada 12 meses após a data (LGPD) | 3 |
-| RN-37 | Sem WhatsApp configurado, o fluxo degrada para telefone — nunca para botão morto | 1 |
+| RN-37 | Sem WhatsApp configurado, o fluxo degrada para telefone, nunca para botão morto | 1 |
 
 ## Módulo: Horário de funcionamento
 
@@ -55,7 +55,7 @@
 | RN-40 | Horário vive em `brands.horario` (JSONB por dia da semana), nunca em código |
 | RN-41 | "Aberto agora" é calculado no fuso da casa (America/Sao_Paulo), não no fuso do visitante |
 | RN-42 | Faixa que cruza a meia-noite (ex.: 19h–01h) conta para o dia em que começou |
-| RN-43 | Horário ausente ou inválido exibe "consulte pelo WhatsApp" — nunca "fechado" por engano |
+| RN-43 | Horário ausente ou inválido exibe "consulte pelo WhatsApp", nunca "fechado" por engano |
 
 ## Módulo: Conteúdo e marca
 
@@ -85,4 +85,4 @@ Coisas que precisam ser verdade sempre, em qualquer fase:
 2. Nenhum conteúdo não publicado aparece publicamente
 3. Nenhuma cor de marca está escrita em componente
 4. Nenhuma frase institucional foi inventada pelo desenvolvedor
-5. O CTA de reserva funciona — mesmo com JS desligado, mesmo com o banco fora do ar
+5. O CTA de reserva funciona, mesmo com JS desligado, mesmo com o banco fora do ar

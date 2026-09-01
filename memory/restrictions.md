@@ -1,4 +1,4 @@
-# Restrições Permanentes — CASA + HAUBERT
+# Restrições Permanentes, CASA + HAUBERT
 
 ## Objetivo
 - Documentar limites e restrições que guiam decisões
@@ -19,8 +19,8 @@
 - Data de revisão planejada está clara?
 
 ## Permissões
-- Dono/compliance: aprova exceção de restrição legal — **Matheus Bonato**
-- Tech lead: aprova exceção técnica — **Matheus Bonato**
+- Dono/compliance: aprova exceção de restrição legal, **Matheus Bonato**
+- Tech lead: aprova exceção técnica, **Matheus Bonato**
 
 ## Exceções
 - Restrição legal pode ser violada por decisão explícita do dono com ADR (raro)
@@ -59,8 +59,8 @@
 
 | Restrição | Detalhes | Prioridade | Revisão |
 |---|---|---|---|
-| **LGPD — base legal da reserva** | Nome, telefone, e-mail e data coletados para execução de contrato (Art. 7º, V). Informar a finalidade no próprio formulário | CRÍTICA | 2027-08-24 (anual) |
-| **LGPD — consentimento para newsletter** | Opt-in explícito e separado do checkbox de reserva. Nada de caixa pré-marcada | CRÍTICA | 2027-08-24 (anual) |
+| **LGPD, base legal da reserva** | Nome, telefone, e-mail e data coletados para execução de contrato (Art. 7º, V). Informar a finalidade no próprio formulário | CRÍTICA | 2027-08-24 (anual) |
+| **LGPD, consentimento para newsletter** | Opt-in explícito e separado do checkbox de reserva. Nada de caixa pré-marcada | CRÍTICA | 2027-08-24 (anual) |
 | **Retenção de dados de reserva** | Máximo 12 meses após a data da reserva; depois, anonimizar. Logs: 90 dias | CRÍTICA | 2027-08-24 (anual) |
 | **Canal de exclusão** | Página `/privacidade` com e-mail de contato do encarregado e prazo de resposta | ALTA | 2027-08-24 (anual) |
 | **Bebida alcoólica** | Qualquer comunicação de drink leva aviso de consumo responsável e restrição a maiores de 18 | ALTA | 2027-08-24 (anual) |
@@ -83,13 +83,13 @@
 
 | Item | Custo aprox | Alternativa grátis | Impacto | Status |
 |---|---|---|---|---|
-| **Fonte Druk** (Commercial Type) | ~US$ 200 licença web | Bebas Neue / Anton / Archivo Expanded (SIL/OFL) | ALTA (é o display do guia) | **[ADIADO]** — ver ADR-003 |
+| **Fonte Druk** (Commercial Type) | ~US$ 200 licença web | Bebas Neue / Anton / Archivo Expanded (SIL/OFL) | ALTA (é o display do guia) | **[ADIADO]**, ver ADR-003 |
 | **Domínio próprio** (.com.br) | ~R$ 40/ano | Subdomínio `.vercel.app` para homologação | CRÍTICA para lançar | **[PENDENTE DECISÃO DO CLIENTE]** |
-| Ensaio fotográfico profissional | R$ 1.500-4.000 | Frames do acervo do Instagram em alta | ALTA (o site é visual) | **[PENDENTE]** — sem foto boa o site não entrega |
-| Supabase Pro | US$ 25/mês | Free tier (500MB, 50k MAU) — sobra para o volume atual | BAIXA | **[ADIADO até Fase 3]** |
-| Vercel Pro | US$ 20/mês | Hobby — suficiente para site institucional | BAIXA | **[ADIADO]** |
-| Resend / e-mail transacional | Grátis até 3k/mês | Free tier atende confirmação de reserva | MÉDIA | **[GRÁTIS — usar free tier na Fase 3]** |
-| Plausible Analytics | US$ 9/mês | Vercel Analytics (Hobby) ou Umami self-host | BAIXA | **[ADIADO — usar Vercel Analytics]** |
+| Ensaio fotográfico profissional | R$ 1.500-4.000 | Frames do acervo do Instagram em alta | ALTA (o site é visual) | **[PENDENTE]**, sem foto boa o site não entrega |
+| Supabase Pro | US$ 25/mês | Free tier (500MB, 50k MAU), sobra para o volume atual | BAIXA | **[ADIADO até Fase 3]** |
+| Vercel Pro | US$ 20/mês | Hobby, suficiente para site institucional | BAIXA | **[ADIADO]** |
+| Resend / e-mail transacional | Grátis até 3k/mês | Free tier atende confirmação de reserva | MÉDIA | **[GRÁTIS, usar free tier na Fase 3]** |
+| Plausible Analytics | US$ 9/mês | Vercel Analytics (Hobby) ou Umami self-host | BAIXA | **[ADIADO, usar Vercel Analytics]** |
 
 **Processo**: dono revisa a lista trimestralmente e aprova conforme a receita do projeto.
 
@@ -98,7 +98,7 @@
 | Restrição | Detalhes | Por quê | Exceção |
 |---|---|---|---|
 | **Reserva em 3 toques** | Qualquer fluxo que passe de 3 toques até o envio da reserva é reprovado | Princípio nº1 (`CLAUDE.md`) | Nenhuma |
-| **Multi-tenancy obrigatório** | Código novo assume N casas; não hardcoda marca, cor ou nome | Roadmap Fase 4 (produto) | Refatorar antes do merge — ADR-002 |
+| **Multi-tenancy obrigatório** | Código novo assume N casas; não hardcoda marca, cor ou nome | Roadmap Fase 4 (produto) | Refatorar antes do merge, ADR-002 |
 | **Sem hardcode de identidade** | Tema, cores, logo, copy e horário vêm da config do tenant/marca | White-label | Usar os tokens, nunca constante de CSS |
 | **A copy vem de `brand/`** | Frase nova no site precisa existir no guia SOCIAL DNA ou ser aprovada pelo cliente | A marca já existe; o dev não é copywriter | Aprovação explícita do dono da marca |
 | **Sem lock-in** | Conteúdo exportável em JSON/CSV a qualquer momento | Confiança + o cliente é dono do conteúdo | Nunca |

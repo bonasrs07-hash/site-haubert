@@ -3,12 +3,12 @@
  *
  * A restrição diz "< 60kb de JS na home" e o ADR-006 promete zero React nas
  * páginas públicas. Depois que o painel entrou, o React passou a existir no
- * projeto — e a única forma de a promessa continuar valendo é MEDIR, não
+ * projeto, e a única forma de a promessa continuar valendo é MEDIR, não
  * confiar.
  *
  * O que se mede é o que a página realmente MANDA o browser baixar: os
  * `<script src>` do HTML e o que eles importam em cascata. Somar a pasta
- * `_astro/` inteira não serve — lá dentro existe chunk que nenhuma página
+ * `_astro/` inteira não serve, lá dentro existe chunk que nenhuma página
  * pública referencia.
  *
  * Uso: npm run orcamento:js
@@ -18,7 +18,7 @@ import path from 'node:path';
 
 /**
  * Onde o build deixou o site. Assim que uma rota SSR entrou no projeto (o
- * painel), o Astro passou a separar `dist/client` de `dist/server` — e a
+ * painel), o Astro passou a separar `dist/client` de `dist/server`, e a
  * primeira versão deste script continuou apontando para `dist`, medindo zero
  * byte e PASSANDO. Orçamento que passa medindo nada é pior que orçamento
  * nenhum, porque cria confiança falsa. Daí a checagem de sanidade no fim.
@@ -97,7 +97,7 @@ console.log(linhas.join('\n'));
 
 // Nenhuma página deste site tem zero byte de JS: o alternador Dia/Noite, a
 // barra de reserva e a folha de reserva são script em toda página. Zero em
-// TODAS significa que o script não achou os arquivos — não que o site
+// TODAS significa que o script não achou os arquivos, não que o site
 // emagreceu. Sem esta checagem, um erro de caminho vira aprovação silenciosa.
 const semNada = linhas.filter((l) => /\s0 B\s/.test(l)).length;
 if (linhas.length > 0 && semNada === linhas.length) {

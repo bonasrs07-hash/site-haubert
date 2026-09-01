@@ -1,9 +1,9 @@
 /**
- * As VAGAS de foto do site — o catálogo que o painel edita. (ADR-008)
+ * As VAGAS de foto do site, o catálogo que o painel edita. (ADR-008)
  *
  * Uma vaga é uma POSIÇÃO ("a foto grande do cartão do dia"), não um arquivo.
  * O arquivo que ocupa a posição hoje pode mudar amanhã sem que nenhuma seção
- * do site saiba — que é a mesma promessa que o ADR-007 já fazia, agora sem
+ * do site saiba, que é a mesma promessa que o ADR-007 já fazia, agora sem
  * precisar de deploy manual.
  *
  * `padrao` é o piso: o arquivo versionado em `src/assets/marca/`. Vaga sem foto
@@ -11,7 +11,7 @@
  * do mesmo jeito. Site com foto antiga é melhor que site que não sobe. (F-006)
  *
  * O catálogo é DADO, não código espalhado: casa nova tem outras vagas, e é aqui
- * que elas são declaradas. O banco guarda só a chave, em texto — ele não pode
+ * que elas são declaradas. O banco guarda só a chave, em texto, ele não pode
  * saber o layout de ninguém. (ADR-002)
  */
 import type { Foto } from './imagens';
@@ -40,7 +40,7 @@ export interface Vaga {
   rotulo: string;
   /** Onde ela aparece, para o dono conseguir se localizar no site. */
   onde: string;
-  /** Proporção da moldura no site — a pré-visualização do painel usa a mesma. */
+  /** Proporção da moldura no site, a pré-visualização do painel usa a mesma. */
   proporcao: string;
   padrao: Foto;
 }
@@ -59,14 +59,14 @@ export const GRUPOS_DE_VAGAS: GrupoDeVagas[] = [
     vagas: [
       {
         chave: 'foto-dia',
-        rotulo: 'Cartão do dia — CASA',
+        rotulo: 'Cartão do dia, CASA',
         onde: 'Home e /sobre, no cartão da CASA Coffee',
         proporcao: '16 / 11',
         padrao: FOTO_DIA,
       },
       {
         chave: 'foto-noite',
-        rotulo: 'Cartão da noite — HAUBERT',
+        rotulo: 'Cartão da noite, HAUBERT',
         onde: 'Home e /sobre, no cartão do HAUBERT',
         proporcao: '16 / 11',
         padrao: FOTO_NOITE,

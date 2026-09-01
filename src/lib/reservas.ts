@@ -1,5 +1,5 @@
 /**
- * Camada de serviços — reserva.
+ * Camada de serviços, reserva.
  *
  * Fase 1: a reserva termina no WhatsApp, no canal que a equipe já usa. O site
  * NÃO coleta e NÃO armazena dado pessoal. (ADR-005)
@@ -13,7 +13,7 @@ import type { Marca } from './tipos';
  * O mínimo que a reserva precisa saber da marca.
  *
  * Existe para que o script do cliente carregue três strings em vez do objeto
- * inteiro — o que vai para o HTML é o que o visitante baixa. `Marca` satisfaz
+ * inteiro, o que vai para o HTML é o que o visitante baixa. `Marca` satisfaz
  * este shape, então nada precisa converter.
  */
 export type MarcaResumo = Pick<Marca, 'slug' | 'nomeCurto' | 'instagramUrl'>;
@@ -45,7 +45,7 @@ export function montarMensagem(marca: MarcaResumo, escolha: EscolhaReserva): str
   return `Oi! Queria reservar uma mesa no ${marca.nomeCurto} para ${pessoas} ${plural}${fim}.`;
 }
 
-/** Só dígitos — o wa.me não aceita '+', espaço nem parêntese. */
+/** Só dígitos, o wa.me não aceita '+', espaço nem parêntese. */
 export function normalizarNumero(numero: string): string {
   return numero.replace(/\D/g, '');
 }
@@ -55,7 +55,7 @@ export function temWhatsapp(numero: string): boolean {
 }
 
 /**
- * Deep link do WhatsApp com UTM — o clique é a métrica de conversão da Fase 1.
+ * Deep link do WhatsApp com UTM, o clique é a métrica de conversão da Fase 1.
  * Sem número configurado devolve `null`, e a UI degrada para telefone. (RN-37)
  */
 export function montarLinkWhatsapp(
@@ -69,7 +69,7 @@ export function montarLinkWhatsapp(
 
   // encodeURIComponent, não URLSearchParams: o segundo codifica espaço como
   // '+', e cabe a quem lê decidir se '+' é espaço ou sinal de mais. O cliente
-  // do WhatsApp não é nosso — '%20' não depende da interpretação de ninguém.
+  // do WhatsApp não é nosso, '%20' não depende da interpretação de ninguém.
   const texto = encodeURIComponent(montarMensagem(marca, escolha));
   const utm = `utm_source=${origem}&utm_medium=reserva&utm_campaign=${marca.slug}`;
   return `https://wa.me/${limpo}?text=${texto}#${utm}`;
