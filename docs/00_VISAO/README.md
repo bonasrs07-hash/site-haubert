@@ -6,8 +6,8 @@ A casa tem marca de sobra e presença digital de menos.
 
 O guia SOCIAL DNA (ago/2025) entrega um sistema de marca maduro: manifesto,
 pilares, paleta por turno, tom de voz por marca, frases proprietárias, política
-de feed. As duas contas somam **~42 mil seguidores** (@casa.coffee 31,2K +
-@haubert.steakhouse 10,8K). O conteúdo funciona.
+de feed. As duas contas somam **~23 mil seguidores** (@casacoffeecolab 16,3K +
+@haubert_taste 6,3K). O conteúdo funciona.
 
 E aí a jornada quebra:
 
@@ -60,7 +60,7 @@ Escopo fechado importa tanto quanto escopo aberto:
 ## Por que agora
 
 - A marca acabou de ser fechada (guia de ago/2025), o custo de aplicar é mínimo agora e cresce depois
-- A audiência já existe: 42K seguidores sem destino claro
+- A audiência já existe: 23K seguidores sem destino claro
 - Concorrência local usa template genérico ou só Instagram, a barra está baixa
 - A stack escolhida (ADR-001) mantém tudo em tier gratuito
 

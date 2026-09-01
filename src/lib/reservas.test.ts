@@ -13,13 +13,13 @@ import {
 const HAUBERT: MarcaResumo = {
   slug: 'haubert',
   nomeCurto: 'HAUBERT',
-  instagramUrl: 'https://instagram.com/haubert.steakhouse',
+  instagramUrl: 'https://instagram.com/haubert_taste',
 };
 
 const CASA: MarcaResumo = {
   slug: 'casa',
   nomeCurto: 'CASA',
-  instagramUrl: 'https://instagram.com/casa.coffee',
+  instagramUrl: 'https://instagram.com/casacoffeecolab',
 };
 
 describe('limitarPessoas', () => {

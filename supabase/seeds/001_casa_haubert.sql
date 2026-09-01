@@ -40,7 +40,7 @@ select
   'CASA Coffee Colab',
   'Luz. Leveza. Encontro.',
   'dia',
-  '@casa.coffee',
+  '@casacoffeecolab',
   '{"seg":["08:00","19:00"],"ter":["08:00","19:00"],"qua":["08:00","19:00"],"qui":["08:00","19:00"],"sex":["08:00","19:00"],"sab":["09:00","19:00"],"dom":["09:00","19:00"]}'::jsonb,
   '{
      "manifesto": "Mais café. Mais que churrasco. Mais que um lugar.",
@@ -64,7 +64,7 @@ select
   'HAUBERT Steak & Grillhouse',
   'Fogo. Força. Tradição.',
   'noite',
-  '@haubert.steakhouse',
+  '@haubert_taste',
   -- Board 008 do guia: "A partir das 19h · qui – dom".
   '{"qui":["19:00","00:00"],"sex":["19:00","00:00"],"sab":["19:00","00:00"],"dom":["19:00","00:00"]}'::jsonb,
   '{

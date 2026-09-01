@@ -15,7 +15,7 @@ Duas operações no MESMO espaço físico, em Novo Hamburgo / RS:
 | Mote | **Luz. Leveza. Encontro.** | **Fogo. Força. Tradição.** |
 | Turno | Dia | Noite (a partir das 19h) |
 | Categoria | Coffee shop / urban culture house | Steakhouse autoral |
-| Instagram | @casa.coffee, 1.482 posts · 31,2K seg. | @haubert.steakhouse, 642 posts · 10,8K seg. |
+| Instagram | @casacoffeecolab, 1.482 posts · 16,3K seg. | @haubert_taste, 642 posts · 6,3K seg. |
 | Tom de voz | Próximo, humano, moderno, convidativo | Confiante, direto, maduro, apaixonado pelo que faz |
 | Estética | Claro, natural, urbano, daylight. Acolhedor e leve. | Escuro, quente, intenso, noturno. Robusto e autoral. |
 

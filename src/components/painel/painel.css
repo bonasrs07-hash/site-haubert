@@ -162,8 +162,12 @@
 /* ---- O cartão, que É o botão ------------------------------------------- */
 .pn__vaga {
   display: grid;
+  /* moldura, rótulo, onde, estado. O `1fr` no "onde" empurra o estado para o
+     rodapé do cartão: sem isso, um "onde" de duas linhas ao lado de um de uma
+     linha desalinhava os rótulos de estado na mesma fileira, e a grade inteira
+     parecia torta. */
+  grid-template-rows: auto auto 1fr auto;
   gap: var(--esp-1);
-  align-content: start;
   width: 100%;
   height: 100%;
   padding: var(--esp-2);
@@ -206,7 +210,7 @@
    No TOQUE ela precisa estar sempre visível (não existe hover para revelá-la),
    então é uma pastilha pequena no canto: a primeira versão era uma tarja
    preta de largura inteira, repetida em 15 cartões, cobrindo um quarto de
-   cada foto — justamente a foto que o dono está tentando avaliar.
+   cada foto, justamente a foto que o dono está tentando avaliar.
    No MOUSE ela vira a tarja, porque ali é transitória e serve de estado de
    hover. */
 .pn__acao {

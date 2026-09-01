@@ -99,6 +99,37 @@ dono decide. Detalhes em `memory/restrictions.md`.
 - Todo acesso ao Supabase passa por `src/lib/`, componente nunca fala com o
   banco direto.
 
+## Pontuação, vírgula no lugar do travessão
+
+**NEGATIVE PROMPT (vale para código, comentário, documentação, copy do site,
+`alt` de imagem, mensagem de commit e descrição de PR): não escreva travessão.
+Escreva vírgula.**
+
+Proibido: **em dash (U+2014)** e **horizontal bar (U+2015)**. A regra cita os
+caracteres por codepoint de propósito, para que a verificação abaixo continue
+podendo exigir zero ocorrência no repositório inteiro.
+
+Quando a vírgula não resolver, nesta ordem: reescreva a frase, use dois-pontos,
+use parênteses. Nunca troque o travessão por hífen solto (` - `): em Markdown
+isso vira item de lista e quebra o documento.
+
+Duas exceções, e só estas duas:
+
+- **en dash (U+2013), `–`**, apenas em intervalo: `19h–01h`, `250–350px`,
+  `boards 001–016`. Intervalo não vira vírgula, `19h,01h` diz outra coisa.
+- **Caracteres de desenho de caixa** (`─ │ ┌ └ ├ ┼ ┬ ▼`) em diagrama ASCII.
+  São desenho, não pontuação.
+
+Motivo: uniformidade de voz num repositório escrito com apoio de agentes. O
+travessão é a pontuação que mais entrega texto de máquina, e a casa escreve
+como quem fala.
+
+Conferir antes de commitar (tem que sair vazio):
+
+```sh
+git ls-files | xargs grep -nIP '\xe2\x80\x94|\xe2\x80\x95'
+```
+
 ## Stack
 
 - **Astro 7** (`output: 'static'` + adapter), HTML estático por padrão; rota que precisar de SSR opta com `export const prerender = false`

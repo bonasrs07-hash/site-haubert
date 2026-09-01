@@ -52,7 +52,7 @@ src/
 | Rota | O que é |
 |---|---|
 | `/` | Home, o funil inteiro, do hero à reserva |
-| `/noite` | HAUBERT, com o modo Noite forçado. É o link da bio do @haubert.steakhouse |
+| `/noite` | HAUBERT, com o modo Noite forçado. É o link da bio do @haubert_taste |
 | `/sobre` | O manifesto longo, os pilares, o compromisso |
 | `/fogo` | Os 5 elementos do método e os 6 cortes |
 | `/cultura` | Música, arte, cidade e os quatro encontros da casa |

@@ -40,7 +40,7 @@
 
 ## Configurações Futuras
 - Testes de posicionamento com clientes reais da casa
-- Pesquisa de marca (awareness, recall) na base de 42K seguidores somados
+- Pesquisa de marca (awareness, recall) na base de 23K seguidores somados
 
 ## Casos de Uso
 - Briefar novo membro do time
@@ -147,7 +147,7 @@ toques /
 - **Sucesso**: entra pelo Instagram, vê a picanha e o salão à noite, reserva em 3 toques
 
 ### Júlia, 27, cultura e eventos
-- **Contexto**: segue @casa.coffee pelos eventos, vai ao In The Flow e ao Matcha Club
+- **Contexto**: segue @casacoffeecolab pelos eventos, vai ao In The Flow e ao Matcha Club
 - **Dores**: a agenda vive em story que expira; nunca sabe quem toca no sábado
 - **Objetivos**: saber o line-up com antecedência, chamar os amigos
 - **Sucesso**: acha a agenda da semana e compartilha o link no grupo

@@ -84,7 +84,7 @@ export function montarLinkTelefone(telefone: string): string | null {
 /**
  * O melhor caminho de reserva disponível AGORA, na ordem em que a equipe
  * responde mais rápido. Nunca devolve `null`: o Instagram é o piso, e é onde a
- * casa já vive (31,2 mil + 10,8 mil seguidores). (F-006)
+ * casa já vive (16,3 mil + 6,3 mil seguidores). (F-006)
  */
 export function melhorCanal(
   marca: MarcaResumo,

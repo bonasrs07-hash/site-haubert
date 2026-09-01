@@ -24,9 +24,9 @@ export const MARCA_CASA: Marca = {
   descritor: 'Coffee Colab',
   mote: 'Luz. Leveza. Encontro.',
   modo: 'dia',
-  instagram: '@casa.coffee',
-  instagramUrl: 'https://instagram.com/casa.coffee',
-  seguidores: '31,2 mil',
+  instagram: '@casacoffeecolab',
+  instagramUrl: 'https://instagram.com/casacoffeecolab',
+  seguidores: '16,3 mil',
   // BLK-003: horário oficial pendente de confirmação do cliente.
   horario: [
     { dias: [1, 2, 3, 4, 5], abre: '08:00', fecha: '19:00' },
@@ -53,9 +53,9 @@ export const MARCA_HAUBERT: Marca = {
   descritor: 'Steak & Grillhouse',
   mote: 'Fogo. Força. Tradição.',
   modo: 'noite',
-  instagram: '@haubert.steakhouse',
-  instagramUrl: 'https://instagram.com/haubert.steakhouse',
-  seguidores: '10,8 mil',
+  instagram: '@haubert_taste',
+  instagramUrl: 'https://instagram.com/haubert_taste',
+  seguidores: '6,3 mil',
   // Board 008 do guia: "A partir das 19h · qui – dom".
   horario: [{ dias: [4, 5, 6, 0], abre: '19:00', fecha: '00:00' }],
   horarioLegivel: `A partir das 19h · qui a dom ${PENDENTE}`,
