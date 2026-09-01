@@ -1,0 +1,56 @@
+---
+/**
+ * O painel de fotos. (ADR-008)
+ *
+ * A sessão chega pronta do middleware — se esta página renderiza, existe um
+ * membro da casa do outro lado. Nada aqui revalida o que já foi validado.
+ *
+ * O dado é buscado no SERVIDOR e entregue à ilha como props. A alternativa
+ * (ilha buscando tudo depois de montar) trocaria uma tela pronta por uma tela
+ * vazia que pisca — e obrigaria a expor mais superfície de API do que a
+ * necessária.
+ */
+import Painel from '@/layouts/Painel.astro';
+import GerenciadorDeFotos from '@/components/painel/GerenciadorDeFotos';
+import { GRUPOS_DE_VAGAS } from '@/constants/vagas';
+import { listarAcervo, listarVagas } from '@/lib/midia';
+
+export const prerender = false;
+
+const sessao = Astro.locals.sessao;
+const [acervo, vagas] = await Promise.all([listarAcervo(sessao), listarVagas(sessao)]);
+
+const atribuicoes: Record<string, string> = {};
+for (const v of vagas) {
+  if (v.mediaId) atribuicoes[v.chave] = v.mediaId;
+}
+
+// O `padrao` é o arquivo versionado. `ImageMetadata.src` já é a URL que o Vite
+// emitiu no build — não precisa de otimização em runtime nem de cópia em
+// `public/`. É o mesmo arquivo que o site serve hoje. (ADR-007 como piso)
+const grupos = GRUPOS_DE_VAGAS.map((g) => ({
+  titulo: g.titulo,
+  descricao: g.descricao,
+  vagas: g.vagas.map((v) => ({
+    chave: v.chave,
+    rotulo: v.rotulo,
+    onde: v.onde,
+    proporcao: v.proporcao,
+    padrao: { url: v.padrao.src.src, alt: v.padrao.alt, largura: v.padrao.src.width },
+  })),
+}));
+---
+
+<Painel titulo="Fotos do site" email={sessao.email}>
+  {/*
+    `client:load` e não `client:idle`: quem abriu o painel veio para usar. A
+    ilha vale só nesta rota — as páginas públicas continuam sem React, e isso
+    é medido por `npm run orcamento:js`. (ADR-006, ADR-008)
+  */}
+  <GerenciadorDeFotos
+    client:load
+    grupos={grupos}
+    acervo={acervo}
+    atribuicoes={atribuicoes}
+  />
+</Painel>

@@ -1,0 +1,146 @@
+---
+/**
+ * Casca do painel.
+ *
+ * Não reusa o `Base.astro` de propósito: ali moram a barra de reserva fixa, o
+ * rodapé-manifesto, o schema.org das duas marcas e o alternador Dia/Noite —
+ * tudo desenhado para converter visitante em mesa. O painel não converte
+ * ninguém; ele é ferramenta de trabalho de uma pessoa só.
+ *
+ * O que ele HERDA são os tokens: a ferramenta é da mesma casa que o site, e
+ * cor literal aqui seria bug de white-label igual a cor literal lá.
+ * (memory/restrictions.md, ADR-002)
+ */
+import '@fontsource/space-grotesk/latin-400.css';
+import '@fontsource/space-grotesk/latin-500.css';
+import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/bebas-neue/latin-400.css';
+import '@/styles/global.css';
+
+interface Props {
+  titulo: string;
+  /** Quem está logado. Ausente na tela de entrar. */
+  email?: string;
+}
+
+const { titulo, email } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR" data-modo="dia">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo} · Painel</title>
+    {/* O painel não é conteúdo. Nunca indexar. */}
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f6efe7" />
+  </head>
+
+  <body class="painel">
+    <header class="painel__topo">
+      <a class="painel__marca" href="/painel">
+        Painel <span>da casa</span>
+      </a>
+
+      {
+        email && (
+          <div class="painel__conta">
+            <span class="painel__email">{email}</span>
+            <a class="painel__ver" href="/" target="_blank" rel="noopener">
+              Ver o site
+            </a>
+            <form method="POST" action="/api/painel/sair">
+              <button class="painel__sair" type="submit">Sair</button>
+            </form>
+          </div>
+        )
+      }
+    </header>
+
+    <main class="painel__corpo">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  .painel {
+    /* O corpo do site reserva espaço para a barra de reserva fixa, que aqui
+       não existe. Sem isto sobrariam 73px de vazio no fim de toda tela. */
+    padding-bottom: 0;
+    background-color: var(--cor-superficie);
+    min-height: 100svh;
+  }
+
+  .painel__topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-4);
+    padding: var(--esp-4) var(--gutter);
+    border-bottom: var(--borda-fina) solid var(--cor-borda);
+    background-color: var(--cor-superficie);
+  }
+
+  .painel__marca {
+    font-family: var(--fonte-titulo);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--cor-texto-forte);
+    min-height: var(--alvo-toque);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+  }
+
+  .painel__marca span {
+    color: var(--cor-texto-suave);
+  }
+
+  .painel__conta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-4);
+  }
+
+  .painel__email,
+  .painel__ver,
+  .painel__sair {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .painel__ver,
+  .painel__sair {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--alvo-toque);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .painel__ver:hover,
+  .painel__sair:hover {
+    color: var(--cor-texto-forte);
+    border-bottom-color: var(--cor-acento);
+  }
+
+  .painel__corpo {
+    /* O padding-top do main global existe por causa do cabeçalho fixo do site.
+       Aqui o cabeçalho rola junto. */
+    padding-top: 0;
+    padding-bottom: var(--esp-9);
+  }
+</style>

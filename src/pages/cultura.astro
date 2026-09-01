@@ -12,7 +12,9 @@ import Cultura from '@/components/secoes/Cultura.astro';
 import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
 import BandaFoto from '@/components/secoes/BandaFoto.astro';
 import { FRASE_LOCAL } from '@/constants/casa';
-import { FOTO_NEON } from '@/constants/imagens';
+
+const fotoDoNeon = await buscarFoto('neon');
+import { buscarFoto } from '@/lib/fotos';
 ---
 
 <Base
@@ -29,7 +31,7 @@ import { FOTO_NEON } from '@/constants/imagens';
   <Cultura />
 
   <BandaFoto
-    foto={FOTO_NEON}
+    foto={fotoDoNeon}
     frase={FRASE_LOCAL}
     apoio="O neon do salão diz a mesma coisa em inglês desde o primeiro dia. Cena local é fornecedor, artista, produtor e vizinho — quem sustenta a casa nas terças de março, não só nos sábados cheios."
   />

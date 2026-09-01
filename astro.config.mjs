@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
+import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 
 // Astro 7 tem apenas 'static' | 'server'. O modo antigamente chamado 'hybrid'
@@ -37,12 +38,14 @@ export default defineConfig({
   output: 'static',
   adapter: vercel({ webAnalytics: { enabled: true } }),
 
-  // A Fase 1 fecha com ZERO React no cliente: alternador de modo e reserva são
-  // <details> + radios + ~1kb de script. `@astrojs/react` continua no
-  // package.json porque a reserva nativa da Fase 3 (formulário, validação,
-  // estados de envio) é o caso em que a ilha se paga — aí a integração volta
-  // para esta lista. Integração registrada sem uso só atrasa build. (P-002)
+  // O React entra AQUI e serve exatamente uma rota: o painel do dono, onde
+  // envio com progresso, galeria e pré-visualização são estado real — o caso
+  // que o ADR-006 previu como exceção legítima. O Astro só embarca o JS da
+  // ilha nas páginas que a usam, então as páginas públicas continuam com os
+  // mesmos ~7 KB de <details> e radios. Isso é medido, não presumido:
+  // `npm run orcamento:js`. (ADR-006, ADR-008)
   integrations: [
+    react(),
     sitemap({
       // /privacidade e /404 saem do índice: uma é ruído de busca, a outra não
       // deveria ser encontrada por ninguém.
@@ -59,6 +62,13 @@ export default defineConfig({
     // Foto é 90% do peso deste site e o público está em 4G. (docs/01_ARQUITETURA)
     responsiveStyles: true,
     layout: 'constrained',
+
+    // O painel guarda as fotos no Storage do Supabase, e é o BUILD que as
+    // baixa e otimiza — o site publicado serve `/_astro/*.webp` e nunca aponta
+    // para lá. Sem esta autorização o Astro se recusa a tocar em imagem
+    // remota, e com razão: otimizar o que vem de qualquer host é um jeito de
+    // virar CDN de estranho. (ADR-008)
+    remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
   },
 
   prefetch: {

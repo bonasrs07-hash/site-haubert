@@ -78,11 +78,19 @@ mobile em 4G, CTA de reserva rastreado, indexado no Google para o nome da casa.
 ---
 
 ## Fase 3 — Painel da equipe
-- [ ] Auth Supabase + `venue_members`
-- [ ] `/painel` com CRUD de cardápio, agenda e fotos — F-005
-- [ ] Upload para Storage com policy por `venue_id`
+- [x] Auth Supabase + `venue_members` — e-mail e senha, **um login só**, cadastro
+      público desligado no console. Sessão em cookie `httpOnly`, validada contra
+      o servidor de Auth a cada requisição ([ADR-008](../08_DECISOES/adr-008-painel-de-fotos.md))
+- [x] **Upload para Storage com policy por `venue_id`** — bucket privado,
+      caminho começando pelo slug da casa, RLS em `media` e `media_slots`
+- [x] `/painel` com troca de **fotos** + galeria de reuso — a parte de fotos do
+      F-005. Publicação por Deploy Hook: o site segue estático e otimizado
+- [ ] `/painel` com CRUD de **cardápio e agenda** — o resto do F-005
 - [ ] Reserva nativa: endpoint validado, rate limit, e-mail transacional
 - [ ] Job de anonimização (retenção de 12 meses)
+
+> **Antes de o painel ir para produção**, ver "Pendências do painel" abaixo:
+> três itens que ficaram conscientemente de fora e um que é passo de console.
 
 > **Pré-requisito de processo, não de código:** a Fase 3 só começa depois que a
 > casa definir quem confirma reserva e em quanto tempo. Reserva nativa sem
@@ -113,6 +121,15 @@ ter a segunda casa. Duas casas atendidas manualmente provam a dor; SaaS antes
 disso é pular etapa.
 
 ---
+
+## Pendências do painel de fotos ([ADR-008](../08_DECISOES/adr-008-painel-de-fotos.md))
+
+| Pendência | Por que ficou de fora | Risco enquanto durar |
+|---|---|---|
+| **CSP não configurada** | Já era lacuna antes do painel (Camada 4 de `docs/11_SEGURANCA` diz "configurar na Vercel" e nunca foi). Fazer agora exige resolver o `nonce`/hash do script inline de tema do [ADR-004](../08_DECISOES/adr-004-modo-dia-noite.md) — feito às pressas, quebra a troca Dia/Noite no site inteiro | Médio, e **pré-existente**. O painel não piorou; só tornou a lacuna mais visível |
+| **Freio de login é por instância** | Trava em memória não é compartilhada entre as instâncias serverless da Vercel. O freio de verdade seria no banco, como já é o de publicação | Baixo com senha longa; a defesa real é o limite do próprio Supabase Auth. Está escrito em `src/lib/freio.ts` para ninguém confundir com proteção completa |
+| **Sem teste de ponta a ponta do fluxo logado** | Depende de um projeto Supabase de verdade, que ainda não existe. O que dá para testar sem ele foi testado: guarda de rota, 401 dos endpoints, validação de arquivo, orçamento de JS | Médio — o caminho feliz (entrar → enviar → publicar) nunca rodou contra um banco |
+| **Cadastro público** | É passo de console, não de código | **Alto até ser feito.** Ver Passo 4b do `INSTALACAO.md` |
 
 ## Ideias registradas (não priorizadas)
 

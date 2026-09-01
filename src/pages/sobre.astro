@@ -16,9 +16,11 @@ import CabecalhoSecao from '@/components/secoes/CabecalhoSecao.astro';
 import GradeEixos from '@/components/secoes/GradeEixos.astro';
 import BandaFoto from '@/components/secoes/BandaFoto.astro';
 import { HEADLINE_MAE } from '@/constants/casa';
-import { FOTO_TIME } from '@/constants/imagens';
+import { buscarFoto } from '@/lib/fotos';
 import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
 import { O_QUE_ENTREGAMOS, PILARES } from '@/constants/casa';
+
+const fotoDoTime = await buscarFoto('time');
 ---
 
 <Base
@@ -38,7 +40,7 @@ import { O_QUE_ENTREGAMOS, PILARES } from '@/constants/casa';
 
   <DuasCulturas />
 
-  <BandaFoto foto={FOTO_TIME} variante="larga" proporcao="21 / 5" />
+  <BandaFoto foto={fotoDoTime} variante="larga" proporcao="21 / 5" />
 
   <section class="casa-secao" id="pilares">
     <div class="casa-container">

@@ -49,3 +49,31 @@ export function supabaseServidor(): SupabaseClient {
   }
   return createClient(url, chaveServico, { auth: { persistSession: false } });
 }
+
+/**
+ * Cliente com o token DO USUÁRIO logado no painel.
+ *
+ * É este que o painel usa para tudo — não a `service_role`. A diferença não é
+ * estilo: com o token do usuário, quem autoriza cada linha é a RLS
+ * (`e_membro_da_casa`), que é a barreira que a gente realmente testa. Painel
+ * escrito com `service_role` funciona igual e passa a depender de o código
+ * nunca errar um `where`. (docs/11_SEGURANCA, ADR-008)
+ *
+ * Sem cache: cada requisição tem o seu token, e cliente compartilhado entre
+ * requisições é como sessão de um usuário vaza para outro.
+ */
+export function supabaseComToken(token: string): SupabaseClient | null {
+  if (!url || !chaveAnon) return null;
+  return createClient(url, chaveAnon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+}
+
+/** Cliente anônimo novo, para o login — que acontece ANTES de existir token. */
+export function supabaseAnonimo(): SupabaseClient | null {
+  if (!url || !chaveAnon) return null;
+  return createClient(url, chaveAnon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}

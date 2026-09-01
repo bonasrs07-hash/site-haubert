@@ -11,13 +11,15 @@
  * persistente é o princípio nº 1. Rolagem lateral custa uma tela, não seis.
  */
 import Foto from '@/components/shared/Foto.astro';
-import { TIRA_ATMOSFERA } from '@/constants/imagens';
+import { buscarFotos } from '@/lib/fotos';
 
 interface Props {
   legenda?: string;
 }
 
 const { legenda = 'Do primeiro café ao último brinde' } = Astro.props;
+
+const tira = await buscarFotos(['tira-1', 'tira-2', 'tira-3', 'tira-4', 'tira-5', 'tira-6']);
 ---
 
 <section class="tira" aria-label="Atmosfera da casa">
@@ -30,7 +32,7 @@ const { legenda = 'Do primeiro café ao último brinde' } = Astro.props;
 
   <ul class="tira__rolo revelar" role="list">
     {
-      TIRA_ATMOSFERA.map((foto) => (
+      tira.map((foto) => (
         <li class="tira__item">
           <Foto foto={foto} proporcao="3 / 4" larguras={[200, 280, 400]} sizes="(min-width: 64rem) 15vw, 60vw" />
         </li>

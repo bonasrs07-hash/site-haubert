@@ -40,3 +40,6 @@ brand/*.ai
 # contexto, permissões da máquina). Não é regra do projeto — regra do projeto
 # mora no CLAUDE.md e é versionada.
 .claude/settings.local.json
+
+.vercel
+.env*

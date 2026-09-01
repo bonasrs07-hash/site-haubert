@@ -11,10 +11,10 @@
  *   larga entregaria borrão. (constants/imagens.ts, ADR-007)
  */
 import Foto from '@/components/shared/Foto.astro';
-import type { Foto as TipoFoto } from '@/constants/imagens';
+import type { FotoResolvida } from '@/lib/fotos';
 
 interface Props {
-  foto: TipoFoto;
+  foto: FotoResolvida;
   frase?: string;
   apoio?: string;
   variante?: 'larga' | 'lado';

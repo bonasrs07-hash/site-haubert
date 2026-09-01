@@ -9,7 +9,7 @@
 import CabecalhoSecao from './CabecalhoSecao.astro';
 import Foto from '@/components/shared/Foto.astro';
 import { ELEMENTOS_DO_FOGO, FRASE_FOGO } from '@/constants/casa';
-import { FOTOS_DO_FOGO } from '@/constants/imagens';
+import { buscarFotos } from '@/lib/fotos';
 
 interface Props {
   olho?: string;
@@ -24,6 +24,9 @@ const {
   lead = 'O fogo revela o que é feito com intenção. Aqui, o tempo é ingrediente e a técnica é o que constrói sabor.',
   comChamada = false,
 } = Astro.props;
+
+// A ordem casa 1 para 1 com ELEMENTOS_DO_FOGO: a sequencia e a mensagem.
+const fotosDoFogo = await buscarFotos(['fogo-1', 'fogo-2', 'fogo-3', 'fogo-4', 'fogo-5']);
 ---
 
 <section class="casa-secao fogo" id="fogo">
@@ -41,10 +44,10 @@ const {
               <h3 class="t-h3">{elemento.nome}</h3>
               <p>{elemento.descricao}</p>
             </div>
-            {FOTOS_DO_FOGO[i] && (
+            {fotosDoFogo[i] && (
               <div class="fogo__foto">
                 <Foto
-                  foto={FOTOS_DO_FOGO[i]}
+                  foto={fotosDoFogo[i]}
                   proporcao="4 / 3"
                   larguras={[200, 280, 340]}
                   sizes="(min-width: 48rem) 12rem, 55vw"

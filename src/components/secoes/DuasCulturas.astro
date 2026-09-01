@@ -10,10 +10,15 @@
  */
 import Foto from '@/components/shared/Foto.astro';
 import { buscarMarcas } from '@/lib/casa';
-import { FOTO_DIA, FOTO_NOITE } from '@/constants/imagens';
+import { buscarFoto } from '@/lib/fotos';
 import { limparPendente } from '@/lib/texto';
 
 const marcas = buscarMarcas();
+
+// As duas vagas que o dono troca no painel. Vaga vazia cai no arquivo do
+// repositorio, entao isto nunca devolve nulo. (ADR-008)
+const fotoDia = await buscarFoto('foto-dia');
+const fotoNoite = await buscarFoto('foto-noite');
 ---
 
 <section class="casa-secao duas" id="duas-culturas">
@@ -32,7 +37,7 @@ const marcas = buscarMarcas();
 
             <div class="duas__foto">
               <Foto
-                foto={marca.modo === 'dia' ? FOTO_DIA : FOTO_NOITE}
+                foto={marca.modo === 'dia' ? fotoDia : fotoNoite}
                 proporcao="16 / 11"
                 larguras={[320, 480, 660]}
                 sizes="(min-width: 48rem) 42vw, 88vw"
