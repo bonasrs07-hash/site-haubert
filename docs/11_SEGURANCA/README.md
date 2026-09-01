@@ -68,27 +68,64 @@ Qualquer resultado diferente de zero é vazamento de tenant e bloqueia o deploy.
 
 ## Camada 4, Cabeçalhos e transporte
 
-Configurar na Vercel:
+**Implementado.** Antes disto a produção respondia com **um** cabeçalho de
+segurança — o `Strict-Transport-Security`, que a Vercel põe sozinha. Os outros
+quatro desta lista não existiam.
+
+São **duas** políticas, e nunca na mesma resposta: duas CSP valem pela
+interseção, então deixar a do site alcançar o painel mataria a hidratação do
+React.
+
+| Onde | Quem põe | `script-src` |
+|---|---|---|
+| Site público | `vercel.json`, gerado por `scripts/csp.mjs` | `'self'` + hashes medidos |
+| `/painel/*`, `/api/painel/*` | `src/middleware.ts` | `'self' 'unsafe-inline'` |
+
+Os quatro cabeçalhos simples (`X-Content-Type-Options`, `Referrer-Policy`,
+`Permissions-Policy`, `X-Frame-Options`) valem para tudo.
 
 ```
+# site público
 Content-Security-Policy: default-src 'self';
-  img-src 'self' data: https://*.supabase.co;
-  connect-src 'self' https://*.supabase.co;
-  font-src 'self';
-  script-src 'self';
-  frame-ancestors 'none'
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-X-Content-Type-Options: nosniff
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), microphone=(), camera=()
+  script-src 'self' 'sha256-…' (×4, medidos do build);
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:; font-src 'self'; connect-src 'self';
+  form-action 'self'; base-uri 'self';
+  frame-ancestors 'none'; object-src 'none'; frame-src 'none';
+  upgrade-insecure-requests
 ```
 
 > `font-src 'self'` só funciona porque as fontes são self-hosted via
 > `@fontsource` (ADR-003). É segurança e privacidade de graça: sem Google Fonts,
 > nenhum IP de visitante vaza para terceiro.
->
-> O script inline de tema (ADR-004) exige um `nonce` na CSP, ou vira a única
-> exceção documentada. Não usar `'unsafe-inline'` genérico.
+
+**Três coisas saíram diferentes do que este documento previa, e o porquê:**
+
+1. **Hash, não `nonce`.** A previsão de `nonce` não é possível: página estática
+   é a mesma para todo mundo, e `nonce` que se repete não é `nonce`. Os hashes
+   do JavaScript embutido são **medidos do build** por `scripts/csp.mjs`, que
+   gera o `vercel.json`. O mesmo script roda como `postbuild` e **derruba o
+   build** se o commitado divergir do medido — CSP desatualizada não avisa, ela
+   bloqueia, e o sintoma seria a troca Dia/Noite morta no site inteiro.
+
+2. **`connect-src`/`img-src` do site não precisam do Supabase.** O documento
+   previa isso, mas depois do ADR-008 o site publicado não fala com o banco: o
+   build baixa as fotos e serve `/_astro/*.webp`. Quem precisa do Supabase em
+   `img-src` é o painel, que mostra o bucket privado por URL assinada.
+
+3. **`style-src` ficou com `'unsafe-inline'`, e é dívida consciente.** O site
+   usa atributo de estilo para três variáveis de dado: `--proporcao` (a forma de
+   cada foto), `--volta` (a velocidade da faixa) e `--atraso` (a escada da
+   animação). Hash de CSP não cobre atributo, e com hash presente o browser
+   *ignora* `'unsafe-inline'` — então uma política estrita de estilo entregaria
+   foto sem proporção. CSS injetado sem script é um problema pequeno perto de
+   `script-src`, que ficou estrito de verdade. **Para quitar:** tirar os três
+   atributos do markup, o que a diretriz de "separar CSS do markup" já pede.
+
+Verificado com a CSP ligada, num Chrome de verdade, nas 10 rotas: script de
+tema executa, a troca Dia/Noite funciona e persiste, `schema.org` intacto,
+`--proporcao` ainda aplica, zero violações. Imagem que não carrega é `lazy` fora
+do viewport — conferido contra um controle servido sem CSP, mesmo resultado.
 
 ## Camada 5, LGPD
 

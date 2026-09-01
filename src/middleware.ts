@@ -50,5 +50,44 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
   // Painel não é conteúdo público: nada de cache em CDN, nada de índice.
   resposta.headers.set('cache-control', 'no-store, must-revalidate');
   resposta.headers.set('x-robots-tag', 'noindex, nofollow');
+  resposta.headers.set('content-security-policy', CSP_DO_PAINEL);
   return resposta;
 });
+
+/**
+ * A CSP do painel. O site público tem a dele, estrita e por hash, gerada no
+ * build para o `vercel.json` — e o `vercel.json` exclui estas rotas de
+ * propósito. Duas políticas na mesma resposta valem pela INTERSEÇÃO, então
+ * deixar a do site alcançar o painel mataria a hidratação do React.
+ *
+ * Aqui `script-src` precisa de `'unsafe-inline'`, e vale dizer por quê em vez de
+ * fingir que é rigor: o painel é SSR com ilha React, e a hidratação injeta
+ * script embutido na hora do pedido. Hash exige conhecer o conteúdo no build, o
+ * que aqui não existe.
+ *
+ * O que sobra ainda vale a pena, e é o oposto de decorativo:
+ *   - `default-src 'self'` corta qualquer origem de fora;
+ *   - `frame-ancestors 'none'` impede clickjacking — e o painel é onde se
+ *     apaga foto e se publica o site;
+ *   - `form-action 'self'` impede que um formulário injetado poste a senha do
+ *     dono em outro servidor;
+ *   - `base-uri 'self'` fecha o truque de reescrever a base e sequestrar todo
+ *     caminho relativo da página.
+ *
+ * `img-src` abre para o Storage do Supabase porque a galeria mostra a foto por
+ * URL assinada, direto do bucket privado (`lib/midia.ts`), e `blob:` porque a
+ * pré-visualização do envio é feita no browser antes de subir.
+ */
+const CSP_DO_PAINEL = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "form-action 'self'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "frame-src 'none'",
+].join('; ');
