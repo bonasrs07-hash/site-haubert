@@ -13,6 +13,7 @@ import BarraReserva from '@/components/shared/BarraReserva.astro';
 import { buscarCasa } from '@/lib/casa';
 import { ESSENCIA } from '@/constants/casa';
 import { paraSchemaOrg } from '@/lib/horario-texto';
+import ogGerados from '@/generated/og.json';
 import { limparPendente, temValor } from '@/lib/texto';
 import type { Modo } from '@/lib/tipos';
 
@@ -31,11 +32,32 @@ const { titulo, descricao, modoForcado, canonica, semIndexacao = false } = Astro
 const casa = await buscarCasa();
 const urlCanonica = new URL(canonica ?? Astro.url.pathname, Astro.site ?? Astro.url.origin);
 
-// A imagem de compartilhamento é gerada a partir das fotos da marca e vive em
-// public/, precisa de URL absoluta, porque quem lê é o WhatsApp e o Instagram,
-// não o browser. Sem ela o card sai como um retângulo cinza, que é exatamente o
-// contrário do que a casa vende. (docs/02_DESIGN_SYSTEM)
-const urlImagemOg = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
+/*
+  A imagem de compartilhamento, agora UMA POR PÁGINA.
+
+  Antes as oito rotas dividiam o mesmo `og.jpg`. Num negócio cuja distribuição
+  inteira é Instagram e WhatsApp, isso significava que todo link compartilhado
+  mostrava o mesmo cartão genérico: o cardápio, um evento de sábado e a página
+  da noite, idênticos. O cartão é a vitrine, é o que a pessoa vê antes de
+  decidir se toca.
+
+  Os cartões nascem no build, em `scripts/gerar-og.mjs`, e o manifesto diz
+  quais existem de verdade. Falhou a geração, a chave não está lá e a página cai
+  no `og.jpg` de sempre: cartão antigo é problema pequeno, cartão quebrado não.
+*/
+function chaveDoOg(rota: string): string {
+  const limpa = rota.replace(/[/]+$/, '') || '/';
+  if (limpa === '/') return 'home';
+  if (limpa.startsWith('/evento/')) return 'evento-' + limpa.slice(8);
+  return limpa.slice(1);
+}
+
+const chaveOg = chaveDoOg(Astro.url.pathname);
+const temCartao = ogGerados.chaves.includes(chaveOg);
+const urlImagemOg = new URL(
+  temCartao ? '/og/' + chaveOg + '.png' : '/og.jpg',
+  Astro.site ?? Astro.url.origin,
+);
 
 // Preview de branch nunca é indexado. Sem isto, a homologação entra no Google e
 // passa a competir com o site de verdade pelo nome da casa, e sai do índice
@@ -147,6 +169,14 @@ const dadosEstruturados = casa.marcas.map((marca) => {
     <meta name="format-detection" content="telephone=no" />
 
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/*
+      Ícone da aba. `/favicon.ico` respondia 404 numa marca que se vende pelo
+      visual. Sai do mesmo gerador dos cartões, tipográfico por token: não
+      depende do logo vetorial, que é BLK-001.
+    */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <script
       type="application/ld+json"

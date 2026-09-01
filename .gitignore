@@ -43,3 +43,10 @@ brand/*.ai
 
 .vercel
 .env*
+
+# Gerados no build (scripts/gerar-og.mjs)
+public/og/
+public/favicon.ico
+public/apple-touch-icon.png
+public/icone-512.png
+src/generated/og.json
