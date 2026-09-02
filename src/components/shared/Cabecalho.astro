@@ -57,7 +57,20 @@ const ehAtual = (href: string) => rotaAtual === href;
             href={item.href}
             aria-current={ehAtual(item.href) ? 'page' : undefined}
           >
-            {item.rotulo}
+            {/*
+              O rótulo aparece duas vezes, uma acima da outra na mesma pista, e
+              a janela recorta para mostrar só uma. Passar o mouse sobe a pista.
+
+              A segunda cópia leva `aria-hidden`: para o leitor de tela ela não
+              existe. Sem isso o link seria anunciado como "Cardápio Cardápio",
+              e o que era animação viraria defeito.
+            */}
+            <span class="nav__rolo">
+              <span class="nav__pista">
+                <span class="nav__face">{item.rotulo}</span>
+                <span class="nav__face nav__face--eco" aria-hidden="true">{item.rotulo}</span>
+              </span>
+            </span>
           </a>
         ))
       }
@@ -187,10 +200,75 @@ const ehAtual = (href: string) => rotaAtual === href;
       border-color var(--transicao);
   }
 
-  .nav__link:hover,
+  /*
+    O hover é a ROLAGEM DO RÓTULO: a palavra sobe e a cópia em acento ocupa o
+    lugar dela.
+
+    Por que assim, e não só o traço que estava aqui antes: o traço fazia o link
+    sob o mouse ficar IDÊNTICO à página atual, e a pessoa não distinguia um do
+    outro. Agora a página atual fica com o sublinhado parado e o hover rola a
+    palavra, que são dois sinais diferentes para duas coisas diferentes.
+
+    A largura do link não muda em nenhum momento: as duas cópias dividem a
+    mesma pista, e quem se move é a pista, dentro de uma janela recortada.
+    Isso importa porque a barra tem 68px de folga aos 1024px, medidos, e um
+    hover que engordasse o link empurraria a assinatura da marca.
+  */
+  .nav__rolo {
+    display: block;
+    overflow: hidden;
+    /* 1.4em, e não 1em: em caixa alta o acento do "Á" sobe acima da maiúscula,
+       e uma janela justa cortaria o acento de "CARDÁPIO". */
+    height: 1.4em;
+  }
+
+  .nav__pista {
+    display: block;
+    transition: transform 240ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .nav__face {
+    display: block;
+    height: 1.4em;
+    line-height: 1.4;
+  }
+
+  .nav__face--eco {
+    color: var(--cor-acento);
+  }
+
+  .nav__link:hover .nav__pista,
+  .nav__link:focus-visible .nav__pista {
+    transform: translateY(-1.4em);
+  }
+
+  /* A página atual continua marcada pelo traço, parada. É o que diferencia
+     "você está aqui" de "seu mouse está aqui". */
   .nav__link[aria-current='page'] {
     color: var(--cor-texto-forte);
     border-bottom-color: var(--cor-acento);
+  }
+
+  /*
+    Quem pediu menos movimento não recebe a rolagem, e também não fica sem
+    resposta: o hover volta a ser o traço de acento de antes. Desligar a
+    animação não pode custar o aviso de que o link é clicável.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .nav__pista {
+      transition: none;
+    }
+
+    .nav__link:hover .nav__pista,
+    .nav__link:focus-visible .nav__pista {
+      transform: none;
+    }
+
+    .nav__link:hover,
+    .nav__link:focus-visible {
+      color: var(--cor-texto-forte);
+      border-bottom-color: var(--cor-acento);
+    }
   }
 
   .topo__acoes {
