@@ -27,6 +27,7 @@ import '@fontsource/space-grotesk/latin-400.css';
 import '@fontsource/space-mono/latin-400.css';
 import '@/styles/global.css';
 import { CORTES } from '@/constants/casa';
+import trilha360 from '@/generated/trilha-360.json';
 
 // A sessão é conferida no middleware, antes desta página existir. Ela precisa
 // de SSR: página pré-renderizada no build não tem a quem perguntar quem entrou.
@@ -46,31 +47,38 @@ export const prerender = false;
 const VIDEO_360: string | null = '/video/chef-360.mp4';
 
 /**
- * O CONTRATO DO GIRO, que o vídeo precisa cumprir e o botão usa para pousar.
+ * A TRILHA DO PRATO: onde está o prato, quadro a quadro.
  *
- * Não é enfeite: é o que faz o hotspot cair em cima do prato em vez de flutuar
- * ao lado dele. Filmar diferente disto é o que quebra o alinhamento, e nada na
- * tela avisa quando quebra.
+ * Com a câmera descendo, o prato não fica mais numa altura fixa do quadro, e
+ * o botão precisa saber onde ele está para pousar em cima dele. A trilha é
+ * gerada junto com o vídeo, pelo mesmo código que desenha o prato, então ela
+ * não pode divergir dele. Refazer essa conta aqui, por fórmula, seria manter a
+ * mesma matemática em dois lugares, que é como os dois divergem.
  *
- *   - uma volta completa por corte, velocidade constante, sem corte de edição;
- *   - de frente no começo de cada volta, de costas na metade;
- *   - a mão que segura o prato vem ADIANTADA do eixo do corpo, em `faseDaMao`
- *     radianos, e o prato orbita num raio de `raio` da largura do quadro;
- *   - o prato fica na altura `alturaDoPrato` do quadro.
- *
- * Os três números saem medidos do vídeo. Quando entrar o footage real, é aqui
- * que se calibra, e em nenhum outro lugar.
+ * Quando entrar o footage real: rastreie o prato e gere uma trilha no mesmo
+ * formato, `[x, y, visibilidade]` por quadro, x e y em porcentagem do quadro.
+ * Nada mais na página precisa mudar.
  */
-const MEDIDAS_DO_QUADRO = {
-  proporcao: '640 / 854',
-  faseDaMao: -0.62,
-  raio: 26.9,
-  alturaDoPrato: 30.8,
-};
+const trilha = trilha360;
 
 // Os cortes saem do mesmo lugar que a seção /fogo usa. Nada de lista paralela:
 // duas fontes para o mesmo dado é como uma delas fica velha.
 const cortes = CORTES;
+
+/*
+  O vídeo tem uma estação por corte. Se as duas listas desandarem, o rótulo
+  passa a anunciar um corte enquanto a imagem mostra outro, e nada na tela
+  avisa: a página fica plausível e errada, que é o pior estado possível.
+
+  Como a rota é SSR, isto derruba a REQUISIÇÃO, não o build. Falhar barulhento
+  numa rota interna é barato; mentir sobre qual corte está na tela, não.
+*/
+if (trilha.cortes !== cortes.length) {
+  throw new Error(
+    `A trilha do giro tem ${trilha.cortes} estações e o cardápio tem ${cortes.length} cortes. ` +
+      'Rode `npm run video:360` depois de mexer em CORTES.',
+  );
+}
 ---
 
 <!doctype html>
@@ -94,9 +102,7 @@ const cortes = CORTES;
         data-palco
         data-frente="1"
         data-tem-video={VIDEO_360 ? "1" : "0"}
-        data-fase={MEDIDAS_DO_QUADRO.faseDaMao}
-        data-raio={MEDIDAS_DO_QUADRO.raio}
-        style={`--proporcao:${MEDIDAS_DO_QUADRO.proporcao}; --altura-prato:${MEDIDAS_DO_QUADRO.alturaDoPrato}%`}
+        style={`--proporcao:${trilha.proporcao}`}
       >
         <div class="piso"></div>
 
@@ -196,6 +202,13 @@ const cortes = CORTES;
       </div>
     </div>
 
+    {/*
+      A trilha viaja como DADO, não como script. Bloco `application/json` não é
+      executável, então ele não pede nada da CSP e o script da página continua
+      empacotado e tipado.
+    */}
+    <script type="application/json" data-trilha set:html={JSON.stringify(trilha.prato)}></script>
+
     <dialog class="ficha" data-ficha>
       <article class="ficha__corpo">
         <header class="ficha__topo">
@@ -259,10 +272,15 @@ const cortes = CORTES;
         }));
         const total = cortes.length;
 
-        // As medidas do quadro vem do servidor, nao repetidas aqui: um numero
-        // de calibragem em dois lugares e um numero que vai divergir.
-        const fase = Number(palco.dataset.fase ?? '0');
-        const raio = Number(palco.dataset.raio ?? '0');
+        // A trilha vem do bloco de dados, nao recalculada aqui: a conta que
+        // desenhou o prato mora no gerador do video, e so la.
+        const bloco = document.querySelector('[data-trilha]');
+        let trilha: number[][] = [];
+        try {
+          trilha = bloco ? JSON.parse(bloco.textContent ?? '[]') : [];
+        } catch {
+          trilha = [];
+        }
 
         const video = palco.querySelector<HTMLVideoElement>('[data-video]');
         const avanco = palco.querySelector<HTMLElement>('[data-avanco]');
@@ -294,28 +312,41 @@ const cortes = CORTES;
           const ang = t * 2 * Math.PI;
           const cos = Math.cos(ang);
 
-          // A mao nao esta no eixo do corpo: ela orbita adiantada. Sem esta
-          // defasagem o botao pousa no peito dele, e nao no prato.
-          const angMao = ang + fase;
-          const cosMao = Math.cos(angMao);
-          const sinMao = Math.sin(angMao);
-
           // Um piso na largura para ele não sumir de perfil: silhueta chapada
           // com escala zero pisca, e piscar parece defeito, não giro.
           const largura = cos >= 0 ? Math.max(cos, 0.17) : Math.min(cos, -0.17);
-          // "de frente" aqui e sobre o PRATO estar clicavel, nao sobre o rosto:
-          // e a mao que decide se ha o que clicar.
-          const deFrente = cosMao > 0.1;
+
+          /*
+            Onde esta o prato agora.
+
+            Com trilha (o caso com video), le o quadro correspondente. Sem
+            trilha sobra a silhueta vetorial, que gira parada no lugar: ali o
+            prato orbita por formula mesmo, porque nao ha camera descendo.
+          */
+          let maoX = 50;
+          let maoY = 31;
+          let visivel = 0;
+          if (trilha.length) {
+            const q = Math.min(trilha.length - 1, Math.max(0, Math.round(p * (trilha.length - 1))));
+            const ponto = trilha[q];
+            maoX = ponto[0];
+            maoY = ponto[1];
+            visivel = ponto[2];
+          } else {
+            const angMao = ang - 0.62;
+            maoX = 50 + Math.sin(angMao) * 26.9;
+            visivel = Math.min(1, Math.max(0, (Math.cos(angMao) + 0.12) / 0.45));
+          }
+
+          // "De frente" aqui e sobre o PRATO estar clicavel, nao sobre o rosto.
+          const deFrente = visivel > 0.35;
 
           palco.style.setProperty('--largura', largura.toFixed(4));
-          // posicao do prato em PORCENTAGEM do quadro, que e o que sobrevive a
-          // qualquer tamanho de tela e a troca do video
-          palco.style.setProperty('--mao-x', (50 + sinMao * raio).toFixed(3));
-          palco.style.setProperty('--aproxima', (0.78 + 0.22 * ((cosMao + 1) / 2)).toFixed(4));
-          palco.style.setProperty(
-            '--visivel',
-            Math.min(1, Math.max(0, (cosMao + 0.12) / 0.45)).toFixed(4),
-          );
+          // posicao em PORCENTAGEM do quadro: sobrevive a qualquer tamanho de
+          // tela e a troca do video
+          palco.style.setProperty('--mao-x', String(maoX));
+          palco.style.setProperty('--mao-y', String(maoY));
+          palco.style.setProperty('--visivel', String(visivel));
           palco.style.setProperty('--frente', deFrente ? '1' : '0');
           palco.dataset.frente = deFrente ? '1' : '0';
 
@@ -440,7 +471,7 @@ const cortes = CORTES;
       .palco {
         --largura: 1;
         --mao-x: 50;
-        --aproxima: 1;
+        --mao-y: 31;
         --visivel: 1;
         --frente: 1;
 
@@ -530,9 +561,9 @@ const cortes = CORTES;
       .mao {
         position: absolute;
         left: calc(var(--mao-x) * 1%);
-        top: var(--altura-prato);
-        width: 30%;
-        transform: translate(-50%, -50%) scale(var(--aproxima));
+        top: calc(var(--mao-y) * 1%);
+        width: 26%;
+        transform: translate(-50%, -50%);
         opacity: var(--visivel);
       }
       /* Com vídeo, o prato já está filmado: o vetor sairia por cima e viraria
