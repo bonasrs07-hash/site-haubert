@@ -90,6 +90,16 @@ const hora = new Intl.DateTimeFormat('pt-BR', {
           </div>
         )
       }
+
+      {/*
+        A ponte para a memória. Fica aqui, e não só na navbar, porque quem chega
+        na agenda já está fazendo a pergunta "o que rola nessa casa?", e metade
+        da resposta é o que já rolou. Vale ainda mais quando não há data
+        confirmada: sem isto, a agenda vazia seria um beco.
+      */}
+      <p class="ag__memoria">
+        <a class="link" href="/memoria">Ver o que já rolou por aqui</a>
+      </p>
     </div>
   </section>
 
@@ -99,6 +109,16 @@ const hora = new Intl.DateTimeFormat('pt-BR', {
 </Base>
 
 <style>
+  .ag__memoria {
+    margin: var(--esp-7) 0 0;
+    padding-top: var(--esp-5);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+  }
+
   .ag__lista,
   .ag__cadencias {
     margin: 0;

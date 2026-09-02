@@ -106,7 +106,11 @@ const dadosDoEvento = {
       {
         jaPassou && (
           <p class="ev__passou">
-            Esta edição já aconteceu. Veja o que vem por aí na{' '}
+            Esta edição já aconteceu. Ela fica na{' '}
+            <a class="link" href="/memoria">
+              memória
+            </a>
+            , junto das outras, e o que vem por aí está na{' '}
             <a class="link" href="/agenda">
               agenda
             </a>
@@ -140,8 +144,25 @@ const dadosDoEvento = {
         </p>
       </div>
 
+      {/*
+        A saída certa depende de onde a pessoa está no tempo. Numa edição que já
+        passou, mandar para a agenda é mandar para uma lista que não a contém;
+        o lugar dela é a memória, com as irmãs.
+      */}
       <p class="ev__voltar">
-        <a class="btn btn-secundario" href="/agenda">Ver a agenda inteira</a>
+        {
+          jaPassou ? (
+            <>
+              <a class="btn btn-primario" href="/memoria">Ver as outras edições</a>
+              <a class="btn btn-secundario" href="/agenda">O que vem por aí</a>
+            </>
+          ) : (
+            <>
+              <a class="btn btn-secundario" href="/agenda">Ver a agenda inteira</a>
+              <a class="btn btn-secundario" href="/memoria">O que já rolou</a>
+            </>
+          )
+        }
       </p>
     </div>
   </section>
@@ -198,5 +219,8 @@ const dadosDoEvento = {
 
   .ev__voltar {
     margin: var(--esp-3) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-3);
   }
 </style>

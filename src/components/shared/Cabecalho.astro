@@ -18,6 +18,10 @@ const rotaAtual = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const NAV = [
   { href: '/cardapio', rotulo: 'Cardápio' },
   { href: '/agenda', rotulo: 'Agenda' },
+  // Memória vem colada na Agenda de propósito: as duas respondem à mesma
+  // pergunta em tempos diferentes, o que vem e o que já foi. Separadas, cada
+  // uma viraria adivinhação.
+  { href: '/memoria', rotulo: 'Memória' },
   { href: '/sobre', rotulo: 'A casa' },
   { href: '/fogo', rotulo: 'O fogo' },
   { href: '/cultura', rotulo: 'Cultura' },

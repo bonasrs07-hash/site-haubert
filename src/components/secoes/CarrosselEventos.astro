@@ -1,0 +1,234 @@
+---
+/**
+ * Uma prateleira da memória: um formato, e as edições dele lado a lado.
+ *
+ * ROLA SEMPRE, EM QUALQUER LARGURA, e é aí que ela difere da `TiraFotos`, que
+ * vira grade a partir de 64rem. A tira tem seis fotos e acabou; aqui o número de
+ * edições cresce para sempre, então virar grade só empurraria a próxima
+ * prateleira para fora da tela. Arquivo que cresce pede trilho, não parede.
+ *
+ * ZERO JAVASCRIPT, como o resto do site (ADR-006). Quem faz o trabalho é
+ * `scroll-snap-type` com `overflow-x`, que é nativo, funciona com o dedo, com a
+ * roda do mouse e com o teclado (o foco entra nos links e o navegador rola
+ * sozinho até eles). Carrossel com seta feita à mão custaria JS e ainda seria
+ * pior no celular, que é onde este site é lido.
+ */
+import type { GrupoDeMemoria } from '@/lib/memoria';
+
+interface Props {
+  grupo: GrupoDeMemoria;
+  /** Escalona a animação de entrada, como o resto das listas do site. */
+  indice?: number;
+}
+
+const { grupo, indice = 0 } = Astro.props;
+
+// Dia e mês para a etiqueta, ano separado: numa prateleira de arquivo o ano é a
+// informação que muda de card para card, e merece peso próprio.
+const diaMes = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: 'short',
+  timeZone: 'America/Sao_Paulo',
+});
+const ano = new Intl.DateTimeFormat('pt-BR', { year: 'numeric', timeZone: 'America/Sao_Paulo' });
+const completa = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'long',
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'America/Sao_Paulo',
+});
+
+const quantas = grupo.edicoes.length;
+---
+
+<section class="prat revelar" style={`--atraso:${Math.min(indice, 4) * 90}ms`} id={grupo.chave}>
+  <div class="casa-container prat__cabeca">
+    <h2 class="prat__titulo">{grupo.titulo}</h2>
+    <p class="prat__conta">{quantas} {quantas === 1 ? 'edição' : 'edições'}</p>
+    {grupo.descricao && <p class="prat__desc">{grupo.descricao}</p>}
+  </div>
+
+  <ul class="prat__rolo" role="list" aria-label={`Edições de ${grupo.titulo}`}>
+    {
+      grupo.edicoes.map((e) => (
+        <li class="prat__item">
+          <a class="edicao" href={`/evento/${e.slug}`}>
+            <span class="edicao__ano">{ano.format(new Date(e.inicioEm))}</span>
+            <span class="edicao__dia">
+              <time datetime={e.inicioEm} title={completa.format(new Date(e.inicioEm))}>
+                {diaMes.format(new Date(e.inicioEm))}
+              </time>
+            </span>
+            <span class="edicao__titulo">{e.titulo}</span>
+            {e.lineup.length > 0 && (
+              <span class="edicao__lineup">{e.lineup.join(' · ')}</span>
+            )}
+            <span class="edicao__ver" aria-hidden="true">Ver a noite</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .prat {
+    padding-block: var(--esp-7);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    transition-delay: var(--atraso);
+  }
+
+  .prat__cabeca {
+    display: grid;
+    gap: var(--esp-2);
+    margin-bottom: var(--esp-5);
+  }
+
+  .prat__titulo {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .prat__conta {
+    margin: 0;
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-acento);
+  }
+
+  .prat__desc {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto-suave);
+  }
+
+  /* ---- O trilho ---------------------------------------------------------- */
+  .prat__rolo {
+    margin: 0;
+    padding: var(--esp-1) var(--gutter);
+    list-style: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 72vw;
+    gap: var(--esp-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .prat__rolo::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prat__item {
+    scroll-snap-align: start;
+  }
+
+  /* ---- O card de uma edição ---------------------------------------------- */
+  .edicao {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    gap: var(--esp-2);
+    padding: var(--esp-5);
+    border: var(--borda-fina) solid var(--cor-borda);
+    border-radius: var(--raio-1);
+    background-color: var(--cor-superficie-2);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color var(--transicao),
+      transform var(--transicao);
+  }
+
+  .edicao:hover,
+  .edicao:focus-visible {
+    border-color: var(--cor-acento);
+    transform: translateY(-2px);
+  }
+
+  .edicao__ano {
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    color: var(--cor-texto-suave);
+  }
+
+  .edicao__dia {
+    font-family: var(--fonte-mono);
+    font-size: var(--tam-meta);
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-acento);
+  }
+
+  .edicao__titulo {
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.375rem, 3.4vw, 1.75rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--cor-texto-forte);
+  }
+
+  .edicao__lineup {
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto-suave);
+  }
+
+  .edicao__ver {
+    margin-top: var(--esp-2);
+    padding-top: var(--esp-3);
+    border-top: var(--borda-fina) solid var(--cor-borda);
+    font-family: var(--fonte-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--ls-meta);
+    text-transform: uppercase;
+    color: var(--cor-texto);
+  }
+
+  .edicao:hover .edicao__ver,
+  .edicao:focus-visible .edicao__ver {
+    color: var(--cor-acento);
+  }
+
+  @media (min-width: 40rem) {
+    .prat__rolo {
+      grid-auto-columns: 42vw;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .prat__rolo {
+      grid-auto-columns: minmax(0, 22rem);
+      max-width: var(--largura-max);
+      margin-inline: auto;
+    }
+  }
+
+  /* Quem pediu menos movimento não precisa do salto no hover. */
+  @media (prefers-reduced-motion: reduce) {
+    .edicao {
+      transition: border-color var(--transicao);
+    }
+
+    .edicao:hover,
+    .edicao:focus-visible {
+      transform: none;
+    }
+  }
+</style>

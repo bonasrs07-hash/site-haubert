@@ -87,9 +87,15 @@ cerimônia sem função ([ADR-006](../08_DECISOES/adr-006-fase1-sem-react.md)).
 | `/noite` | Estático | Rota do HAUBERT com o modo forçado e canônica própria (ADR-004). Não há dado dinâmico a buscar, SSR aqui só adicionaria latência |
 | `/sobre`, `/fogo`, `/cultura`, `/contato` | Estático | Institucional |
 | `/privacidade`, `/404` | Estático, `noindex` | Não devem ser encontradas na busca |
-| `/cardapio` | SSR + cache 5min | Vem do banco; a equipe edita |
-| `/agenda`, `/evento/[slug]` | SSR + cache 5min | Vem do banco; muda toda semana |
-| `/painel/*` | SSR, sem cache | Autenticado |
+| `/cardapio` | Estático, lido do banco no build | A equipe edita no painel e clica em Publicar (ADR-008) |
+| `/agenda`, `/evento/[slug]` | Estático, lido do banco no build | Idem. `/agenda` mostra só o que vem |
+| `/memoria` | Estático, lido do banco no build | O que já aconteceu, uma prateleira por formato. Fecha o buraco de `/evento/[slug]` ficar no ar sem índice que leve até ele |
+| `/painel/*`, `/api/*` | SSR, sem cache | Autenticado (o painel) ou escrita (a API) |
+
+> **Isto mudou no ADR-008.** A tabela dizia "SSR + cache 5min" para `/cardapio` e
+> `/agenda`, e ficou para trás quando o painel passou a publicar por rebuild.
+> Hoje o build lê o banco com a `service_role`, otimiza as fotos e serve HTML
+> estático: o site publicado não fala com o Supabase.
 
 > **Armadilha do `static` + adapter:** rota dinâmica sem `export const prerender = false`
 > congela no build. Item obrigatório no checklist de PR.

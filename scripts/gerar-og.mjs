@@ -62,6 +62,7 @@ const ROTAS = [
   { chave: 'home', olho: 'Novo Hamburgo · RS', titulo: 'Mais que café. Mais que churrasco.', modo: 'dia' },
   { chave: 'cardapio', olho: 'O que sai da cozinha', titulo: 'Cardápio', modo: 'noite' },
   { chave: 'agenda', olho: 'O que vem por aí', titulo: 'Agenda', modo: 'noite' },
+  { chave: 'memoria', olho: 'O que já rolou', titulo: 'A casa conecta. A memória fica.', modo: 'noite' },
   { chave: 'sobre', olho: 'Quem somos', titulo: 'Uma essência. Dois conceitos.', modo: 'dia' },
   { chave: 'fogo', olho: 'O método', titulo: 'O fogo é o que transforma', modo: 'noite' },
   { chave: 'cultura', olho: 'Programação', titulo: 'A cultura não é acessório', modo: 'dia' },

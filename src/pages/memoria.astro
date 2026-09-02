@@ -1,0 +1,106 @@
+---
+/**
+ * /memoria, o que já rolou na casa.
+ *
+ * POR QUE ESTA PÁGINA EXISTE
+ * `/agenda` mostra só o que vem, e isso é regra, não descuido: agenda com data
+ * velha é agenda errada (RN-43, BLK-007). Só que a noite não deixa de existir
+ * depois que acaba. A página de cada evento continua no ar justamente para que
+ * link compartilhado não morra na segunda-feira, mas até agora não havia por
+ * onde CHEGAR nelas: a história da casa estava publicada e inalcançável.
+ *
+ * Numa casa que vive de Instagram, isso é o ativo mais desperdiçado que havia
+ * aqui. Quem nunca veio decide pelo que já rolou, e story some em 24h.
+ *
+ * ESTÁTICA, lida do banco no BUILD e publicada por rebuild, como o resto
+ * (ADR-008). Uma prateleira por formato, cada uma rolando na horizontal.
+ *
+ * SEM EVENTO PASSADO no banco, a página diz isso em voz alta e manda para onde
+ * há conteúdo de verdade. Não inventa edição, não repete a `/cultura` e não
+ * finge acervo que não existe: página que mente sobre o próprio tamanho é pior
+ * que página curta. (F-006)
+ */
+import Base from '@/layouts/Base.astro';
+import HeroPagina from '@/components/secoes/HeroPagina.astro';
+import CarrosselEventos from '@/components/secoes/CarrosselEventos.astro';
+import ChamadaReserva from '@/components/secoes/ChamadaReserva.astro';
+import Faixa from '@/components/secoes/Faixa.astro';
+import { buscarEventosPublicados } from '@/lib/agenda';
+import { jaAconteceram, agruparPorFormato, contarEdicoes } from '@/lib/memoria';
+import { EVENTOS } from '@/constants/casa';
+
+const passados = jaAconteceram(await buscarEventosPublicados());
+const grupos = agruparPorFormato(passados, EVENTOS);
+const total = contarEdicoes(grupos);
+const temMemoria = total > 0;
+
+// O lead não promete "role de lado": com poucas edições a prateleira cabe
+// inteira na tela e não rola, e frase que a tela não cumpre lê como desleixo.
+// Quem tem muita edição descobre a rolagem pelo card cortado na borda, que é
+// a dica que o próprio desenho já dá.
+const lead = temMemoria
+  ? 'Cada noite que já aconteceu por aqui, guardada. Um trilho para cada encontro da casa.'
+  : 'O que já aconteceu na casa fica registrado aqui, edição por edição.';
+---
+
+<Base
+  titulo="Memória"
+  descricao="As noites que já aconteceram na CASA + HAUBERT: cada edição dos encontros da casa, em Novo Hamburgo."
+>
+  <HeroPagina
+    olho="O que já rolou"
+    titulo="Memória"
+    lead={lead}
+    frase={temMemoria ? `${total} ${total === 1 ? 'noite registrada' : 'noites registradas'}` : undefined}
+  />
+
+  {
+    temMemoria ? (
+      grupos.map((grupo, i) => <CarrosselEventos grupo={grupo} indice={i} />)
+    ) : (
+      <section class="casa-secao">
+        <div class="casa-container">
+          <div class="mem__vazio">
+            <p class="mem__aviso">
+              Ainda não há edição registrada por aqui. Cada noite entra nesta página depois de
+              acontecer, com data, line-up e página própria.
+            </p>
+            <p class="mem__saidas">
+              <a class="btn btn-primario" href="/agenda">Ver o que vem por aí</a>
+              <a class="btn btn-secundario" href="/cultura">Conhecer os encontros da casa</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Faixa texto="A casa conecta. A memória fica." velocidade={40} />
+
+  <ChamadaReserva olho="Presença" titulo="Esteja na próxima." origem="memoria" id="memoria" />
+</Base>
+
+<style>
+  .mem__vazio {
+    display: grid;
+    gap: var(--esp-6);
+    max-width: 52ch;
+  }
+
+  .mem__aviso {
+    margin: 0;
+    padding: var(--esp-4) var(--esp-5);
+    border-left: 2px solid var(--cor-acento);
+    background-color: var(--cor-superficie-2);
+    font-size: var(--tam-corpo-sm);
+    line-height: 1.55;
+    color: var(--cor-texto);
+  }
+
+  .mem__saidas {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-3);
+  }
+</style>
