@@ -17,8 +17,7 @@
     "og": "node scripts/gerar-og.mjs",
     "prebuild": "node scripts/gerar-og.mjs",
     "csp": "node scripts/csp.mjs",
-    "postbuild": "node scripts/csp.mjs",
-    "video:360": "node scripts/render-360.mjs src/generated/trilha-360.json | ffmpeg -y -v error -f rawvideo -pix_fmt rgb24 -s 640x854 -r 24 -i - -vf \"noise=alls=6:allf=t,vignette=PI/5\" -c:v libx264 -pix_fmt yuv420p -crf 29 -g 6 -keyint_min 6 -sc_threshold 0 -movflags +faststart -an public/video/chef-360.mp4"
+    "postbuild": "node scripts/csp.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.4",

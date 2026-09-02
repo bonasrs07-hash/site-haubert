@@ -8,19 +8,18 @@
  * então quem guarda de verdade é o middleware. (`src/middleware.ts`)
  *
  * O QUE ESTA PÁGINA TESTA
- * O scroll como manivela de um giro de 360°: rolar para frente gira o chef,
- * rolar para trás desgira, e ele para onde a mão parar. Uma volta inteira por
- * corte, com a troca de prato caindo sempre no ponto em que ele está de costas,
- * que é onde ninguém vê a troca acontecer.
+ * O scroll como manivela: a posição da rolagem vira o instante do vídeo, então
+ * rolar para frente adianta o quadro, rolar para trás volta, e ele para onde a
+ * mão parar. Nada roda sozinho, nada é temporizador.
  *
- * O VÍDEO REAL
- * Enquanto `VIDEO_360` for `null`, quem gira é a silhueta vetorial. Assim que o
- * arquivo existir, basta apontar a constante: o mesmo scroll passa a mexer o
- * `currentTime` do vídeo, e o resto da página não muda.
+ * O QUE O VÍDEO PRECISA CUMPRIR
+ * MUITO quadro-chave (`-g 6` no ffmpeg). Vídeo com quadro-chave esparso trava
+ * ao buscar, porque o browser precisa decodificar desde o anterior a cada
+ * quadro; a referência atual chegou com UM só, para o arquivo inteiro, e
+ * raspava aos solavancos até ser reencodada.
  *
- * Para o vídeo funcionar bem raspado pelo scroll ele precisa de MUITO keyframe
- * (`-g 6` no ffmpeg, ou similar). Vídeo com keyframe esparso trava ao buscar,
- * porque o browser tem que decodificar do keyframe anterior a cada quadro.
+ * Fora isso, a página não exige nada do vídeo: onde está o prato em cada
+ * quadro é a trilha que diz, e ela é dado, não fórmula.
  */
 import '@fontsource/bebas-neue/latin-400.css';
 import '@fontsource/space-grotesk/latin-400.css';
@@ -36,10 +35,14 @@ export const prerender = false;
 /**
  * O vídeo do giro.
  *
- * Hoje aponta para um PLACEHOLDER gerado aqui mesmo, com o giro certo mas
- * imagem fictícia, só para a mecânica poder ser vista andando. Trocar pelo
- * footage real é trocar este caminho, contanto que o vídeo respeite o
- * contrato do giro descrito em `MEDIDAS_DO_QUADRO` abaixo.
+ * Hoje é a REFERÊNCIA gerada no Luma AI (`haubert360.mp4`), reencodada. O
+ * original vinha com UM único quadro-chave, o que trava a raspagem quadro a
+ * quadro: para achar um instante qualquer o browser tem que decodificar tudo
+ * desde o começo. Reencodado com quadro-chave a cada 6, virou 38 pontos de
+ * entrada, e é isso que faz o scroll andar liso.
+ *
+ * Continua sendo referência, não peça final: tem a marca d'água do Luma, a
+ * roupa dele troca de cor entre as voltas e as voltas não são regulares.
  *
  * `null` volta a desenhar a silhueta vetorial, que é o plano B se o arquivo
  * sumir.
@@ -49,17 +52,29 @@ const VIDEO_360: string | null = '/video/chef-360.mp4';
 /**
  * A TRILHA DO PRATO: onde está o prato, quadro a quadro.
  *
- * Com a câmera descendo, o prato não fica mais numa altura fixa do quadro, e
- * o botão precisa saber onde ele está para pousar em cima dele. A trilha é
- * gerada junto com o vídeo, pelo mesmo código que desenha o prato, então ela
- * não pode divergir dele. Refazer essa conta aqui, por fórmula, seria manter a
- * mesma matemática em dois lugares, que é como os dois divergem.
+ * O prato não fica parado no quadro: ele orbita com o giro e some por trás do
+ * corpo. Para o botão pousar em cima dele, a página precisa saber onde ele
+ * está, e nenhuma fórmula sabe isso de um vídeo qualquer. Então é dado:
+ * `[x, y, visibilidade]` por quadro, x e y em porcentagem do quadro.
  *
- * Quando entrar o footage real: rastreie o prato e gere uma trilha no mesmo
- * formato, `[x, y, visibilidade]` por quadro, x e y em porcentagem do quadro.
- * Nada mais na página precisa mudar.
+ * ATENÇÃO, a trilha de hoje foi marcada A OLHO sobre a referência do Luma, não
+ * rastreada. Ela acerta o passeio do prato de modo aproximado, e é para isso
+ * que serve agora. O footage real precisa de uma trilha medida.
+ *
+ * A visibilidade é o que desliga o botão quando o prato está atrás dele: sem
+ * ela, sobra um botão clicável em cima das costas do cara.
  */
 const trilha = trilha360;
+
+/*
+  A proporção também como NÚMERO, porque o CSS precisa dela em conta, não só
+  em `aspect-ratio`: é assim que o quadro cabe na tela pelo lado que apertar
+  primeiro sem nunca deformar. Deformar aqui seria pior que feio: o botão se
+  posiciona em porcentagem do quadro, então quadro esticado é botão fora do
+  prato.
+*/
+const [larguraDoVideo, alturaDoVideo] = trilha.proporcao.split('/').map((n) => Number(n.trim()));
+const razaoDoVideo = larguraDoVideo / alturaDoVideo;
 
 // Os cortes saem do mesmo lugar que a seção /fogo usa. Nada de lista paralela:
 // duas fontes para o mesmo dado é como uma delas fica velha.
@@ -76,7 +91,7 @@ const cortes = CORTES;
 if (trilha.cortes !== cortes.length) {
   throw new Error(
     `A trilha do giro tem ${trilha.cortes} estações e o cardápio tem ${cortes.length} cortes. ` +
-      'Rode `npm run video:360` depois de mexer em CORTES.',
+      'Regere a trilha em src/generated/ depois de mexer em CORTES.',
   );
 }
 ---
@@ -102,7 +117,7 @@ if (trilha.cortes !== cortes.length) {
         data-palco
         data-frente="1"
         data-tem-video={VIDEO_360 ? "1" : "0"}
-        style={`--proporcao:${trilha.proporcao}`}
+        style={`--proporcao:${trilha.proporcao}; --razao:${razaoDoVideo.toFixed(4)}`}
       >
         <div class="piso"></div>
 
@@ -492,8 +507,10 @@ if (trilha.cortes !== cortes.length) {
          Ele guarda a proporção do arquivo, então o botão pode ser posicionado
          em porcentagem e continuar certo em qualquer tela. */
       .quadro {
+        --altura: min(64vh, 620px, calc(92vw / var(--razao)));
         position: relative;
-        height: min(76vh, 720px);
+        height: var(--altura);
+        width: calc(var(--altura) * var(--razao));
         aspect-ratio: var(--proporcao);
       }
       .giro__video {
@@ -562,7 +579,7 @@ if (trilha.cortes !== cortes.length) {
         position: absolute;
         left: calc(var(--mao-x) * 1%);
         top: calc(var(--mao-y) * 1%);
-        width: 26%;
+        width: 15%;
         transform: translate(-50%, -50%);
         opacity: var(--visivel);
       }
