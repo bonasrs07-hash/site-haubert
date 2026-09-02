@@ -97,7 +97,7 @@ const cortes = CORTES;
  * Estava em 120 e a cena passava correndo, sem tempo de levar o mouse até o
  * botão antes de o prato virar.
  */
-const ROLAGEM_POR_CORTE = 260;
+const ROLAGEM_POR_CORTE = 340;
 
 /**
  * O MAPA DE RITMO: qual quadro do vídeo mostrar em cada ponto da rolagem.
@@ -118,7 +118,12 @@ const ROLAGEM_POR_CORTE = 260;
  * sobra o que acelerar. Quem está segurando a cena hoje é `ROLAGEM_POR_CORTE`.
  * O mapa é para o footage de verdade, onde existem costas de verdade.
  */
-const PASSOS_DO_MAPA = 700;
+/*
+  Resolução do mapa. Precisa ser mais fina que a duração de um quadro em
+  rolagem, senão é o mapa, e não o vídeo, que passa a dar o passo: com poucos
+  passos a imagem anda aos saltos por culpa da tabela.
+*/
+const PASSOS_DO_MAPA = 1400;
 const mapaDeRitmo = (() => {
   const acumulado: number[] = [];
   let soma = 0;
