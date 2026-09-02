@@ -1,5 +1,6 @@
 /**
- * Guarda do painel. (docs/11_SEGURANCA, "Auth antes de renderizar")
+ * Guarda das rotas com sessão: o painel e os estudos internos.
+ * (docs/11_SEGURANCA, "Auth antes de renderizar")
  *
  * A verificação acontece AQUI, no servidor, antes de qualquer HTML sair. Não
  * existe versão desta checagem no cliente: esconder o botão não é proteger a
@@ -18,12 +19,30 @@ import { lerSessao } from '@/lib/sessao';
 /** As duas rotas do painel que existem justamente para quem NÃO tem sessão. */
 const ABERTAS = new Set(['/painel/entrar', '/api/painel/entrar', '/api/painel/sair']);
 
+/**
+ * O que exige sessão.
+ *
+ * `/360` é estudo interno: não tem link em lugar nenhum do site, não entra no
+ * sitemap e não é para o público. Nada disso é proteção, e é por isso que ela
+ * está nesta lista. URL escondida vaza por histórico, por `Referer`, por
+ * captura de tela e pela primeira pessoa que contar para alguém, e no dia em
+ * que vazar ela já estaria aberta. Quem guarda a rota é a sessão, não o
+ * silêncio. (docs/11_SEGURANCA, "Auth antes de renderizar")
+ *
+ * A comparação é por segmento inteiro, de propósito: `startsWith('/painel')`
+ * cru também casaria com uma futura `/painelzinho`, que não é painel nenhum.
+ */
+const PROTEGIDAS = ['/painel', '/api/painel', '/360'];
+
+const exigeSessao = (rota: string) =>
+  PROTEGIDAS.some((base) => rota === base || rota.startsWith(base + '/'));
+
 export const onRequest = defineMiddleware(async (contexto, proximo) => {
   const rota = contexto.url.pathname.replace(/\/+$/, '') || '/';
 
   // O site público não passa por nada disto. Também é o que mantém o build das
   // páginas estáticas sem uma ida ao banco por página.
-  if (!rota.startsWith('/painel') && !rota.startsWith('/api/painel')) return proximo();
+  if (!exigeSessao(rota)) return proximo();
 
   // A tela de entrar é a única do painel que existe para quem NÃO tem sessão,
   // e é onde a senha é digitada. Ela precisa da blindagem MAIS que as outras:
@@ -57,13 +76,13 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
 });
 
 /**
- * Toda resposta do painel sai por aqui, inclusive o 401, o redirecionamento e
- * a tela de entrar. Uma saída que escapa da blindagem é uma porta destrancada
- * que ninguém sabe que existe, então não existe `return` de painel que não
- * passe por esta função.
+ * Toda resposta de rota protegida sai por aqui, inclusive o 401, o
+ * redirecionamento e a tela de entrar. Uma saída que escapa da blindagem é uma
+ * porta destrancada que ninguém sabe que existe, então não existe `return`
+ * daqui que não passe por esta função.
  */
 function blindar(resposta: Response): Response {
-  // Painel não é conteúdo público: nada de cache em CDN, nada de índice.
+  // Nada disto é conteúdo público: sem cache em CDN, sem índice.
   resposta.headers.set('cache-control', 'no-store, must-revalidate');
   resposta.headers.set('x-robots-tag', 'noindex, nofollow');
   resposta.headers.set('content-security-policy', CSP_DO_PAINEL);
@@ -71,10 +90,21 @@ function blindar(resposta: Response): Response {
 }
 
 /**
- * A CSP do painel. O site público tem a dele, estrita e por hash, gerada no
- * build para o `vercel.json`, e o `vercel.json` exclui estas rotas de
- * propósito. Duas políticas na mesma resposta valem pela INTERSEÇÃO, então
- * deixar a do site alcançar o painel mataria a hidratação do React.
+ * A CSP das rotas protegidas (painel e `/360`). O site público tem a dele,
+ * estrita e por hash, gerada no build para o `vercel.json`, que exclui as
+ * rotas do painel de propósito.
+ *
+ * `/360` está excluída lá junto com o painel, e pelo mesmo motivo de fundo: o
+ * `vercel.json` só sabe os hashes que o build MEDIU, e o build mede HTML
+ * estático. Rota SSR não gera HTML no build, então o script embutido que o
+ * Astro põe na página nunca entraria na lista. Duas políticas na mesma
+ * resposta valem pela interseção, e a interseção teria bloqueado esse script:
+ * a página abriria inteira e completamente parada, sem erro nenhum na tela.
+ *
+ * O que esta política NÃO permite: vídeo de fora da origem. Quando o giro
+ * ganhar o arquivo de verdade, ele mora em `public/video/` e passa por
+ * `default-src 'self'`. Se um dia vier do Storage do Supabase, é preciso
+ * abrir `media-src` aqui.
  *
  * Aqui `script-src` precisa de `'unsafe-inline'`, e vale dizer por quê em vez de
  * fingir que é rigor: o painel é SSR com ilha React, e a hidratação injeta

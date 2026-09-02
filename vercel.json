@@ -23,7 +23,7 @@
       ]
     },
     {
-      "source": "/((?!api/|painel).*)",
+      "source": "/((?!api/|painel|360).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",

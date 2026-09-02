@@ -53,6 +53,9 @@ export default defineConfig({
           - /404, que não deveria ser encontrada por ninguém
           - /painel/*, que é ferramenta de trabalho e já responde `noindex`
             por meta e por cabeçalho.
+          - /360, estudo interno atrás de sessão. Hoje ela é SSR e nem chegaria
+            aqui, mas listar é barato e o dia em que alguém a pré-renderizar
+            não pode ser o dia em que ela entra no sitemap.
 
         O painel entrou aqui por descuido quando as rotas foram criadas, e o
         resultado era um sitemap dizendo "indexe" para páginas que respondem
@@ -63,7 +66,8 @@ export default defineConfig({
       filter: (pagina) =>
         !pagina.includes('/privacidade') &&
         !pagina.includes('/404') &&
-        !pagina.includes('/painel'),
+        !pagina.includes('/painel') &&
+        !pagina.includes('/360'),
       i18n: undefined,
     }),
   ],

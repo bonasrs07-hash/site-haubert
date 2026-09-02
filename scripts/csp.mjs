@@ -133,7 +133,14 @@ function montar(hashes) {
         // CSP dele é posta pelo `src/middleware.ts`, mais frouxa no script e
         // mais restrita no resto. Se as duas valessem para a mesma rota o
         // browser aplicaria a interseção e o painel morreria.
-        source: '/((?!api/|painel).*)',
+        //
+        // `/360` sai pelo MESMO motivo, e custou uma medição descobrir: ela é
+        // SSR, então o `medirHashes()` abaixo nunca a vê (ele varre o HTML
+        // estático, e SSR não gera HTML no build). Só que o Astro embute o
+        // script de página no HTML, então a rota serviria um script inline com
+        // um hash que esta lista não tem. A CSP não avisa, ela bloqueia: a
+        // página abriria bonita e completamente parada.
+        source: '/((?!api/|painel|360).*)',
         headers: [{ key: 'Content-Security-Policy', value: politicaPublica(hashes) }],
       },
     ],

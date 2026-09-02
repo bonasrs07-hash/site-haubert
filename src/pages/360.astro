@@ -1,0 +1,863 @@
+---
+/**
+ * /360, estudo do giro cinematográfico. ROTA INTERNA.
+ *
+ * Não é página do site: não tem link em lugar nenhum, não entra no sitemap,
+ * responde `noindex` e exige sessão. Esconder a URL não protege nada, ela vaza
+ * por histórico, por `Referer` e pela primeira pessoa que contar para alguém,
+ * então quem guarda de verdade é o middleware. (`src/middleware.ts`)
+ *
+ * O QUE ESTA PÁGINA TESTA
+ * O scroll como manivela de um giro de 360°: rolar para frente gira o chef,
+ * rolar para trás desgira, e ele para onde a mão parar. Uma volta inteira por
+ * corte, com a troca de prato caindo sempre no ponto em que ele está de costas,
+ * que é onde ninguém vê a troca acontecer.
+ *
+ * O VÍDEO REAL
+ * Enquanto `VIDEO_360` for `null`, quem gira é a silhueta vetorial. Assim que o
+ * arquivo existir, basta apontar a constante: o mesmo scroll passa a mexer o
+ * `currentTime` do vídeo, e o resto da página não muda.
+ *
+ * Para o vídeo funcionar bem raspado pelo scroll ele precisa de MUITO keyframe
+ * (`-g 6` no ffmpeg, ou similar). Vídeo com keyframe esparso trava ao buscar,
+ * porque o browser tem que decodificar do keyframe anterior a cada quadro.
+ */
+import '@fontsource/bebas-neue/latin-400.css';
+import '@fontsource/space-grotesk/latin-400.css';
+import '@fontsource/space-mono/latin-400.css';
+import '@/styles/global.css';
+import { CORTES } from '@/constants/casa';
+
+// A sessão é conferida no middleware, antes desta página existir. Ela precisa
+// de SSR: página pré-renderizada no build não tem a quem perguntar quem entrou.
+export const prerender = false;
+
+/**
+ * O vídeo do giro.
+ *
+ * Hoje aponta para um PLACEHOLDER gerado aqui mesmo, com o giro certo mas
+ * imagem fictícia, só para a mecânica poder ser vista andando. Trocar pelo
+ * footage real é trocar este caminho, contanto que o vídeo respeite o
+ * contrato do giro descrito em `MEDIDAS_DO_QUADRO` abaixo.
+ *
+ * `null` volta a desenhar a silhueta vetorial, que é o plano B se o arquivo
+ * sumir.
+ */
+const VIDEO_360: string | null = '/video/chef-360.mp4';
+
+/**
+ * O CONTRATO DO GIRO, que o vídeo precisa cumprir e o botão usa para pousar.
+ *
+ * Não é enfeite: é o que faz o hotspot cair em cima do prato em vez de flutuar
+ * ao lado dele. Filmar diferente disto é o que quebra o alinhamento, e nada na
+ * tela avisa quando quebra.
+ *
+ *   - uma volta completa por corte, velocidade constante, sem corte de edição;
+ *   - de frente no começo de cada volta, de costas na metade;
+ *   - a mão que segura o prato vem ADIANTADA do eixo do corpo, em `faseDaMao`
+ *     radianos, e o prato orbita num raio de `raio` da largura do quadro;
+ *   - o prato fica na altura `alturaDoPrato` do quadro.
+ *
+ * Os três números saem medidos do vídeo. Quando entrar o footage real, é aqui
+ * que se calibra, e em nenhum outro lugar.
+ */
+const MEDIDAS_DO_QUADRO = {
+  proporcao: '640 / 854',
+  faseDaMao: -0.62,
+  raio: 26.9,
+  alturaDoPrato: 30.8,
+};
+
+// Os cortes saem do mesmo lugar que a seção /fogo usa. Nada de lista paralela:
+// duas fontes para o mesmo dado é como uma delas fica velha.
+const cortes = CORTES;
+---
+
+<!doctype html>
+<html lang="pt-BR" data-modo="noite">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Estudo 360 · interno</title>
+  </head>
+
+  <body class="estudo">
+    <header class="estudo__topo">
+      <span class="estudo__selo">Estudo interno · giro 360</span>
+      <a class="estudo__voltar" href="/painel">Painel</a>
+    </header>
+
+    <div class="trilho" data-trilho style={`height:${cortes.length * 120}vh`}>
+      <div
+        class="palco"
+        data-palco
+        data-frente="1"
+        data-tem-video={VIDEO_360 ? "1" : "0"}
+        data-fase={MEDIDAS_DO_QUADRO.faseDaMao}
+        data-raio={MEDIDAS_DO_QUADRO.raio}
+        style={`--proporcao:${MEDIDAS_DO_QUADRO.proporcao}; --altura-prato:${MEDIDAS_DO_QUADRO.alturaDoPrato}%`}
+      >
+        <div class="piso"></div>
+
+        <div class="quadro">
+        {
+          VIDEO_360 ? (
+            <video
+              class="giro__video"
+              data-video
+              src={VIDEO_360}
+              muted
+              playsinline
+              preload="auto"
+              aria-hidden="true"
+            />
+          ) : (
+            <>
+              <p class="giro__marca">Vídeo 360, um prato por volta, placeholder</p>
+              <svg class="giro__figura" viewBox="0 0 400 520" aria-hidden="true">
+                <g class="figura__brilho" stroke-width="10" stroke-linecap="round" fill="none">
+                  <path d="M252 168 L306 120 L332 82" />
+                  <circle cx="200" cy="96" r="41" />
+                </g>
+                <g class="figura__traco" stroke-width="27" stroke-linecap="round" fill="none">
+                  <path d="M150 176 L106 238 L120 290" />
+                  <path d="M250 172 L304 122 L330 84" />
+                  <path d="M176 300 L170 476" />
+                  <path d="M226 300 L234 476" />
+                </g>
+                <g class="figura__corpo">
+                  <circle cx="200" cy="96" r="39" />
+                  <rect x="187" y="128" width="26" height="30" />
+                  <path
+                    d="M148 158 h104 c12 0 18 8 19 20 l8 106 c1 12 -6 20 -18 20 h-122 c-12 0 -19 -8 -18 -20 l8 -106 c1 -12 7 -20 19 -20 z"
+                  />
+                </g>
+                <g class="figura__rosto">
+                  <circle cx="188" cy="90" r="3.5" />
+                  <circle cx="212" cy="90" r="3.5" />
+                </g>
+              </svg>
+            </>
+          )
+        }
+
+        <div class="mao" data-mao>
+          <svg class="mao__prato" viewBox="0 0 200 200" aria-hidden="true">
+            <ellipse cx="100" cy="130" rx="84" ry="19" class="prato__sombra" />
+            <ellipse cx="100" cy="119" rx="84" ry="22" class="prato__borda" />
+            <ellipse cx="100" cy="112" rx="84" ry="22" class="prato__face" />
+            <ellipse cx="100" cy="110" rx="62" ry="15" class="prato__fundo" />
+            <path
+              data-corte
+              class="prato__corte"
+              d="M62 106 c4 -24 24 -36 44 -34 22 2 34 16 32 34 -2 20 -20 30 -40 29 -20 -1 -38 -10 -36 -29 z"
+            />
+            <g class="prato__grelha" stroke-width="3" fill="none">
+              <path d="M74 100 L124 94" />
+              <path d="M78 110 L128 104" />
+            </g>
+          </svg>
+
+          <button class="ponto" type="button" data-abrir aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 5 L12 19"></path>
+              <path d="M5 12 L19 12"></path>
+            </svg>
+            <span class="so-leitor" data-rotulo>Ver a ficha do corte</span>
+          </button>
+        </div>
+        </div>
+
+        <div class="rotulo">
+          <h1 class="rotulo__nome" data-nome>{cortes[0].nome}</h1>
+          <p class="rotulo__contador" data-contador>Corte 1 de {cortes.length}</p>
+        </div>
+
+        <nav class="regua" aria-label="Cortes">
+          {
+            cortes.map((corte, i) => (
+              <button
+                class="regua__item"
+                type="button"
+                data-ir={i}
+                data-nome={corte.nome}
+                data-desc={corte.descricao}
+                aria-current={i === 0 ? 'true' : 'false'}
+              >
+                {corte.nome}
+              </button>
+            ))
+          }
+        </nav>
+
+        <div class="barra"><i data-avanco></i></div>
+        <p class="dica">Role para girar · passe o mouse no prato</p>
+      </div>
+    </div>
+
+    <dialog class="ficha" data-ficha>
+      <article class="ficha__corpo">
+        <header class="ficha__topo">
+          <div>
+            <p class="ficha__olho" data-ficha-olho>Corte 1 de {cortes.length}</p>
+            <h2 class="ficha__nome" data-ficha-nome>{cortes[0].nome}</h2>
+          </div>
+          <button class="ficha__fechar" type="button" data-fechar>Fechar</button>
+        </header>
+
+        <p class="ficha__texto" data-ficha-texto>{cortes[0].descricao}</p>
+
+        <dl class="ficha__linhas">
+          <div class="ficha__linha">
+            <dt>Peso</dt>
+            <dd>[A CONFIRMAR]</dd>
+          </div>
+          <div class="ficha__linha">
+            <dt>Ponto sugerido</dt>
+            <dd>[A CONFIRMAR]</dd>
+          </div>
+          <div class="ficha__linha">
+            <dt>Acompanha</dt>
+            <dd>[A CONFIRMAR]</dd>
+          </div>
+          <div class="ficha__linha">
+            <dt>Preço</dt>
+            <dd>[FASE 2, pelo painel]</dd>
+          </div>
+        </dl>
+
+        <div class="ficha__acoes">
+          <a class="botao-primario" href="/#reservar">Reservar mesa</a>
+          <button class="botao-secundario" type="button" data-fechar>Voltar ao giro</button>
+        </div>
+      </article>
+    </dialog>
+
+    <a class="reserva" href="/#reservar">Reservar</a>
+
+    <script>
+      /*
+        O motor do giro.
+
+        Uma volta inteira por corte. O ângulo sai direto da posição do scroll,
+        nunca de um temporizador: é isso que faz a coisa andar e voltar na
+        velocidade da mão, e parar onde a pessoa parar.
+
+        `cos` é a largura aparente do corpo numa volta, e `sin` é onde o prato
+        está na órbita. Com os dois, a troca de corte cai exatamente no meio da
+        volta, com ele de costas, que é onde ninguém vê a troca acontecer.
+      */
+      const trilho = document.querySelector<HTMLElement>('[data-trilho]');
+      const palco = document.querySelector<HTMLElement>('[data-palco]');
+      const regua = [...document.querySelectorAll<HTMLButtonElement>('[data-ir]')];
+
+      if (trilho && palco && regua.length) {
+        const cortes = regua.map((b) => ({
+          nome: b.dataset.nome ?? '',
+          descricao: b.dataset.desc ?? '',
+        }));
+        const total = cortes.length;
+
+        // As medidas do quadro vem do servidor, nao repetidas aqui: um numero
+        // de calibragem em dois lugares e um numero que vai divergir.
+        const fase = Number(palco.dataset.fase ?? '0');
+        const raio = Number(palco.dataset.raio ?? '0');
+
+        const video = palco.querySelector<HTMLVideoElement>('[data-video]');
+        const avanco = palco.querySelector<HTMLElement>('[data-avanco]');
+        const alvoNome = palco.querySelector<HTMLElement>('[data-nome]');
+        const alvoContador = palco.querySelector<HTMLElement>('[data-contador]');
+        const alvoRotulo = palco.querySelector<HTMLElement>('[data-rotulo]');
+
+        const ficha = document.querySelector<HTMLDialogElement>('[data-ficha]');
+        const fichaOlho = document.querySelector<HTMLElement>('[data-ficha-olho]');
+        const fichaNome = document.querySelector<HTMLElement>('[data-ficha-nome]');
+        const fichaTexto = document.querySelector<HTMLElement>('[data-ficha-texto]');
+
+        // -1 para a primeira medida sempre pintar o rótulo e a régua.
+        let indice = -1;
+        let pendente = false;
+        let duracao = 0;
+
+        const raiz = () => document.scrollingElement ?? document.documentElement;
+
+        // Arrow const, e nao `function`: declaracao hoisted faz o TypeScript
+        // perder o estreitamento de `palco` que o `if` acima ja garantiu.
+        const medir = () => {
+          pendente = false;
+          const r = raiz();
+          const alcance = r.scrollHeight - r.clientHeight;
+          const p = alcance > 0 ? Math.min(1, Math.max(0, r.scrollTop / alcance)) : 0;
+
+          const t = p * total;
+          const ang = t * 2 * Math.PI;
+          const cos = Math.cos(ang);
+
+          // A mao nao esta no eixo do corpo: ela orbita adiantada. Sem esta
+          // defasagem o botao pousa no peito dele, e nao no prato.
+          const angMao = ang + fase;
+          const cosMao = Math.cos(angMao);
+          const sinMao = Math.sin(angMao);
+
+          // Um piso na largura para ele não sumir de perfil: silhueta chapada
+          // com escala zero pisca, e piscar parece defeito, não giro.
+          const largura = cos >= 0 ? Math.max(cos, 0.17) : Math.min(cos, -0.17);
+          // "de frente" aqui e sobre o PRATO estar clicavel, nao sobre o rosto:
+          // e a mao que decide se ha o que clicar.
+          const deFrente = cosMao > 0.1;
+
+          palco.style.setProperty('--largura', largura.toFixed(4));
+          // posicao do prato em PORCENTAGEM do quadro, que e o que sobrevive a
+          // qualquer tamanho de tela e a troca do video
+          palco.style.setProperty('--mao-x', (50 + sinMao * raio).toFixed(3));
+          palco.style.setProperty('--aproxima', (0.78 + 0.22 * ((cosMao + 1) / 2)).toFixed(4));
+          palco.style.setProperty(
+            '--visivel',
+            Math.min(1, Math.max(0, (cosMao + 0.12) / 0.45)).toFixed(4),
+          );
+          palco.style.setProperty('--frente', deFrente ? '1' : '0');
+          palco.dataset.frente = deFrente ? '1' : '0';
+
+          if (avanco) avanco.style.width = (p * 100).toFixed(2) + '%';
+
+          // O vídeo é raspado pelo mesmo número que gira a silhueta. Trocar um
+          // pelo outro não muda mais nada desta página.
+          if (video && duracao > 0) {
+            const tempo = p * duracao;
+            if (Math.abs(video.currentTime - tempo) > 0.01) video.currentTime = tempo;
+          }
+
+          const i = Math.min(total - 1, Math.max(0, Math.floor(t + 0.5)));
+          if (i !== indice) {
+            indice = i;
+            const corte = cortes[i];
+            if (alvoNome) alvoNome.textContent = corte.nome;
+            if (alvoContador) alvoContador.textContent = 'Corte ' + (i + 1) + ' de ' + total;
+            if (alvoRotulo) alvoRotulo.textContent = 'Ver a ficha do corte ' + corte.nome;
+            regua.forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false'));
+          }
+        };
+
+        const aoRolar = () => {
+          if (pendente) return;
+          pendente = true;
+          requestAnimationFrame(medir);
+        };
+
+        if (video) {
+          video.pause();
+          video.addEventListener('loadedmetadata', () => {
+            duracao = video.duration || 0;
+            medir();
+          });
+        }
+
+        document.addEventListener('scroll', aoRolar, { passive: true });
+        window.addEventListener('resize', aoRolar);
+        medir();
+
+        regua.forEach((botao, i) => {
+          botao.addEventListener('click', () => {
+            const r = raiz();
+            const alcance = r.scrollHeight - r.clientHeight;
+            window.scrollTo({ top: (i / total) * alcance, behavior: 'smooth' });
+          });
+        });
+
+        // O <dialog> nativo já fecha no Esc e já prende o foco dentro dele.
+        // Reescrever isso à mão é como se esquece metade.
+        const abrir = document.querySelector<HTMLButtonElement>('[data-abrir]');
+        if (abrir && ficha) {
+          abrir.addEventListener('click', () => {
+            const i = Math.max(0, indice);
+            const corte = cortes[i];
+            if (fichaOlho) fichaOlho.textContent = 'Corte ' + (i + 1) + ' de ' + total;
+            if (fichaNome) fichaNome.textContent = corte.nome;
+            if (fichaTexto) fichaTexto.textContent = corte.descricao;
+            ficha.showModal();
+          });
+          document.querySelectorAll<HTMLButtonElement>('[data-fechar]').forEach((b) => {
+            b.addEventListener('click', () => ficha.close());
+          });
+          // Clique no fundo escuro fecha; clique no cartão não.
+          ficha.addEventListener('click', (evento) => {
+            if (evento.target === ficha) ficha.close();
+          });
+        }
+      }
+    </script>
+
+    <style>
+      /* ====================================================================
+         Estudo /360. Tudo por token: esta página é rascunho da página real, e
+         rascunho com cor literal vira página real com cor literal.
+
+         As duas variáveis abaixo são DERIVADAS, não cores novas: a figura é a
+         superfície puxada para o preto, porque uma silhueta contra o carvão
+         precisa ser mais escura que o carvão para existir.
+         ==================================================================== */
+      .estudo {
+        --figura: color-mix(in oklab, var(--cor-superficie) 58%, black);
+        --louca: color-mix(in oklab, var(--cor-superficie-2) 92%, white);
+
+        margin: 0;
+        padding-bottom: 0;
+        background-color: var(--cor-superficie);
+      }
+
+      .estudo__topo {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--esp-4);
+        padding: var(--esp-2) var(--gutter);
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+        background-color: color-mix(in oklab, var(--cor-superficie) 82%, transparent);
+        border-bottom: var(--borda-fina) solid
+          color-mix(in oklab, var(--cor-borda) 40%, transparent);
+      }
+
+      .estudo__voltar {
+        min-height: var(--alvo-toque);
+        display: inline-flex;
+        align-items: center;
+        color: var(--cor-acento);
+        text-decoration: none;
+      }
+      .estudo__voltar:hover {
+        color: var(--cor-texto-forte);
+      }
+
+      /* ---- o palco ------------------------------------------------------ */
+      .palco {
+        --largura: 1;
+        --mao-x: 50;
+        --aproxima: 1;
+        --visivel: 1;
+        --frente: 1;
+
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        background-image: radial-gradient(
+          90% 60% at 50% 104%,
+          color-mix(in oklab, var(--cor-acento-fundo) 55%, transparent) 0%,
+          transparent 60%
+        );
+      }
+
+      /* O quadro é o sistema de coordenadas de tudo que pousa sobre o vídeo.
+         Ele guarda a proporção do arquivo, então o botão pode ser posicionado
+         em porcentagem e continuar certo em qualquer tela. */
+      .quadro {
+        position: relative;
+        height: min(76vh, 720px);
+        aspect-ratio: var(--proporcao);
+      }
+      .giro__video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .giro__figura {
+        position: absolute;
+        left: 50%;
+        top: 13%;
+        height: 86%;
+        width: auto;
+        transform: translateX(-50%) scaleX(var(--largura));
+        transform-origin: 50% 50%;
+      }
+
+      .giro__marca {
+        position: absolute;
+        top: calc(var(--altura-topo) + var(--esp-4));
+        left: 50%;
+        translate: -50% 0;
+        margin: 0;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+      }
+
+      .figura__corpo {
+        fill: var(--figura);
+      }
+      .figura__traco {
+        stroke: var(--figura);
+      }
+      .figura__brilho {
+        stroke: var(--cor-acento);
+        opacity: 0.85;
+        filter: blur(7px);
+      }
+      /* O rosto só existe de frente. É o detalhe que vende o giro. */
+      .figura__rosto {
+        fill: var(--cor-acento);
+        opacity: calc(var(--frente) * 0.55);
+      }
+
+      .piso {
+        position: absolute;
+        left: 50%;
+        bottom: 20vh;
+        translate: -50% 0;
+        width: min(52vh, 520px);
+        height: 9vh;
+        filter: blur(18px);
+        background-image: radial-gradient(
+          50% 50% at 50% 50%,
+          color-mix(in oklab, var(--cor-acento-fundo) 75%, transparent) 0%,
+          transparent 70%
+        );
+      }
+
+      /* ---- o prato, que orbita junto ------------------------------------ */
+      .mao {
+        position: absolute;
+        left: calc(var(--mao-x) * 1%);
+        top: var(--altura-prato);
+        width: 30%;
+        transform: translate(-50%, -50%) scale(var(--aproxima));
+        opacity: var(--visivel);
+      }
+      /* Com vídeo, o prato já está filmado: o vetor sairia por cima e viraria
+         prato em dobro. Sobra o botão, que é o que precisa pousar nele. */
+      .palco[data-tem-video='1'] .mao__prato {
+        display: none;
+      }
+      .mao__prato {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .prato__sombra {
+        fill: black;
+        opacity: 0.45;
+      }
+      .prato__borda {
+        fill: color-mix(in oklab, var(--cor-superficie-2) 80%, black);
+      }
+      .prato__face {
+        fill: var(--louca);
+      }
+      .prato__fundo {
+        fill: color-mix(in oklab, var(--cor-superficie-2) 60%, black);
+      }
+      .prato__corte {
+        fill: var(--cor-acento);
+      }
+      .prato__grelha {
+        stroke: var(--cor-superficie);
+        opacity: 0.45;
+      }
+
+      /* ---- o botão escondido -------------------------------------------- */
+      .ponto {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        translate: -50% -50%;
+        width: var(--alvo-toque);
+        height: var(--alvo-toque);
+        display: grid;
+        place-items: center;
+        border-radius: var(--raio-selo);
+        border: var(--borda-fina) solid var(--cor-acento);
+        background-color: var(--cor-acento-fundo);
+        color: var(--cor-acento-texto);
+        cursor: pointer;
+        opacity: 0;
+        scale: 0.7;
+        transition:
+          opacity var(--transicao),
+          scale var(--transicao);
+      }
+      .ponto svg {
+        width: 18px;
+        height: 18px;
+      }
+      /* Sem o prato vetorial a área de hover viraria um retângulo invisível
+         no vazio. Ela vira um alvo redondo do tamanho do prato, centrado nele. */
+      .palco[data-tem-video='1'] .mao {
+        aspect-ratio: 1;
+        border-radius: var(--raio-selo);
+      }
+      .mao:hover .ponto,
+      .ponto:focus-visible {
+        opacity: 1;
+        scale: 1;
+      }
+      /* Tela de toque não tem hover: lá o botão fica sempre à vista, senão
+         ele fica escondido para sempre em metade dos acessos. */
+      @media (hover: none) {
+        .ponto {
+          opacity: 1;
+          scale: 1;
+        }
+      }
+      /* De costas não há prato para clicar. */
+      .palco[data-frente='0'] .ponto {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .ponto::after {
+        content: '';
+        position: absolute;
+        inset: -10px;
+        border-radius: var(--raio-selo);
+        border: var(--borda-fina) solid color-mix(in oklab, var(--cor-acento) 55%, transparent);
+        animation: pulso 2.4s ease-out infinite;
+      }
+      @keyframes pulso {
+        0% {
+          transform: scale(0.85);
+          opacity: 0.9;
+        }
+        100% {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      /* ---- rótulo, régua, barra ----------------------------------------- */
+      .rotulo {
+        position: absolute;
+        left: 50%;
+        bottom: 21vh;
+        translate: -50% 0;
+        text-align: center;
+        opacity: var(--frente);
+      }
+      .rotulo__nome {
+        margin: 0;
+        font-family: var(--fonte-titulo);
+        font-size: clamp(3rem, 7vh, 5rem);
+        line-height: var(--lh-h1);
+        text-transform: uppercase;
+        color: var(--cor-texto-forte);
+      }
+      .rotulo__contador {
+        margin: var(--esp-2) 0 0;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+      }
+
+      .regua {
+        position: absolute;
+        left: 50%;
+        bottom: 9vh;
+        translate: -50% 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--esp-2);
+      }
+      .regua__item {
+        min-height: var(--alvo-toque);
+        padding-inline: var(--esp-3);
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        cursor: pointer;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+      }
+      .regua__item:hover {
+        color: var(--cor-texto-forte);
+      }
+      .regua__item[aria-current='true'] {
+        color: var(--cor-texto-forte);
+        border-bottom-color: var(--cor-acento);
+      }
+
+      .barra {
+        position: absolute;
+        left: 50%;
+        bottom: 5vh;
+        translate: -50% 0;
+        width: min(420px, 62vw);
+        height: 2px;
+        background-color: color-mix(in oklab, var(--cor-texto) 20%, transparent);
+      }
+      .barra i {
+        display: block;
+        height: 100%;
+        width: 0;
+        background-color: var(--cor-acento);
+      }
+
+      .dica {
+        position: absolute;
+        left: 50%;
+        bottom: 2vh;
+        translate: -50% 0;
+        margin: 0;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+      }
+
+      /* ---- a ficha do corte --------------------------------------------- */
+      .ficha {
+        margin: auto;
+        padding: 0;
+        border: var(--borda-fina) solid var(--cor-borda);
+        background-color: var(--cor-superficie-2);
+        color: var(--cor-texto);
+        max-width: min(560px, 92vw);
+      }
+      .ficha::backdrop {
+        background-color: var(--veu-modal);
+      }
+      .ficha__corpo {
+        display: grid;
+        gap: var(--esp-5);
+        padding: var(--esp-6);
+      }
+      .ficha__topo {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--esp-4);
+      }
+      .ficha__olho {
+        margin: 0 0 var(--esp-2);
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-acento);
+      }
+      .ficha__nome {
+        margin: 0;
+        font-family: var(--fonte-titulo);
+        font-size: clamp(2.25rem, 6vw, 3.25rem);
+        line-height: var(--lh-h2);
+        text-transform: uppercase;
+        color: var(--cor-texto-forte);
+      }
+      .ficha__texto {
+        margin: 0;
+        font-size: var(--tam-corpo-sm);
+        line-height: var(--lh-corpo);
+      }
+      .ficha__linhas {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--esp-4);
+        margin: 0;
+      }
+      .ficha__linha {
+        display: grid;
+        gap: var(--esp-1);
+        padding-top: var(--esp-3);
+        border-top: var(--borda-fina) solid
+          color-mix(in oklab, var(--cor-borda) 45%, transparent);
+      }
+      .ficha__linha dt {
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+        color: var(--cor-texto-suave);
+      }
+      .ficha__linha dd {
+        margin: 0;
+        font-size: var(--tam-corpo-sm);
+        color: var(--cor-texto-forte);
+      }
+      .ficha__acoes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--esp-3);
+        align-items: center;
+      }
+      .ficha__fechar,
+      .botao-secundario {
+        min-height: var(--alvo-toque);
+        padding-inline: var(--esp-4);
+        background: none;
+        border: var(--borda-fina) solid var(--cor-borda);
+        color: var(--cor-texto);
+        cursor: pointer;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+      }
+      .ficha__fechar:hover,
+      .botao-secundario:hover {
+        color: var(--cor-texto-forte);
+      }
+      .botao-primario {
+        min-height: var(--alvo-toque);
+        display: inline-flex;
+        align-items: center;
+        padding-inline: var(--esp-5);
+        background-color: var(--cor-acento-fundo);
+        color: var(--cor-acento-texto);
+        text-decoration: none;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+      }
+      .botao-primario:hover {
+        filter: brightness(1.12);
+      }
+
+      /* Princípio nº 1: reservar não sai da tela, nem numa página de estudo. */
+      .reserva {
+        position: fixed;
+        right: var(--gutter);
+        bottom: var(--esp-5);
+        z-index: 50;
+        min-height: var(--alvo-toque);
+        display: inline-flex;
+        align-items: center;
+        padding-inline: var(--esp-5);
+        background-color: var(--cor-acento-fundo);
+        color: var(--cor-acento-texto);
+        text-decoration: none;
+        font-family: var(--fonte-mono);
+        font-size: var(--tam-meta);
+        letter-spacing: var(--ls-meta);
+        text-transform: uppercase;
+      }
+      .reserva:hover {
+        filter: brightness(1.12);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ponto::after {
+          animation: none;
+          opacity: 0.4;
+        }
+      }
+    </style>
+  </body>
+</html>
