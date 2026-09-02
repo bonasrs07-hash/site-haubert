@@ -91,6 +91,56 @@ const FOCO = { x: 44, y: 46 };
 // duas fontes para o mesmo dado é como uma delas fica velha.
 const cortes = CORTES;
 
+/**
+ * Quanto de rolagem cada corte custa. É A ALAVANCA DE VELOCIDADE da cena:
+ * mexer aqui é a forma de deixar tudo mais lento ou mais rápido de uma vez.
+ * Estava em 120 e a cena passava correndo, sem tempo de levar o mouse até o
+ * botão antes de o prato virar.
+ */
+const ROLAGEM_POR_CORTE = 260;
+
+/**
+ * O MAPA DE RITMO: qual quadro do vídeo mostrar em cada ponto da rolagem.
+ *
+ * Antes era regra de três: metade da rolagem, metade do vídeo. O problema é
+ * que isso gasta a mesma rolagem nos momentos em que ele está de costas e
+ * naqueles em que o prato está na frente da câmera, e o prato passa voando.
+ * Não dava tempo de levar o mouse até o botão antes de ele sumir.
+ *
+ * Agora cada quadro custa rolagem proporcional ao quanto o prato aparece
+ * nele: quadro com o prato inteiro custa sete vezes um quadro de costas. A
+ * cena DEMORA onde há o que ver e passa depressa pelo resto, e o peso sai da
+ * própria trilha, não de uma lista de tempos escrita à mão que envelheceria na
+ * primeira troca de vídeo.
+ *
+ * No vídeo de teste isto rende pouco, e vale dizer por quê em vez de fingir
+ * que resolveu: em 72% dos quadros dele o prato já está à vista, então não
+ * sobra o que acelerar. Quem está segurando a cena hoje é `ROLAGEM_POR_CORTE`.
+ * O mapa é para o footage de verdade, onde existem costas de verdade.
+ */
+const PASSOS_DO_MAPA = 700;
+const mapaDeRitmo = (() => {
+  const acumulado: number[] = [];
+  let soma = 0;
+  for (const [, , visibilidade] of trilha.prato) {
+    soma += 1 + 6 * visibilidade * visibilidade;
+    acumulado.push(soma);
+  }
+  const mapa: number[] = [];
+  for (let passo = 0; passo < PASSOS_DO_MAPA; passo++) {
+    const alvo = (passo / (PASSOS_DO_MAPA - 1)) * soma;
+    let baixo = 0;
+    let alto = acumulado.length - 1;
+    while (baixo < alto) {
+      const meio = (baixo + alto) >> 1;
+      if (acumulado[meio] < alvo) baixo = meio + 1;
+      else alto = meio;
+    }
+    mapa.push(baixo);
+  }
+  return mapa;
+})();
+
 /*
   O vídeo tem uma estação por corte. Se as duas listas desandarem, o rótulo
   passa a anunciar um corte enquanto a imagem mostra outro, e nada na tela
@@ -122,7 +172,7 @@ if (trilha.cortes !== cortes.length) {
       <a class="estudo__voltar" href="/painel">Painel</a>
     </header>
 
-    <div class="trilho" data-trilho style={`height:${cortes.length * 120}vh`}>
+    <div class="trilho" data-trilho style={`height:${cortes.length * ROLAGEM_POR_CORTE}vh`}>
       <div
         class="palco"
         data-palco
@@ -259,7 +309,11 @@ if (trilha.cortes !== cortes.length) {
       executável, então ele não pede nada da CSP e o script da página continua
       empacotado e tipado.
     */}
-    <script type="application/json" data-trilha set:html={JSON.stringify(trilha.prato)}></script>
+    <script
+      type="application/json"
+      data-trilha
+      set:html={JSON.stringify({ prato: trilha.prato, ritmo: mapaDeRitmo })}
+    ></script>
 
     <dialog class="ficha" data-ficha>
       <article class="ficha__corpo">
@@ -332,10 +386,14 @@ if (trilha.cortes !== cortes.length) {
 
         const bloco = document.querySelector('[data-trilha]');
         let trilha: number[][] = [];
+        let ritmo: number[] = [];
         try {
-          trilha = bloco ? JSON.parse(bloco.textContent ?? '[]') : [];
+          const dados = bloco ? JSON.parse(bloco.textContent ?? '{}') : {};
+          trilha = dados.prato ?? [];
+          ritmo = dados.ritmo ?? [];
         } catch {
           trilha = [];
+          ritmo = [];
         }
 
         const video = palco.querySelector<HTMLVideoElement>('[data-video]');
@@ -352,6 +410,7 @@ if (trilha.cortes !== cortes.length) {
         let indice = -1;
         let pendente = false;
         let duracao = 0;
+        let mostrandoBotao = false;
 
         const raiz = () => document.scrollingElement ?? document.documentElement;
 
@@ -363,7 +422,20 @@ if (trilha.cortes !== cortes.length) {
           const alcance = r.scrollHeight - r.clientHeight;
           const p = alcance > 0 ? Math.min(1, Math.max(0, r.scrollTop / alcance)) : 0;
 
-          const t = p * total;
+          /*
+            A rolagem escolhe o QUADRO pelo mapa de ritmo, e o quadro é que
+            manda em todo o resto. Assim a cena demora onde o prato aparece.
+
+            Tudo depois daqui é derivado do quadro, nunca da rolagem crua: se a
+            cartela seguisse a rolagem e a imagem seguisse o mapa, o nome do
+            corte andaria em descompasso com o que está na tela.
+          */
+          const quadro = ritmo.length
+            ? ritmo[Math.min(ritmo.length - 1, Math.max(0, Math.round(p * (ritmo.length - 1))))]
+            : Math.round(p * Math.max(0, trilha.length - 1));
+          const andamento = trilha.length > 1 ? quadro / (trilha.length - 1) : 0;
+
+          const t = andamento * total;
           const ang = t * 2 * Math.PI;
           const cos = Math.cos(ang);
 
@@ -382,8 +454,7 @@ if (trilha.cortes !== cortes.length) {
           let maoY = 31;
           let visivel = 0;
           if (trilha.length) {
-            const q = Math.min(trilha.length - 1, Math.max(0, Math.round(p * (trilha.length - 1))));
-            const ponto = trilha[q];
+            const ponto = trilha[quadro];
             maoX = ponto[0];
             maoY = ponto[1];
             visivel = ponto[2];
@@ -393,8 +464,16 @@ if (trilha.cortes !== cortes.length) {
             visivel = Math.min(1, Math.max(0, (Math.cos(angMao) + 0.12) / 0.45));
           }
 
-          // "De frente" aqui e sobre o PRATO estar clicavel, nao sobre o rosto.
-          const deFrente = visivel > 0.35;
+          /*
+            Histerese, e não um limiar só.
+
+            Com um limiar único o botão pisca quando a visibilidade oscila em
+            volta dele: aparece, some, aparece. Aqui ele precisa de 0,45 para
+            NASCER e só morre abaixo de 0,2, então uma vez à vista ele fica
+            firme o bastante para a mão chegar nele.
+          */
+          const deFrente = mostrandoBotao ? visivel > 0.2 : visivel > 0.45;
+          mostrandoBotao = deFrente;
 
           palco.style.setProperty('--largura', largura.toFixed(4));
           palco.style.setProperty('--visivel', String(visivel));
@@ -410,8 +489,8 @@ if (trilha.cortes !== cortes.length) {
             Fundo e primeiro plano andando juntos seriam um bloco só, e um
             bloco só não desce.
           */
-          palco.style.setProperty('--vigas', (-p * 5400).toFixed(1));
-          palco.style.setProperty('--deriva', (-p * 9).toFixed(3));
+          palco.style.setProperty('--vigas', (-p * 1500).toFixed(1));
+          palco.style.setProperty('--deriva', (-p * 7).toFixed(3));
 
           for (let k = 0; k < cartelas.length; k++) {
             const u = t - k;
@@ -447,7 +526,7 @@ if (trilha.cortes !== cortes.length) {
           palco.style.setProperty('--mao-py', py.toFixed(1) + 'px');
           palco.style.setProperty(
             '--mao-tamanho',
-            Math.max(56, Math.round(desenhoL * 0.16)) + 'px',
+            Math.max(72, Math.round(desenhoL * 0.2)) + 'px',
           );
           palco.style.setProperty('--frente', deFrente ? '1' : '0');
           palco.dataset.frente = deFrente ? '1' : '0';
@@ -457,7 +536,7 @@ if (trilha.cortes !== cortes.length) {
           // O vídeo é raspado pelo mesmo número que gira a silhueta. Trocar um
           // pelo outro não muda mais nada desta página.
           if (video && duracao > 0) {
-            const tempo = p * duracao;
+            const tempo = andamento * duracao;
             if (Math.abs(video.currentTime - tempo) > 0.01) video.currentTime = tempo;
           }
 
@@ -630,10 +709,11 @@ if (trilha.cortes !== cortes.length) {
           color-mix(in oklab, var(--cor-acento) 45%, transparent) 97%,
           transparent 100%
         );
-        background-size: 100% 132px;
+        background-size: 100% 190px;
         background-repeat: repeat;
         background-position: 0 calc(var(--vigas) * 1px);
-        opacity: 0.42;
+        /* discretas de propósito: elas têm que ser sentidas, não olhadas */
+        opacity: 0.2;
         /* apaga nas pontas, senão as vigas nascem e morrem em linha reta */
         mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
       }
@@ -666,7 +746,7 @@ if (trilha.cortes !== cortes.length) {
         position: absolute;
         inset: 0;
         pointer-events: none;
-        opacity: 0.07;
+        opacity: 0.05;
         mix-blend-mode: overlay;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
       }
@@ -792,15 +872,15 @@ if (trilha.cortes !== cortes.length) {
         inset: -10px;
         border-radius: var(--raio-selo);
         border: var(--borda-fina) solid color-mix(in oklab, var(--cor-acento) 55%, transparent);
-        animation: pulso 2.4s ease-out infinite;
+        animation: pulso 3.6s ease-out infinite;
       }
       @keyframes pulso {
         0% {
-          transform: scale(0.85);
-          opacity: 0.9;
+          transform: scale(0.9);
+          opacity: 0.55;
         }
         100% {
-          transform: scale(1.5);
+          transform: scale(1.45);
           opacity: 0;
         }
       }
@@ -827,7 +907,7 @@ if (trilha.cortes !== cortes.length) {
         right: var(--gutter);
         bottom: 17vh;
         max-width: 34ch;
-        transform: translateY(calc((0.42 - var(--u)) * 78vh));
+        transform: translateY(calc((0.42 - var(--u)) * 58vh));
         opacity: var(--vis);
         will-change: transform, opacity;
       }
