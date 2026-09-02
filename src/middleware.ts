@@ -25,7 +25,7 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
   // páginas estáticas sem uma ida ao banco por página.
   if (!rota.startsWith('/painel') && !rota.startsWith('/api/painel')) return proximo();
 
-  // A tela de entrar é a única do painel que existe para quem NÃO tem sessão —
+  // A tela de entrar é a única do painel que existe para quem NÃO tem sessão,
   // e é onde a senha é digitada. Ela precisa da blindagem MAIS que as outras:
   // `form-action 'self'` é o que impede um formulário injetado de postar a senha
   // do dono em outro servidor. Ela ficava de fora porque saía por um `return`
@@ -57,7 +57,7 @@ export const onRequest = defineMiddleware(async (contexto, proximo) => {
 });
 
 /**
- * Toda resposta do painel sai por aqui — inclusive o 401, o redirecionamento e
+ * Toda resposta do painel sai por aqui, inclusive o 401, o redirecionamento e
  * a tela de entrar. Uma saída que escapa da blindagem é uma porta destrancada
  * que ninguém sabe que existe, então não existe `return` de painel que não
  * passe por esta função.
@@ -72,7 +72,7 @@ function blindar(resposta: Response): Response {
 
 /**
  * A CSP do painel. O site público tem a dele, estrita e por hash, gerada no
- * build para o `vercel.json` — e o `vercel.json` exclui estas rotas de
+ * build para o `vercel.json`, e o `vercel.json` exclui estas rotas de
  * propósito. Duas políticas na mesma resposta valem pela INTERSEÇÃO, então
  * deixar a do site alcançar o painel mataria a hidratação do React.
  *
@@ -83,7 +83,7 @@ function blindar(resposta: Response): Response {
  *
  * O que sobra ainda vale a pena, e é o oposto de decorativo:
  *   - `default-src 'self'` corta qualquer origem de fora;
- *   - `frame-ancestors 'none'` impede clickjacking — e o painel é onde se
+ *   - `frame-ancestors 'none'` impede clickjacking, e o painel é onde se
  *     apaga foto e se publica o site;
  *   - `form-action 'self'` impede que um formulário injetado poste a senha do
  *     dono em outro servidor;

@@ -69,7 +69,7 @@ Qualquer resultado diferente de zero é vazamento de tenant e bloqueia o deploy.
 ## Camada 4, Cabeçalhos e transporte
 
 **Implementado.** Antes disto a produção respondia com **um** cabeçalho de
-segurança — o `Strict-Transport-Security`, que a Vercel põe sozinha. Os outros
+segurança: o `Strict-Transport-Security`, que a Vercel põe sozinha. Os outros
 quatro desta lista não existiam.
 
 São **duas** políticas, e nunca na mesma resposta: duas CSP valem pela
@@ -105,7 +105,7 @@ Content-Security-Policy: default-src 'self';
    é a mesma para todo mundo, e `nonce` que se repete não é `nonce`. Os hashes
    do JavaScript embutido são **medidos do build** por `scripts/csp.mjs`, que
    gera o `vercel.json`. O mesmo script roda como `postbuild` e **derruba o
-   build** se o commitado divergir do medido — CSP desatualizada não avisa, ela
+   build** se o commitado divergir do medido. CSP desatualizada não avisa, ela
    bloqueia, e o sintoma seria a troca Dia/Noite morta no site inteiro.
 
 2. **`connect-src`/`img-src` do site não precisam do Supabase.** O documento
@@ -117,7 +117,7 @@ Content-Security-Policy: default-src 'self';
    usa atributo de estilo para três variáveis de dado: `--proporcao` (a forma de
    cada foto), `--volta` (a velocidade da faixa) e `--atraso` (a escada da
    animação). Hash de CSP não cobre atributo, e com hash presente o browser
-   *ignora* `'unsafe-inline'` — então uma política estrita de estilo entregaria
+   *ignora* `'unsafe-inline'`, então uma política estrita de estilo entregaria
    foto sem proporção. CSS injetado sem script é um problema pequeno perto de
    `script-src`, que ficou estrito de verdade. **Para quitar:** tirar os três
    atributos do markup, o que a diretriz de "separar CSS do markup" já pede.
@@ -125,7 +125,7 @@ Content-Security-Policy: default-src 'self';
 Verificado com a CSP ligada, num Chrome de verdade, nas 10 rotas: script de
 tema executa, a troca Dia/Noite funciona e persiste, `schema.org` intacto,
 `--proporcao` ainda aplica, zero violações. Imagem que não carrega é `lazy` fora
-do viewport — conferido contra um controle servido sem CSP, mesmo resultado.
+do viewport, conferido contra um controle servido sem CSP, mesmo resultado.
 
 ## Camada 5, LGPD
 
@@ -173,6 +173,57 @@ Riscos que não são técnicos mas custam caro:
    imediatamente; a ANPD e os titulares conforme a Art. 48 da LGPD
 4. **Corrigir** e registrar em `memory/learnings.md`
 5. **ADR `[URGENT]`** se a correção mudar arquitetura
+
+## Auditoria de 2026-09-02
+
+Varredura das seis camadas contra o **banco de produção**, não contra os
+arquivos de migration: arquivo é intenção, servidor é fato.
+
+**Corrigido: item despublicado do cardápio vazava pela API pública.** A policy
+de leitura de `menu_items` checava apenas o `publicado` da SEÇÃO, mas o item tem
+o seu próprio, o painel dá ao dono a caixa "No site" por item, e o site filtra
+por ela. O banco não filtrava. Um prato marcado "fora do site" ficava escondido
+no site e legível por qualquer pessoa com a chave anônima, que sai no HTML de
+toda página. Provado com a chave anônima antes (HTTP 200 com o item) e depois
+(`[]`) da migration `003`, e conferido que o dono continua enxergando o item no
+painel. O cardápio estava vazio, então nada vazou de fato: era dívida esperando
+o primeiro prato despublicado. A policy de `events` sempre checou o próprio
+flag; `menu_items` era a exceção.
+
+**Sem achado (verificado, não presumido):** nenhuma chave commitada; a
+`service_role` não aparece no bundle do cliente; RLS ligada nas 10 tabelas, com
+toda escrita atrás de `e_membro_da_casa`; bucket `midia` privado; caminho do
+Storage gerado no servidor, nome enviado pelo usuário nunca vira caminho;
+upload validado por *magic bytes* e pelas dimensões do cabeçalho WebP real;
+endpoints do painel só aceitam POST e passam todos por `venue_id = casaId`, com
+a RLS como segunda camada; sem `select *`; sem log de dado sensível; `venue_members`
+sem policy de INSERT, então ninguém se auto-adiciona à equipe; hook de publicação
+vem de variável de servidor, com freio no banco e 429.
+
+**Dívidas conhecidas, não corrigidas aqui:**
+
+1. **`anon` tem grant de escrita em todas as tabelas** (padrão do Supabase). Hoje
+   quem barra é só a RLS, e ela barra. Mas isso torna a RLS ponto único de
+   falha: tabela nova sem policy correta fica escrevível por estranho. Vale
+   revogar o que não é usado (`revoke insert, update, delete ... from anon`).
+2. **Bucket `midia` sem `file_size_limit` nem `allowed_mime_types` próprios.** A
+   validação é toda da aplicação; quem tivesse a sessão do dono poderia subir
+   direto pela API do Storage. Definir os limites no bucket é defesa em
+   profundidade barata.
+3. **`set:html` com `JSON.stringify` no `ld+json`.** Não é explorável hoje: todo
+   texto passa por `texto()`, que remove `<` e `>`, e a CSP nova barra
+   manipulador inline. Mas a proteção mora longe do lugar do risco: quem
+   escreve um campo novo precisa lembrar de passá-lo por `texto()`. Escapar o
+   sinal de menor como `<` na hora de serializar o JSON fecharia isso no
+   lugar certo, que é onde o dado vira HTML.
+4. **`path-to-regexp@6.1.0` (ReDoS, GHSA-9wv6-86v2-598j)** viaja dentro da função
+   publicada, via `@vercel/routing-utils` do adapter. Não há correção limpa: o
+   `@astrojs/vercel@11.0.9` continua fixando a versão vulnerável e apenas
+   adiciona a corrigida ao lado, e o que o `npm audit` sugere é downgrade para a
+   série 8, incompatível com Astro 7. Acompanhar release do adapter.
+5. **Freio de login em memória**, por instância. Já documentado em `lib/freio.ts`
+   e no ADR-008: atrasa força bruta, não impede. A defesa real é o limite do
+   Supabase Auth mais senha longa.
 
 ## Revisão
 

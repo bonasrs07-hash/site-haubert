@@ -37,7 +37,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import pg from 'pg';
+// O `pg` NÃO entra aqui em cima. Ele só serve ao caminho B (conexão direta), e
+// é dependência opcional: não está instalado. Importar no topo derruba o script
+// antes da primeira linha rodar, inclusive quando o caminho A (API de gestão),
+// que é o preferido e não precisa de `pg`, daria conta sozinho.
+// Isto quebrava `npm run migrar` de verdade, e só apareceu numa auditoria.
+// A importação foi para dentro de `aplicarDireto()`, onde ela é usada.
 
 const arquivo = process.argv[2];
 const soConferir = process.argv.includes('--conferir');
@@ -169,6 +174,15 @@ if (token) {
 if (!processado) await aplicarDireto();
 
 async function aplicarDireto() {
+let pg;
+try {
+  pg = (await import('pg')).default;
+} catch {
+  console.error('O caminho direto precisa do pacote `pg`, que não está instalado.');
+  console.error('Ou instale (`npm i -D pg`), ou use SUPABASE_ACCESS_TOKEN, que é o caminho preferido.');
+  process.exit(1);
+}
+
 const cliente = new pg.Client({
   connectionString: conexao,
   ssl: { rejectUnauthorized: false },

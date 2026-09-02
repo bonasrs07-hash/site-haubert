@@ -2,7 +2,7 @@
  * Gera e confere os cabeçalhos de segurança do site público. (docs/11_SEGURANCA, Camada 4)
  *
  * O ESTADO QUE ISTO CORRIGE
- * A produção respondia com UM cabeçalho de segurança — o HSTS, que a Vercel põe
+ * A produção respondia com UM cabeçalho de segurança: o HSTS, que a Vercel põe
  * sozinha. Os outros quatro que o plano de segurança lista estavam ausentes.
  *
  * POR QUE O ARQUIVO É GERADO, E NÃO ESCRITO À MÃO
@@ -17,7 +17,7 @@
  * publicar CSP errada é silencioso e caro.
  *
  * POR QUE NÃO O `security.csp` NATIVO DO ASTRO
- * Ele resolveria os hashes de script sozinho, mas também gera hash de ESTILO — e
+ * Ele resolveria os hashes de script sozinho, mas também gera hash de ESTILO, e
  * o spec manda o browser ignorar `'unsafe-inline'` quando há hash. Os
  * `style="--proporcao:4 / 3"` e `style="--atraso:70ms"` do site são atributo, que
  * hash não cobre. Ligá-lo entregaria foto sem proporção e animação sem escada.
@@ -35,13 +35,13 @@ const PASTA = 'dist/client';
  * injetado roda. Fica em `'self'` + os hashes medidos, sem `'unsafe-inline'`.
  *
  * `style-src` fica com `'unsafe-inline'`, e isto é uma escolha, não um descuido.
- * O site usa atributo de estilo para três variáveis de dado — `--proporcao` (a
+ * O site usa atributo de estilo para três variáveis de dado: `--proporcao` (a
  * forma de cada foto), `--volta` (a velocidade da faixa) e `--atraso` (a escada
  * da animação). As duas primeiras vêm de dado e não viram classe sem um
  * catálogo fixo. CSS injetado sem script é um problema pequeno; a troca de dia
  * e noite quebrada é um problema que o cliente vê. Para fechar isto depois:
- * tirar os três atributos do markup — o que a diretriz de "separar CSS do
- * markup" já pede — e aí `style-src 'self'` passa a caber.
+ * tirar os três atributos do markup (o que a diretriz de "separar CSS do
+ * markup" já pede), e aí `style-src 'self'` passa a caber.
  */
 const politicaPublica = (hashes) =>
   [
@@ -155,7 +155,7 @@ function main() {
   // script de tema do ADR-004 que está em toda página, algo mudou de lugar.
   if (paginas === 0 || hashes.length === 0) {
     console.error(`  medi ${paginas} páginas e ${hashes.length} scripts embutidos.`);
-    console.error('  isso não bate com um build real — o HTML mudou de lugar?');
+    console.error('  isso não bate com um build real. O HTML mudou de lugar?');
     process.exit(1);
   }
 
@@ -198,18 +198,18 @@ function main() {
 
   console.error('');
   console.error('  O vercel.json commitado não bate com a política medida do build.');
-  console.error('  Publicar assim entrega o site com os scripts BLOQUEADOS pela CSP');
-  console.error('  — a troca Dia/Noite para de funcionar em todas as páginas.');
+  console.error('  Publicar assim entrega o site com os scripts BLOQUEADOS pela CSP,');
+  console.error('  ou seja, a troca Dia/Noite para de funcionar em todas as páginas.');
   console.error('');
 
   // Um guarda que diz "mudou" sem dizer O QUÊ obriga quem for consertar a
-  // adivinhar — e esta mensagem costuma ser lida no log de um build que falhou
+  // adivinhar, e esta mensagem costuma ser lida no log de um build que falhou
   // longe daqui, onde ninguém pode abrir o `dist/` para olhar.
   const antigos = new Set(
     [...(atual.match(/'sha256-([^']+)'/g) ?? [])].map((s) => s.slice(8, -1)),
   );
   // Quando os hashes conferem e mesmo assim o conteúdo diverge, a diferença
-  // está em outro ponto da política — e aí só o caractere exato resolve. A
+  // está em outro ponto da política, e aí só o caractere exato resolve. A
   // comparação é entre as formas canônicas, senão a minificação da Vercel
   // aparece como diferença e esconde a de verdade.
   if (atualObj) {

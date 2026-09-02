@@ -5,13 +5,13 @@
  * As oito rotas públicas usavam o MESMO `og.jpg`. Num negócio cuja
  * distribuição inteira é Instagram e WhatsApp, todo link compartilhado
  * mostrava o mesmo cartão genérico: o cardápio, um evento de sábado e a página
- * da noite, idênticos. O cartão é a vitrine — é o que a pessoa vê antes de
+ * da noite, idênticos. O cartão é a vitrine: é o que a pessoa vê antes de
  * decidir se toca.
  *
  * POR QUE satori, E NÃO SÓ O sharp QUE JÁ ESTAVA AQUI
  * Testei o caminho sem dependência nova: SVG com `@font-face` embutido,
- * rasterizado pelo sharp. Ele ignora a fonte e cai numa serifa do sistema —
- * conferido olhando o PNG. Como o ponto inteiro é a tipografia da marca, isso
+ * rasterizado pelo sharp. Ele ignora a fonte e cai numa serifa do sistema, conferido
+ * olhando o PNG. Como o ponto inteiro é a tipografia da marca, isso
  * não serve. O satori roda só no build e não põe um byte no cliente.
  *
  * FALHA SEM DRAMA
@@ -195,7 +195,7 @@ async function principal() {
   }
 
   // O favicon sai do mesmo lugar, com a mesma paleta: o "+" da assinatura
-  // sobre a superfície da marca. Tipográfico por token, como o og.jpg já era —
+  // sobre a superfície da marca. Tipográfico por token, como o og.jpg já era,
   // não depende do BLK-001 (logo vetorial).
   try {
     const marca = {
