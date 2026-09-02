@@ -177,6 +177,12 @@ if (trilha.cortes !== cortes.length) {
           O véu e o grão são o que transformam filmagem em cena: sem eles o
           texto briga com a imagem e some sobre a parte clara dela.
         */}
+        {/*
+          As vigas. Não são enfeite: são a única coisa que ATRAVESSA a tela,
+          e é atravessar que o olho lê como deslocamento. Sem uma referência
+          passando, câmera parada contra fundo parado não desce nunca.
+        */}
+        <div class="vigas"></div>
         <div class="veu-cena"></div>
         <div class="grao"></div>
 
@@ -206,9 +212,24 @@ if (trilha.cortes !== cortes.length) {
           </button>
         </div>
 
-        <div class="rotulo">
-          <h1 class="rotulo__nome" data-nome>{cortes[0].nome}</h1>
-          <p class="rotulo__contador" data-contador>Corte 1 de {cortes.length}</p>
+        {/*
+          Uma cartela por corte, e cada uma ATRAVESSA a tela de baixo para
+          cima no seu trecho do scroll. Um rótulo que troca de texto parado no
+          lugar não vai a lugar nenhum; um que sobe e sai por cima leva a
+          página junto.
+        */}
+        <div class="cartelas">
+          {
+            cortes.map((corte, i) => (
+              <article class="cartela" data-cartela={i}>
+                <p class="cartela__contador">
+                  Corte {String(i + 1).padStart(2, '0')} de {String(cortes.length).padStart(2, '0')}
+                </p>
+                <h2 class="cartela__nome">{corte.nome}</h2>
+                <p class="cartela__desc">{corte.descricao}</p>
+              </article>
+            ))
+          }
         </div>
 
         <nav class="regua" aria-label="Cortes">
@@ -229,7 +250,7 @@ if (trilha.cortes !== cortes.length) {
         </nav>
 
         <div class="barra"><i data-avanco></i></div>
-        <p class="dica">Role para girar · passe o mouse no prato</p>
+        <p class="dica">Role para descer · passe o mouse no prato</p>
       </div>
     </div>
 
@@ -319,9 +340,8 @@ if (trilha.cortes !== cortes.length) {
 
         const video = palco.querySelector<HTMLVideoElement>('[data-video]');
         const avanco = palco.querySelector<HTMLElement>('[data-avanco]');
-        const alvoNome = palco.querySelector<HTMLElement>('[data-nome]');
-        const alvoContador = palco.querySelector<HTMLElement>('[data-contador]');
         const alvoRotulo = palco.querySelector<HTMLElement>('[data-rotulo]');
+        const cartelas = [...palco.querySelectorAll<HTMLElement>('[data-cartela]')];
 
         const ficha = document.querySelector<HTMLDialogElement>('[data-ficha]');
         const fichaOlho = document.querySelector<HTMLElement>('[data-ficha-olho]');
@@ -380,6 +400,29 @@ if (trilha.cortes !== cortes.length) {
           palco.style.setProperty('--visivel', String(visivel));
 
           /*
+            As três velocidades. É a DIFERENÇA entre elas que produz a
+            descida, não o valor de nenhuma sozinha:
+
+              vigas    depressa, atravessam a tela e somem por cima
+              cartelas no meio, sobem uma por corte
+              fundo    devagar, quase parado, é o que fica para trás
+
+            Fundo e primeiro plano andando juntos seriam um bloco só, e um
+            bloco só não desce.
+          */
+          palco.style.setProperty('--vigas', (-p * 5400).toFixed(1));
+          palco.style.setProperty('--deriva', (-p * 9).toFixed(3));
+
+          for (let k = 0; k < cartelas.length; k++) {
+            const u = t - k;
+            cartelas[k].style.setProperty('--u', u.toFixed(4));
+            // Aparece subindo e some saindo. As pontas se cruzam de propósito:
+            // a de baixo já entra enquanto a de cima ainda sai.
+            const vis = u < -0.12 || u > 1.05 ? 0 : Math.min(1, Math.min(u + 0.12, 1.05 - u) / 0.22);
+            cartelas[k].style.setProperty('--vis', Math.max(0, vis).toFixed(3));
+          }
+
+          /*
             Da porcentagem do VÍDEO para o pixel da TELA.
 
             O fundo é `cover`: ele estica até cobrir e o que sobra é cortado,
@@ -418,12 +461,10 @@ if (trilha.cortes !== cortes.length) {
             if (Math.abs(video.currentTime - tempo) > 0.01) video.currentTime = tempo;
           }
 
-          const i = Math.min(total - 1, Math.max(0, Math.floor(t + 0.5)));
+          const i = Math.min(total - 1, Math.max(0, Math.floor(t)));
           if (i !== indice) {
             indice = i;
             const corte = cortes[i];
-            if (alvoNome) alvoNome.textContent = corte.nome;
-            if (alvoContador) alvoContador.textContent = 'Corte ' + (i + 1) + ' de ' + total;
             if (alvoRotulo) alvoRotulo.textContent = 'Ver a ficha do corte ' + corte.nome;
             regua.forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false'));
           }
@@ -529,6 +570,8 @@ if (trilha.cortes !== cortes.length) {
       /* ---- o palco ------------------------------------------------------ */
       .palco {
         --largura: 1;
+        --deriva: 0;
+        --vigas: 0;
         --mao-px: 50%;
         --mao-py: 50%;
         --mao-tamanho: 96px;
@@ -551,6 +594,13 @@ if (trilha.cortes !== cortes.length) {
         object-fit: cover;
         object-position: var(--foco-x) var(--foco-y);
         display: block;
+        /*
+          A sobra de 12% existe para o fundo poder DERIVAR sem mostrar borda.
+          Em `cover` puro, numa tela larga, o vídeo cobre exatamente a altura
+          e não sobra um pixel para mover: qualquer deslocamento abriria preto
+          em cima ou embaixo.
+        */
+        transform: scale(1.12) translateY(calc(var(--deriva) * 1%));
         /* Tratamento de cena, não correção: puxa a imagem para a noite da casa
            e tira o brilho de cozinha que briga com a tipografia por cima. Sem
            exagero: escurecer até o rosto sumir não é cinema, é imagem perdida,
@@ -559,8 +609,33 @@ if (trilha.cortes !== cortes.length) {
       }
       .fundo--vetor {
         object-fit: contain;
-        transform: scaleX(var(--largura));
+        transform: scaleX(var(--largura)) translateY(calc(var(--deriva) * 1%));
         transform-origin: 50% 50%;
+      }
+
+      /*
+        As vigas sobem MUITO mais rápido que o fundo. É a diferença de
+        velocidade entre as camadas que produz a sensação de descida, não a
+        velocidade de nenhuma delas sozinha.
+      */
+      .vigas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          transparent 90%,
+          color-mix(in oklab, var(--cor-decor) 60%, transparent) 95%,
+          color-mix(in oklab, var(--cor-acento) 45%, transparent) 97%,
+          transparent 100%
+        );
+        background-size: 100% 132px;
+        background-repeat: repeat;
+        background-position: 0 calc(var(--vigas) * 1px);
+        opacity: 0.42;
+        /* apaga nas pontas, senão as vigas nascem e morrem em linha reta */
+        mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
       }
 
       /*
@@ -731,15 +806,32 @@ if (trilha.cortes !== cortes.length) {
       }
 
       /* ---- rótulo, régua, barra ----------------------------------------- */
-      /* O nome do corte é a legenda da cena: canto inferior esquerdo, grande,
-         como cartela de filme. O contador vem antes dele, pequeno. */
-      .rotulo {
+      /*
+        As cartelas. Cada uma sobe pelo seu trecho do scroll, e a de baixo já
+        vem entrando quando a de cima ainda está saindo.
+
+        `--u` é o andamento do corte, de 0 a 1. Em 0,42 a cartela está na
+        altura de leitura; antes disso ela vem de baixo, depois disso ela sai
+        por cima.
+      */
+      .cartelas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .cartela {
+        --u: 0;
+        --vis: 0;
         position: absolute;
         left: var(--gutter);
         right: var(--gutter);
-        bottom: 15vh;
+        bottom: 17vh;
+        max-width: 34ch;
+        transform: translateY(calc((0.42 - var(--u)) * 78vh));
+        opacity: var(--vis);
+        will-change: transform, opacity;
       }
-      .rotulo__contador {
+      .cartela__contador {
         margin: 0 0 var(--esp-2);
         font-family: var(--fonte-mono);
         font-size: var(--tam-meta);
@@ -747,7 +839,7 @@ if (trilha.cortes !== cortes.length) {
         text-transform: uppercase;
         color: var(--cor-acento);
       }
-      .rotulo__nome {
+      .cartela__nome {
         margin: 0;
         font-family: var(--fonte-titulo);
         font-size: clamp(3rem, 9vh, 6.5rem);
@@ -757,6 +849,13 @@ if (trilha.cortes !== cortes.length) {
         /* sobre imagem em movimento, a sombra é o que garante a leitura
            quando um quadro claro passa por baixo */
         text-shadow: 0 2px 24px rgb(0 0 0 / 0.55);
+      }
+      .cartela__desc {
+        margin: var(--esp-3) 0 0;
+        font-size: var(--tam-corpo-sm);
+        line-height: var(--lh-corpo);
+        color: var(--cor-texto);
+        text-shadow: 0 1px 16px rgb(0 0 0 / 0.6);
       }
 
       .regua {
