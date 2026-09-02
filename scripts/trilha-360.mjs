@@ -45,7 +45,7 @@ fs.writeFileSync(process.argv[2], JSON.stringify({
   quadros: QUADROS,
   fps: 24,
   cortes: 6,
-  proporcao: '960 / 540',
+  proporcao: '1280 / 720',
   prato,
 }) + '\n');
 console.log('trilha:', prato.length, 'quadros | clicaveis:', prato.filter((p) => p[2] > 0.35).length);

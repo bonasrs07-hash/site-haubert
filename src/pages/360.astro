@@ -76,6 +76,17 @@ const trilha = trilha360;
 const [larguraDoVideo, alturaDoVideo] = trilha.proporcao.split('/').map((n) => Number(n.trim()));
 const razaoDoVideo = larguraDoVideo / alturaDoVideo;
 
+/**
+ * O ponto do vídeo que fica no centro do enquadramento, em porcentagem.
+ *
+ * Fundo em `cover` corta o que não cabe, e cortar pelo meio jogaria o chef
+ * para fora numa tela alta: ele vive à esquerda do centro neste material. Este
+ * par vale para os DOIS lados, o `object-position` do CSS e a conta que põe o
+ * botão sobre o prato. Se divergirem, o botão passa a apontar para o lugar
+ * errado exatamente quando a tela é estreita.
+ */
+const FOCO = { x: 44, y: 46 };
+
 // Os cortes saem do mesmo lugar que a seção /fogo usa. Nada de lista paralela:
 // duas fontes para o mesmo dado é como uma delas fica velha.
 const cortes = CORTES;
@@ -117,15 +128,15 @@ if (trilha.cortes !== cortes.length) {
         data-palco
         data-frente="1"
         data-tem-video={VIDEO_360 ? "1" : "0"}
-        style={`--proporcao:${trilha.proporcao}; --razao:${razaoDoVideo.toFixed(4)}`}
+        data-foco-x={FOCO.x}
+        data-foco-y={FOCO.y}
+        data-razao={razaoDoVideo.toFixed(4)}
+        style={`--razao:${razaoDoVideo.toFixed(4)}; --foco-x:${FOCO.x}%; --foco-y:${FOCO.y}%`}
       >
-        <div class="piso"></div>
-
-        <div class="quadro">
         {
           VIDEO_360 ? (
             <video
-              class="giro__video"
+              class="fundo"
               data-video
               src={VIDEO_360}
               muted
@@ -135,8 +146,7 @@ if (trilha.cortes !== cortes.length) {
             />
           ) : (
             <>
-              <p class="giro__marca">Vídeo 360, um prato por volta, placeholder</p>
-              <svg class="giro__figura" viewBox="0 0 400 520" aria-hidden="true">
+              <svg class="fundo fundo--vetor" viewBox="0 0 400 520" aria-hidden="true">
                 <g class="figura__brilho" stroke-width="10" stroke-linecap="round" fill="none">
                   <path d="M252 168 L306 120 L332 82" />
                   <circle cx="200" cy="96" r="41" />
@@ -163,6 +173,13 @@ if (trilha.cortes !== cortes.length) {
           )
         }
 
+        {/*
+          O véu e o grão são o que transformam filmagem em cena: sem eles o
+          texto briga com a imagem e some sobre a parte clara dela.
+        */}
+        <div class="veu-cena"></div>
+        <div class="grao"></div>
+
         <div class="mao" data-mao>
           <svg class="mao__prato" viewBox="0 0 200 200" aria-hidden="true">
             <ellipse cx="100" cy="130" rx="84" ry="19" class="prato__sombra" />
@@ -187,7 +204,6 @@ if (trilha.cortes !== cortes.length) {
             </svg>
             <span class="so-leitor" data-rotulo>Ver a ficha do corte</span>
           </button>
-        </div>
         </div>
 
         <div class="rotulo">
@@ -289,6 +305,10 @@ if (trilha.cortes !== cortes.length) {
 
         // A trilha vem do bloco de dados, nao recalculada aqui: a conta que
         // desenhou o prato mora no gerador do video, e so la.
+        const focoX = Number(palco.dataset.focoX ?? '50');
+        const focoY = Number(palco.dataset.focoY ?? '50');
+        const razao = Number(palco.dataset.razao ?? '1.7778');
+
         const bloco = document.querySelector('[data-trilha]');
         let trilha: number[][] = [];
         try {
@@ -357,11 +377,35 @@ if (trilha.cortes !== cortes.length) {
           const deFrente = visivel > 0.35;
 
           palco.style.setProperty('--largura', largura.toFixed(4));
-          // posicao em PORCENTAGEM do quadro: sobrevive a qualquer tamanho de
-          // tela e a troca do video
-          palco.style.setProperty('--mao-x', String(maoX));
-          palco.style.setProperty('--mao-y', String(maoY));
           palco.style.setProperty('--visivel', String(visivel));
+
+          /*
+            Da porcentagem do VÍDEO para o pixel da TELA.
+
+            O fundo é `cover`: ele estica até cobrir e o que sobra é cortado,
+            então a mesma porcentagem do vídeo cai em lugares diferentes da
+            tela conforme a janela muda de forma. Sem esta conversão o botão
+            fica certo numa tela e errado em todas as outras.
+
+            `--foco-*` tem que ser o mesmo do `object-position` do CSS. É por
+            isso que ele é declarado uma vez só, no servidor, e desce para os
+            dois lados.
+          */
+          const larguraDaTela = palco.clientWidth;
+          const alturaDaTela = palco.clientHeight;
+          const proporcao = video && video.videoWidth ? video.videoWidth / video.videoHeight : razao;
+          const escala = Math.max(larguraDaTela / proporcao, alturaDaTela);
+          const desenhoL = proporcao * escala;
+          const desenhoA = escala;
+          const px = (larguraDaTela - desenhoL) * (focoX / 100) + (maoX / 100) * desenhoL;
+          const py = (alturaDaTela - desenhoA) * (focoY / 100) + (maoY / 100) * desenhoA;
+
+          palco.style.setProperty('--mao-px', px.toFixed(1) + 'px');
+          palco.style.setProperty('--mao-py', py.toFixed(1) + 'px');
+          palco.style.setProperty(
+            '--mao-tamanho',
+            Math.max(56, Math.round(desenhoL * 0.16)) + 'px',
+          );
           palco.style.setProperty('--frente', deFrente ? '1' : '0');
           palco.dataset.frente = deFrente ? '1' : '0';
 
@@ -485,8 +529,9 @@ if (trilha.cortes !== cortes.length) {
       /* ---- o palco ------------------------------------------------------ */
       .palco {
         --largura: 1;
-        --mao-x: 50;
-        --mao-y: 31;
+        --mao-px: 50%;
+        --mao-py: 50%;
+        --mao-tamanho: 96px;
         --visivel: 1;
         --frente: 1;
 
@@ -494,52 +539,61 @@ if (trilha.cortes !== cortes.length) {
         top: 0;
         height: 100vh;
         overflow: hidden;
-        display: grid;
-        place-items: center;
-        background-image: radial-gradient(
-          90% 60% at 50% 104%,
-          color-mix(in oklab, var(--cor-acento-fundo) 55%, transparent) 0%,
-          transparent 60%
-        );
+        background-color: var(--cor-superficie);
       }
 
-      /* O quadro é o sistema de coordenadas de tudo que pousa sobre o vídeo.
-         Ele guarda a proporção do arquivo, então o botão pode ser posicionado
-         em porcentagem e continuar certo em qualquer tela. */
-      .quadro {
-        --altura: min(64vh, 620px, calc(92vw / var(--razao)));
-        position: relative;
-        height: var(--altura);
-        width: calc(var(--altura) * var(--razao));
-        aspect-ratio: var(--proporcao);
-      }
-      .giro__video {
+      /* O vídeo É o fundo: cobre a tela inteira e o resto pousa em cima. */
+      .fundo {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
+        object-position: var(--foco-x) var(--foco-y);
         display: block;
+        /* Tratamento de cena, não correção: puxa a imagem para a noite da casa
+           e tira o brilho de cozinha que briga com a tipografia por cima. Sem
+           exagero: escurecer até o rosto sumir não é cinema, é imagem perdida,
+           e a graduação ainda soma com o véu e com a vinheta por cima. */
+        filter: brightness(0.88) contrast(1.05) saturate(0.85);
       }
-      .giro__figura {
-        position: absolute;
-        left: 50%;
-        top: 13%;
-        height: 86%;
-        width: auto;
-        transform: translateX(-50%) scaleX(var(--largura));
+      .fundo--vetor {
+        object-fit: contain;
+        transform: scaleX(var(--largura));
         transform-origin: 50% 50%;
       }
 
-      .giro__marca {
+      /*
+        O véu. Escuro em cima e embaixo, onde mora o texto, e quase limpo no
+        meio, onde mora a imagem. Um véu parelho apagaria a cena inteira para
+        salvar duas linhas de texto.
+      */
+      .veu-cena {
         position: absolute;
-        top: calc(var(--altura-topo) + var(--esp-4));
-        left: 50%;
-        translate: -50% 0;
-        margin: 0;
-        font-family: var(--fonte-mono);
-        font-size: var(--tam-meta);
-        letter-spacing: var(--ls-meta);
-        text-transform: uppercase;
-        color: var(--cor-texto-suave);
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(
+            to bottom,
+            color-mix(in oklab, var(--cor-superficie) 78%, transparent) 0%,
+            transparent 22%,
+            transparent 52%,
+            color-mix(in oklab, var(--cor-superficie) 90%, transparent) 100%
+          ),
+          radial-gradient(
+            125% 85% at 50% 46%,
+            transparent 46%,
+            color-mix(in oklab, var(--cor-superficie) 72%, transparent) 100%
+          );
+      }
+
+      .grao {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.07;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
       }
 
       .figura__corpo {
@@ -559,27 +613,20 @@ if (trilha.cortes !== cortes.length) {
         opacity: calc(var(--frente) * 0.55);
       }
 
-      .piso {
-        position: absolute;
-        left: 50%;
-        bottom: 20vh;
-        translate: -50% 0;
-        width: min(52vh, 520px);
-        height: 9vh;
-        filter: blur(18px);
-        background-image: radial-gradient(
-          50% 50% at 50% 50%,
-          color-mix(in oklab, var(--cor-acento-fundo) 75%, transparent) 0%,
-          transparent 70%
-        );
-      }
 
       /* ---- o prato, que orbita junto ------------------------------------ */
+      /*
+        O alvo do prato. Fica em PIXEL, não em porcentagem: `cover` corta a
+        imagem, então a mesma porcentagem do vídeo cai em lugares diferentes da
+        tela conforme a janela muda de forma. Quem faz essa conversão é o
+        script, com o mesmo foco que o CSS usa no `object-position`.
+      */
       .mao {
         position: absolute;
-        left: calc(var(--mao-x) * 1%);
-        top: calc(var(--mao-y) * 1%);
-        width: 15%;
+        left: var(--mao-px);
+        top: var(--mao-py);
+        width: var(--mao-tamanho);
+        height: var(--mao-tamanho);
         transform: translate(-50%, -50%);
         opacity: var(--visivel);
       }
@@ -684,39 +731,41 @@ if (trilha.cortes !== cortes.length) {
       }
 
       /* ---- rótulo, régua, barra ----------------------------------------- */
+      /* O nome do corte é a legenda da cena: canto inferior esquerdo, grande,
+         como cartela de filme. O contador vem antes dele, pequeno. */
       .rotulo {
         position: absolute;
-        left: 50%;
-        bottom: 21vh;
-        translate: -50% 0;
-        text-align: center;
-        opacity: var(--frente);
-      }
-      .rotulo__nome {
-        margin: 0;
-        font-family: var(--fonte-titulo);
-        font-size: clamp(3rem, 7vh, 5rem);
-        line-height: var(--lh-h1);
-        text-transform: uppercase;
-        color: var(--cor-texto-forte);
+        left: var(--gutter);
+        right: var(--gutter);
+        bottom: 15vh;
       }
       .rotulo__contador {
-        margin: var(--esp-2) 0 0;
+        margin: 0 0 var(--esp-2);
         font-family: var(--fonte-mono);
         font-size: var(--tam-meta);
         letter-spacing: var(--ls-meta);
         text-transform: uppercase;
-        color: var(--cor-texto-suave);
+        color: var(--cor-acento);
+      }
+      .rotulo__nome {
+        margin: 0;
+        font-family: var(--fonte-titulo);
+        font-size: clamp(3rem, 9vh, 6.5rem);
+        line-height: var(--lh-h1);
+        text-transform: uppercase;
+        color: var(--cor-texto-forte);
+        /* sobre imagem em movimento, a sombra é o que garante a leitura
+           quando um quadro claro passa por baixo */
+        text-shadow: 0 2px 24px rgb(0 0 0 / 0.55);
       }
 
       .regua {
         position: absolute;
-        left: 50%;
-        bottom: 9vh;
-        translate: -50% 0;
+        left: var(--gutter);
+        right: var(--gutter);
+        bottom: 6vh;
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
         gap: var(--esp-2);
       }
       .regua__item {
@@ -740,14 +789,15 @@ if (trilha.cortes !== cortes.length) {
         border-bottom-color: var(--cor-acento);
       }
 
+      /* A barra vai de ponta a ponta, rente ao pé da tela: é a régua do filme,
+         não um enfeite centralizado. */
       .barra {
         position: absolute;
-        left: 50%;
-        bottom: 5vh;
-        translate: -50% 0;
-        width: min(420px, 62vw);
-        height: 2px;
-        background-color: color-mix(in oklab, var(--cor-texto) 20%, transparent);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background-color: color-mix(in oklab, var(--cor-texto) 18%, transparent);
       }
       .barra i {
         display: block;
@@ -758,9 +808,8 @@ if (trilha.cortes !== cortes.length) {
 
       .dica {
         position: absolute;
-        left: 50%;
-        bottom: 2vh;
-        translate: -50% 0;
+        right: var(--gutter);
+        top: calc(var(--altura-topo) + var(--esp-2));
         margin: 0;
         font-family: var(--fonte-mono);
         font-size: var(--tam-meta);
